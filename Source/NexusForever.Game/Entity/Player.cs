@@ -816,7 +816,7 @@ namespace NexusForever.Game.Entity
 
             if (ControlGuid != null)
             {
-                entity.ControllerGuid = ControlGuid;
+                entity.ControllerGuid = Guid;
 
                 Session.EnqueueMessageEncrypted(new ServerMovementControl
                 {
@@ -973,6 +973,8 @@ namespace NexusForever.Game.Entity
                 Resurrect   = reason == TeleportReason.EndMatch && !IsAlive
             };
 
+            SetControl(null);
+
             IMapPosition source = null;
             if (Map != null)
             {
@@ -1063,6 +1065,8 @@ namespace NexusForever.Game.Entity
             {
                 SendGenericError(error);
                 pendingTeleport = null;
+
+                SetControl(this);
 
                 log.Trace($"Error {error} occured during teleport for {Name}({CharacterId})!");
             }
