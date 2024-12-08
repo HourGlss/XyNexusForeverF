@@ -1,7 +1,10 @@
 ﻿using System.Numerics;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Effect;
+using NexusForever.Game.Static.Account;
+using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -14,11 +17,14 @@ namespace NexusForever.Game.Spell.Effect.Handler
         #region Dependency Injection
 
         private readonly IGameTableManager gameTableManager;
+        private readonly IRapidTransportCostCalculator rapidTransportCostCalculator;
 
         public SpellEffectRapidTransportHandler(
-            IGameTableManager gameTableManager)
+            IGameTableManager gameTableManager,
+            IRapidTransportCostCalculator rapidTransportCostCalculator)
         {
-            this.gameTableManager = gameTableManager;
+            this.gameTableManager             = gameTableManager;
+            this.rapidTransportCostCalculator = rapidTransportCostCalculator;
         }
 
         #endregion
@@ -28,12 +34,19 @@ namespace NexusForever.Game.Spell.Effect.Handler
         /// </summary>
         public void Apply(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
-            TaxiNodeEntry taxiNode = gameTableManager.TaxiNode.GetEntry(spell.Parameters.TaxiNode);
-            if (taxiNode == null)
+            if (spell.Parameters.TaxiNode == null)
                 return;
 
-            WorldLocation2Entry worldLocation = gameTableManager.WorldLocation2.GetEntry(taxiNode.WorldLocation2Id);
-            if (worldLocation == null)
+            TaxiNodeEntry taxiNodeEntry = gameTableManager.TaxiNode.GetEntry(spell.Parameters.TaxiNode.Value);
+            if (taxiNodeEntry == null)
+                return;
+
+            WorldLocation2Entry worldLocationEntry = gameTableManager.WorldLocation2.GetEntry(taxiNodeEntry.WorldLocation2Id);
+            if (worldLocationEntry == null)
+                return;
+
+            GameFormulaEntry spellEntry = gameTableManager.GameFormula.GetEntry(1307);
+            if (spellEntry == null)
                 return;
 
             if (target is not IPlayer player)
@@ -42,9 +55,32 @@ namespace NexusForever.Game.Spell.Effect.Handler
             if (!player.CanTeleport())
                 return;
 
-            var rotation = new Quaternion(worldLocation.Facing0, worldLocation.Facing0, worldLocation.Facing2, worldLocation.Facing3);
+            if (player.SpellManager.GetSpellCooldown(spellEntry.Dataint0) > 0d)
+            {
+                ulong? serviceTokenPrice = rapidTransportCostCalculator.CalculateServiceTokenCost(spell.Parameters.TaxiNode.Value);
+                if (serviceTokenPrice == null)
+                    return;
+
+                if (!player.Account.CurrencyManager.CanAfford(AccountCurrencyType.ServiceToken, serviceTokenPrice.Value))
+                    return;
+
+                player.Account.CurrencyManager.CurrencySubtractAmount(AccountCurrencyType.ServiceToken, serviceTokenPrice.Value);
+            }
+            else
+            {
+                ulong? creditPrice = rapidTransportCostCalculator.CalculateCreditCost(spell.Parameters.TaxiNode.Value, player.Map.Entry.Id, player.Position);
+                if (creditPrice == null)
+                    return;
+
+                if (!player.CurrencyManager.CanAfford(CurrencyType.Credits, creditPrice.Value))
+                    return;
+
+                player.CurrencyManager.CurrencySubtractAmount(CurrencyType.Credits, creditPrice.Value);
+            }
+
+            var rotation = new Quaternion(worldLocationEntry.Facing0, worldLocationEntry.Facing0, worldLocationEntry.Facing2, worldLocationEntry.Facing3);
             player.Rotation = rotation.ToEuler();
-            player.TeleportTo((ushort)worldLocation.WorldId, worldLocation.Position0, worldLocation.Position1, worldLocation.Position2);
+            player.TeleportTo((ushort)worldLocationEntry.WorldId, worldLocationEntry.Position0, worldLocationEntry.Position1, worldLocationEntry.Position2);
         }
     }
 }

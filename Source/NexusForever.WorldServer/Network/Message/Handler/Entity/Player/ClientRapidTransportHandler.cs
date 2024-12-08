@@ -1,7 +1,6 @@
 ﻿using NexusForever.Game.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
 
@@ -23,23 +22,15 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity.Player
 
         public void HandleMessage(IWorldSession session, ClientRapidTransport rapidTransport)
         {
-            // TODO: rawaho note, below checks should really happen in the spell effect handler
-            //TODO: check for cooldown
-            //TODO: handle payment
+            GameFormulaEntry gameFormulaEntry = gameTableManager.GameFormula.GetEntry(1307);
+            if (gameFormulaEntry == null)
+                return;
 
-            TaxiNodeEntry taxiNode = gameTableManager.TaxiNode.GetEntry(rapidTransport.TaxiNode);
-            if (taxiNode == null)
-                throw new InvalidPacketValueException();
+            uint publicTransportSpellId = gameFormulaEntry.Dataint0;
+            if (session.Player.SpellManager.GetSpellCooldown(gameFormulaEntry.Dataint0) > 0d)
+                publicTransportSpellId = gameFormulaEntry.Dataint01;
 
-            if (session.Player.Level < taxiNode.AutoUnlockLevel)
-                throw new InvalidPacketValueException();
-
-            WorldLocation2Entry worldLocation = gameTableManager.WorldLocation2.GetEntry(taxiNode.WorldLocation2Id);
-            if (worldLocation == null)
-                throw new InvalidPacketValueException();
-
-            GameFormulaEntry entry = gameTableManager.GameFormula.GetEntry(1307);
-            session.Player.CastSpell(entry.Dataint0, new SpellParameters
+            session.Player.CastSpell(publicTransportSpellId, new SpellParameters
             {
                 TaxiNode = rapidTransport.TaxiNode
             });
