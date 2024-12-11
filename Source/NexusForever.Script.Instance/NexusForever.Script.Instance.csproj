@@ -21,7 +21,6 @@
     <Folder Include="Adventure\WarOfTheWilds\" />
     <Folder Include="Adventure\RiotInTheVoid\" />
     <Folder Include="Adventure\TheHycrestInsurrection\" />
-    <Folder Include="Arena\TheCryoPlex\" />
     <Folder Include="Battleground\DaggerstonePass\" />
     <Folder Include="Battleground\HallsOfTheBloodsworn\" />
     <Folder Include="Dungeon\ColdbloodCitadel\" />

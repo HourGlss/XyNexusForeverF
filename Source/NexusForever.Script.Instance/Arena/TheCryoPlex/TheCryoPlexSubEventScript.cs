@@ -1,9 +1,9 @@
 ﻿using NexusForever.Script.Template.Filter;
 
-namespace NexusForever.Script.Instance.Arena.TheSlaughterdome
+namespace NexusForever.Script.Instance.Arena.TheCryoPlex
 {
-    [ScriptFilterOwnerId(209)]
-    public class TheSlaughterdomeSubEventScript : ArenaSubEventScript<PublicEventObjective>
+    [ScriptFilterOwnerId(582)]
+    public class TheCryoPlexSubEventScript : ArenaSubEventScript<PublicEventObjective>
     {
         public override PublicEventObjective PrepareForBattleObjective => PublicEventObjective.PrepareForBattle;
         public override PublicEventObjective ParticipateInArenaObjective => PublicEventObjective.ParticipateInArena;

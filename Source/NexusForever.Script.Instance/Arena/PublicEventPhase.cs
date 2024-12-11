@@ -1,4 +1,4 @@
-﻿namespace NexusForever.Script.Instance.Arena.TheSlaughterdome
+﻿namespace NexusForever.Script.Instance.Arena
 {
     public enum PublicEventPhase
     {
