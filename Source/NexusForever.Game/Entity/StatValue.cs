@@ -17,7 +17,7 @@ namespace NexusForever.Game.Entity
             Value  = 0x02
         }
 
-        public Stat Stat { get; }
+        public Static.Entity.Stat Stat { get; }
         public StatType Type { get; }
 
         public float Value
@@ -41,7 +41,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public StatValue(CharacterStatModel model)
         {
-            Stat  = (Stat)model.Stat;
+            Stat  = (Static.Entity.Stat)model.Stat;
             Type  = EntityManager.Instance.GetStatAttribute(Stat).Type;
             Value = model.Value;
         }
@@ -51,7 +51,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public StatValue(EntityStatModel model)
         {
-            Stat  = (Stat)model.Stat;
+            Stat  = (Static.Entity.Stat)model.Stat;
             Type  = EntityManager.Instance.GetStatAttribute(Stat).Type;
             Value = model.Value;
         }
@@ -59,7 +59,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Create a new <see cref="IStatValue"/> from supplied <see cref="Stat"/> and value.
         /// </summary>
-        public StatValue(Stat stat, uint value)
+        public StatValue(Static.Entity.Stat stat, uint value)
         {
             Stat     = stat;
             Type     = StatType.Integer;
@@ -70,7 +70,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Create a new <see cref="IStatValue"/> from supplied <see cref="Stat"/> and value.
         /// </summary>
-        public StatValue(Stat stat, float value)
+        public StatValue(Static.Entity.Stat stat, float value)
         {
             Stat     = stat;
             Type     = StatType.Float;

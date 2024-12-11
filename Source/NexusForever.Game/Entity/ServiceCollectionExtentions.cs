@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Entity.Movement;
+using NexusForever.Game.Entity.Stat;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Entity
@@ -10,6 +11,7 @@ namespace NexusForever.Game.Entity
         public static void AddGameEntity(this IServiceCollection sc)
         {
             sc.AddGameEntityMovement();
+            sc.AddGameEntityStat();
 
             sc.AddTransient<IEntityFactory, EntityFactory>();
             sc.AddTransient<INonPlayerEntity, NonPlayerEntity>();

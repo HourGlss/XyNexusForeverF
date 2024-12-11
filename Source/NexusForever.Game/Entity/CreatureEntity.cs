@@ -2,6 +2,7 @@
 using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Abstract.Entity.Stat;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Script;
 
@@ -14,8 +15,10 @@ namespace NexusForever.Game.Entity
     {
         #region Dependency Injection
 
-        public CreatureEntity(IMovementManager movementManager)
-            : base(movementManager)
+        public CreatureEntity(
+            IMovementManager movementManager,
+            IStatUpdateManager statUpdateManager)
+            : base(movementManager, statUpdateManager)
         {
         }
 

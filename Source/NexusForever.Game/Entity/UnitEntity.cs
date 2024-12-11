@@ -1,7 +1,7 @@
-﻿using System.Numerics;
-using NexusForever.Game.Abstract.Combat;
+﻿using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Abstract.Entity.Stat;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Combat;
 using NexusForever.Game.Spell;
@@ -15,7 +15,6 @@ using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Script.Template;
-using NexusForever.Shared.Game;
 
 namespace NexusForever.Game.Entity
 {
@@ -80,10 +79,7 @@ namespace NexusForever.Game.Entity
 
         public IThreatManager ThreatManager { get; private set; }
 
-        /// <summary>
-        /// Initial stab at a timer to regenerate Health & Shield values.
-        /// </summary>
-        private UpdateTimer statUpdateTimer = new UpdateTimer(0.25); // TODO: Long-term this should be absorbed into individual timers for each Stat regeneration method
+        private IStatUpdateManager statUpdateManager;
 
         private readonly List<ISpell> pendingSpells = new();
 
@@ -91,9 +87,13 @@ namespace NexusForever.Game.Entity
 
         #region Dependency Injection
 
-        public UnitEntity(IMovementManager movementManager)
+        public UnitEntity(
+            IMovementManager movementManager,
+            IStatUpdateManager statUpdateManager)
             : base(movementManager)
         {
+            this.statUpdateManager = statUpdateManager;
+
             ThreatManager = new ThreatManager(this);
 
             InitialiseHitRadius();
@@ -131,12 +131,7 @@ namespace NexusForever.Game.Entity
                     pendingSpells.Remove(spell);
             }
 
-            statUpdateTimer.Update(lastTick);
-            if (statUpdateTimer.HasElapsed)
-            {
-                HandleStatUpdate(lastTick);
-                statUpdateTimer.Reset();
-            }
+            statUpdateManager.Update(lastTick);
         }
 
         /// <summary>
@@ -229,24 +224,6 @@ namespace NexusForever.Game.Entity
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Handles regeneration of Stat Values. Used to provide a hook into the Update method, for future implementation.
-        /// </summary>
-        protected virtual void HandleStatUpdate(double lastTick)
-        {
-            if (!IsAlive)
-                return;
-
-            // TODO: This should probably get moved to a Calculation Library/Manager at some point. There will be different timers on Stat refreshes, but right now the timer is hardcoded to every 0.25s.
-            // Probably worth considering an Attribute-grouped Class that allows us to run differentt regeneration methods & calculations for each stat.
-
-            if (Health < MaxHealth)
-                ModifyHealth((uint)(MaxHealth / 200f), DamageType.Heal, null);
-
-            if (Shield < MaxShieldCapacity)
-                Shield += (uint)(MaxShieldCapacity * GetPropertyValue(Property.ShieldRegenPct) * statUpdateTimer.Duration);
         }
 
         /// Checks if this <see cref="IUnitEntity"/> is currently casting a spell.
@@ -572,6 +549,16 @@ namespace NexusForever.Game.Entity
             InCombat   = ThreatManager.IsThreatened;
             Sheathed   = !inCombat;
             StandState = inCombat ? StandState.Stand : StandState.State0;
+
+            statUpdateManager.OnCombatStateUpdate(InCombat);
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/> has a <see cref="Stat"/> updated.
+        /// </summary>
+        protected override void OnStatUpdate(IStatValue statValue, float previousValue)
+        {
+            statUpdateManager.OnStatUpdate(statValue, previousValue);
         }
     }
 }

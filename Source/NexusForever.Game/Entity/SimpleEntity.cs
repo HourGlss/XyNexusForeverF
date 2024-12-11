@@ -2,6 +2,7 @@ using System.Numerics;
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Abstract.Entity.Stat;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Quest;
@@ -21,9 +22,12 @@ namespace NexusForever.Game.Entity
 
         #region Dependency Injection
 
-        public SimpleEntity(IMovementManager movementManager)
-            : base(movementManager)
+        public SimpleEntity(
+            IMovementManager movementManager,
+            IStatUpdateManager<IUnitEntity> statUpdateManager)
+            : base(movementManager, statUpdateManager)
         {
+            statUpdateManager.Initialise(this);
         }
 
         #endregion
@@ -39,8 +43,8 @@ namespace NexusForever.Game.Entity
 
             SetBaseProperty(Property.BaseHealth, 101.0f);
 
-            SetStat(Stat.Health, 101u);
-            SetStat(Stat.Level, 1u);
+            SetStat(Static.Entity.Stat.Health, 101u);
+            SetStat(Static.Entity.Stat.Level, 1u);
 
             Creature2DisplayGroupEntryEntry displayGroupEntry = GameTableManager.Instance.
                 Creature2DisplayGroupEntry.

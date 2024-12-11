@@ -6,6 +6,6 @@ namespace NexusForever.Game.Abstract.Entity
     {
         void Initialise();
 
-        StatAttribute GetStatAttribute(Stat stat);
+        StatAttribute GetStatAttribute(Static.Entity.Stat stat);
     }
 }
