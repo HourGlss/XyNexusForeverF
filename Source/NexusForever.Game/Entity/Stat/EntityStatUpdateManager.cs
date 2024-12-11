@@ -64,9 +64,6 @@ namespace NexusForever.Game.Entity.Stat
         /// </summary>
         public void OnCombatStateUpdate(bool inCombat)
         {
-            if (!entity.IsAlive)
-                return;
-
             foreach (IStatUpdater statUpdater in statUpdaters)
                 statUpdater.OnCombatStateUpdate(inCombat);
         }
