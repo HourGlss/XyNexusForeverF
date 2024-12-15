@@ -1,22 +1,30 @@
-﻿using NexusForever.Game.Abstract.Entity;
+﻿using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Spell.Event;
 using NexusForever.Game.Static.Spell;
 using NexusForever.Network.World.Message.Static;
-using NLog;
 
-namespace NexusForever.Game.Spell
+namespace NexusForever.Game.Spell.Type
 {
-    [SpellType(CastMethod.Channeled)]
-    public partial class SpellChanneled : Spell, ISpellType
+    public class SpellChanneled : Spell
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-        private static CastMethod castMethod = CastMethod.Channeled;
+        public override CastMethod CastMethod => CastMethod.Channeled;
 
-        public SpellChanneled(IUnitEntity caster, ISpellParameters parameters)
-            : base(caster, parameters, castMethod)
+        #region Dependency Injection
+
+        private readonly ILogger<SpellChanneled> log;
+
+        public SpellChanneled(
+            ILogger<SpellChanneled> log,
+            ISpellTargetInfoCollection spellTargetInfoCollection,
+            IGlobalSpellManager globalSpellManager)
+            : base(log, spellTargetInfoCollection, globalSpellManager)
         {
+            this.log = log;
         }
+
+        #endregion
 
         public override bool Cast()
         {
@@ -33,8 +41,6 @@ namespace NexusForever.Game.Spell
                 }
 
                 Execute();
-
-                targets.ForEach(t => t.Effects.Clear());
             })); // Execute after initial delay
             events.EnqueueEvent(new SpellEvent(Parameters.SpellInfo.Entry.ChannelMaxTime / 1000d, Finish)); // End Spell Cast
 
@@ -42,7 +48,7 @@ namespace NexusForever.Game.Spell
 
             // Add ticks at each pulse
             for (int i = 1; i <= numberOfPulses; i++)
-                events.EnqueueEvent(new SpellEvent((Parameters.SpellInfo.Entry.ChannelInitialDelay + (Parameters.SpellInfo.Entry.ChannelPulseTime * i)) / 1000d, () =>
+                events.EnqueueEvent(new SpellEvent((Parameters.SpellInfo.Entry.ChannelInitialDelay + Parameters.SpellInfo.Entry.ChannelPulseTime * i) / 1000d, () =>
                 {
                     CastResult checkResources = CheckResourceConditions();
                     if (checkResources != CastResult.Ok)
@@ -53,12 +59,10 @@ namespace NexusForever.Game.Spell
 
                     effectTriggerCount.Clear();
                     Execute();
-
-                    targets.ForEach(t => t.Effects.Clear());
                 }));
 
             status = SpellStatus.Casting;
-            log.Trace($"Spell {Parameters.SpellInfo.Entry.Id} has started casting.");
+            log.LogTrace($"Spell {Parameters.SpellInfo.Entry.Id} has started casting.");
             return true;
         }
 

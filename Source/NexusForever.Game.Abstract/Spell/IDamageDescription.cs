@@ -1,10 +1,11 @@
 ﻿using NexusForever.Game.Static.Spell;
+using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Game.Abstract.Spell
 {
-    public interface IDamageDescription
+    public interface IDamageDescription : INetworkBuildable<DamageDescription>
     {
-        DamageType DamageType { get; set; }
         uint RawDamage { get; set; }
         uint RawScaledDamage { get; set; }
         uint AbsorbedAmount { get; set; }
@@ -12,5 +13,7 @@ namespace NexusForever.Game.Abstract.Spell
         uint AdjustedDamage { get; set; }
         uint OverkillAmount { get; set; }
         bool KilledTarget { get; set; }
+        CombatResult CombatResult { get; set; }
+        DamageType DamageType { get; set; }
     }
 }

@@ -2,6 +2,7 @@ using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Entity.Stat;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -20,8 +21,9 @@ namespace NexusForever.Game.Entity
 
         public NonPlayerEntity(
             IMovementManager movementManager,
-            IStatUpdateManager<IUnitEntity> statUpdateManager)
-            : base(movementManager, statUpdateManager)
+            IStatUpdateManager<IUnitEntity> statUpdateManager,
+            ISpellFactory spellFactory)
+            : base(movementManager, statUpdateManager, spellFactory)
         {
             statUpdateManager.Initialise(this);
         }

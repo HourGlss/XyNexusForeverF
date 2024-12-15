@@ -1,31 +1,55 @@
-﻿using NexusForever.Game.Abstract.Entity;
+﻿using Microsoft.Extensions.Logging;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Static;
-using NLog;
 
-namespace NexusForever.Game.Spell
+namespace NexusForever.Game.Spell.Type
 {
-    public partial class SpellThreshold : Spell, ISpellType
+    public abstract class SpellThreshold : Spell
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+        public bool HasThresholdToCast => Parameters.SpellInfo.Thresholds.Count > 0 && thresholdValue < thresholdMax || thresholdSpells.Count > 0;
 
-        public bool HasThresholdToCast => (Parameters.SpellInfo.Thresholds.Count > 0 && thresholdValue < thresholdMax) || thresholdSpells.Count > 0;
-
-        private readonly List<ISpell> thresholdSpells = new List<ISpell>();
+        private readonly List<ISpell> thresholdSpells = [];
         private double holdDuration;
         protected uint totalThresholdTimer;
         protected uint thresholdMax;
         protected uint thresholdValue;
 
-        public SpellThreshold(IUnitEntity caster, ISpellParameters parameters, CastMethod castMethod)
-            : base(caster, parameters, castMethod)
+        #region Dependency Injection
+
+        private readonly ILogger log;
+        private readonly ISpellFactory spellFactory;
+
+        public SpellThreshold(
+            ILogger log,
+            ISpellTargetInfoCollection spellTargetInfoCollection,
+            IGlobalSpellManager globalSpellManager,
+            ISpellFactory spellFactory)
+            : base(log, spellTargetInfoCollection, globalSpellManager)
         {
+            this.log          = log;
+            this.spellFactory = spellFactory;
+        }
+
+        #endregion
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public override void Initialise(IUnitEntity caster, ISpellParameters parameters)
+        {
+            base.Initialise(caster, parameters);
+
             thresholdMax = (uint)parameters.SpellInfo.Thresholds.Count;
         }
 
+        /// <summary>
+        /// Invoked each world tick with the delta since the previous tick occurred.
+        /// </summary>
         public override void Update(double lastTick)
         {
             base.Update(lastTick);
@@ -72,7 +96,7 @@ namespace NexusForever.Game.Spell
 
         protected virtual void Execute()
         {
-            
+
             if ((currentPhase == 0 || currentPhase == 255) && !HasThresholdToCast && CastMethod != CastMethod.ChargeRelease)
             {
                 CostSpell();
@@ -103,7 +127,7 @@ namespace NexusForever.Game.Spell
             {
                 if (CastMethod == CastMethod.RapidTap && result != CastResult.PrereqCasterCast)
                 {
-                    if (caster is IPlayer player)
+                    if (Caster is IPlayer player)
                         player.SpellManager.SetAsContinuousCast(null);
 
                     SendSpellCastResult(result);
@@ -111,7 +135,7 @@ namespace NexusForever.Game.Spell
                 }
             }
 
-            Spell thresholdSpell = InitialiseThresholdSpell();
+            ISpell thresholdSpell = InitialiseThresholdSpell();
             thresholdSpell.Cast();
             thresholdSpells.Add(thresholdSpell);
 
@@ -130,7 +154,7 @@ namespace NexusForever.Game.Spell
             return true;
         }
 
-        private Spell InitialiseThresholdSpell()
+        private ISpell InitialiseThresholdSpell()
         {
             if (Parameters.SpellInfo.Thresholds.Count == 0)
                 return null;
@@ -139,7 +163,11 @@ namespace NexusForever.Game.Spell
             if (spellInfo == null || thresholdsEntry == null)
                 throw new InvalidOperationException($"{spellInfo} or {thresholdsEntry} is null!");
 
-            Spell thresholdSpell = GlobalSpellManager.Instance.NewSpell((CastMethod)spellInfo.BaseInfo.Entry.CastMethod, caster, new SpellParameters
+            ISpell thresholdSpell = spellFactory.CreateSpell(spellInfo.BaseInfo.Entry.CastMethod);
+            if (thresholdSpell == null)
+                throw new InvalidOperationException();
+
+            thresholdSpell.Initialise(Caster, new SpellParameters
             {
                 SpellInfo = spellInfo,
                 ParentSpellInfo = Parameters.SpellInfo,
@@ -149,7 +177,7 @@ namespace NexusForever.Game.Spell
                 IsProxy = CastMethod == CastMethod.ChargeRelease
             });
 
-            log.Trace($"Added Child Spell {thresholdSpell.Spell4Id} with casting ID {thresholdSpell.CastingId} to parent casting ID {CastingId}");
+            log.LogTrace($"Added Child Spell {thresholdSpell.Spell4Id} with casting ID {thresholdSpell.CastingId} to parent casting ID {CastingId}");
 
             return thresholdSpell;
         }
@@ -180,7 +208,7 @@ namespace NexusForever.Game.Spell
 
         private void SendThresholdStart()
         {
-            if (caster is IPlayer player)
+            if (Caster is IPlayer player)
                 player.Session.EnqueueMessageEncrypted(new ServerSpellThresholdStart
                 {
                     Spell4Id = Parameters.SpellInfo.Entry.Id,
@@ -192,7 +220,7 @@ namespace NexusForever.Game.Spell
 
         protected void SendThresholdUpdate()
         {
-            if (caster is IPlayer player)
+            if (Caster is IPlayer player)
                 player.Session.EnqueueMessageEncrypted(new ServerSpellThresholdUpdate
                 {
                     Spell4Id = Parameters.ParentSpellInfo?.Entry.Id ?? Spell4Id,
@@ -202,14 +230,14 @@ namespace NexusForever.Game.Spell
 
         protected override bool CanFinish()
         {
-            return (status == SpellStatus.Waiting && !HasThresholdToCast) || base.CanFinish();
+            return status == SpellStatus.Waiting && !HasThresholdToCast || base.CanFinish();
         }
 
         protected override void OnStatusChange(SpellStatus previousStatus, SpellStatus status)
         {
             base.OnStatusChange(previousStatus, status);
 
-            if (status == SpellStatus.Finished && caster is IPlayer player)
+            if (status == SpellStatus.Finished && Caster is IPlayer player)
             {
                 // Clear any Threshold information sent to the caster.
                 if (thresholdMax > 0)

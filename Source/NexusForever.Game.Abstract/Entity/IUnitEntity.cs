@@ -50,6 +50,11 @@ namespace NexusForever.Game.Abstract.Entity
         bool IsCasting();
 
         /// <summary>
+        /// Return <see cref="ISpell"/> with the supplied casting id.
+        /// </summary>
+        ISpell GetSpell(uint castingId);
+
+        /// <summary>
         /// Check if this <see cref="IUnitEntity"/> has a spell active with the provided <see cref="Spell4Entry"/> Id
         /// </summary>
         bool HasSpell(uint spell4Id, out ISpell spell, bool isCasting = false);

@@ -19,6 +19,7 @@ using NexusForever.Game.Abstract.Matching.Match;
 using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Abstract.Social;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Achievement;
 using NexusForever.Game.Character;
 using NexusForever.Game.Configuration.Model;
@@ -239,8 +240,9 @@ namespace NexusForever.Game.Entity
             IMatchingManager matchingManager,
             IMatchManager matchManager,
             IStatUpdateManager<IPlayer> statUpdateManager,
+            ISpellFactory spellFactory,
             ICurrencyManager currencyManager)
-            : base(movementManager, statUpdateManager)
+            : base(movementManager, statUpdateManager, spellFactory)
         {
             this.entityFactory     = entityFactory;
             this.matchingManager   = matchingManager;

@@ -1,11 +1,8 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Linq.Expressions;
 using System.Reflection;
-using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Entity;
-using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message;
@@ -32,10 +29,6 @@ namespace NexusForever.Game.Spell
         private uint nextCastingId = 1;
         private uint nextEffectId = 1;
 
-        // Spell Delegates
-        private delegate Spell SpellFactoryDelegate(IUnitEntity unit, ISpellParameters parameters);
-        private ImmutableDictionary<CastMethod, SpellFactoryDelegate> spellFactoryDelegates;
-
         private readonly Dictionary<uint, ISpellBaseInfo> spellBaseInfoStore = new();
 
         // entry caches
@@ -48,44 +41,9 @@ namespace NexusForever.Game.Spell
 
         public void Initialise()
         {
-            InitialiseSpellFactories();
             CacheSpellEntries();
             InitialiseSpellInfo();
             InitialiseVitalCastResults();
-        }
-
-        private void InitialiseSpellFactories()
-        {
-            var builder = ImmutableDictionary.CreateBuilder<CastMethod, SpellFactoryDelegate>();
-
-            Type[] types = new Type[2];
-            types[0] = typeof(IUnitEntity);
-            types[1] = typeof(ISpellParameters);
-
-            ParameterExpression[] constructorParams = new ParameterExpression[2];
-            constructorParams[0] = Expression.Parameter(typeof(IUnitEntity));
-            constructorParams[1] = Expression.Parameter(typeof(ISpellParameters));
-
-            foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
-            {
-                foreach (var attribute in type.GetCustomAttributes<SpellTypeAttribute>())
-                {
-                    if (attribute == null)
-                        continue;
-
-                    ConstructorInfo constructor = type.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
-                        null, types, null);
-
-                    NewExpression @new = Expression.New(constructor, constructorParams);
-
-                    Expression<SpellFactoryDelegate> lambda =
-                        Expression.Lambda<SpellFactoryDelegate>(@new, constructorParams[0], constructorParams[1]);
-
-                    builder.Add(attribute.CastMethod, lambda.Compile());
-                }
-            }
-
-            spellFactoryDelegates = builder.ToImmutable();
         }
 
         private void CacheSpellEntries()
@@ -150,21 +108,6 @@ namespace NexusForever.Game.Spell
             }
 
             vitalCastResults = builder.ToImmutable();
-        }
-
-        /// <summary>
-        /// Return a new <see cref="IWorldEntity"/> of supplied <see cref="EntityType"/>.
-        /// </summary>
-        public Spell NewSpell(CastMethod castMethod, IUnitEntity caster, ISpellParameters parameters)
-        {
-            if (spellFactoryDelegates.TryGetValue(castMethod, out SpellFactoryDelegate factory))
-                return factory.Invoke(caster, parameters);
-
-            log.Warn($"Unhandled cast method {castMethod}. Using {CastMethod.Normal} instead.");
-            if (spellFactoryDelegates.TryGetValue(CastMethod.Normal, out SpellFactoryDelegate normalFactory))
-                return normalFactory.Invoke(caster, parameters);
-
-            return null;
         }
 
         /// <summary>

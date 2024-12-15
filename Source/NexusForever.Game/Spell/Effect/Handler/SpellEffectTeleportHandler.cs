@@ -4,6 +4,7 @@ using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map.Lock;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Effect;
+using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;

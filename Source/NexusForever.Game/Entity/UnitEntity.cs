@@ -13,6 +13,7 @@ using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Script.Template;
 
@@ -81,18 +82,23 @@ namespace NexusForever.Game.Entity
 
         private IStatUpdateManager statUpdateManager;
 
-        private readonly List<ISpell> pendingSpells = new();
+        private readonly List<ISpell> pendingSpells = [];
+        private readonly Dictionary<uint, ISpell> spells = [];
 
-        private Dictionary<Property, Dictionary</*spell4Id*/uint, ISpellPropertyModifier>> spellProperties = new();
+        private readonly Dictionary<Property, Dictionary</*spell4Id*/uint, ISpellPropertyModifier>> spellProperties = [];
 
         #region Dependency Injection
 
+        private readonly ISpellFactory spellFactory;
+
         public UnitEntity(
             IMovementManager movementManager,
-            IStatUpdateManager statUpdateManager)
+            IStatUpdateManager statUpdateManager,
+            ISpellFactory spellFactory)
             : base(movementManager)
         {
             this.statUpdateManager = statUpdateManager;
+            this.spellFactory      = spellFactory;
 
             ThreatManager = new ThreatManager(this);
 
@@ -105,7 +111,7 @@ namespace NexusForever.Game.Entity
         {
             base.Dispose();
 
-            foreach (ISpell spell in pendingSpells)
+            foreach (ISpell spell in spells.Values)
                 spell.Dispose();
         }
 
@@ -123,15 +129,38 @@ namespace NexusForever.Game.Entity
         {
             base.Update(lastTick);
 
-            foreach (ISpell spell in pendingSpells.ToArray())
+            // new spells can be added during updates
+            // we need a pending queue to prevent issues with iterating over the spell dictionary
+            foreach (ISpell spell in pendingSpells)
+                spells.Add(spell.CastingId, spell);
+
+            pendingSpells.Clear();
+
+            foreach (ISpell spell in spells.Values)
             {
                 spell.Update(lastTick);
                 spell.LateUpdate(lastTick);
                 if (spell.IsFinished)
-                    pendingSpells.Remove(spell);
+                    spells.Remove(spell.CastingId);
             }
 
             statUpdateManager.Update(lastTick);
+        }
+
+        public override ServerEntityCreate BuildCreatePacket(bool initialCommands)
+        {
+            ServerEntityCreate entityCreate = base.BuildCreatePacket(initialCommands);
+
+            foreach (ISpell spell in spells.Values)
+            {
+                SpellInit spellInit = spell.BuildSpellInit();
+                entityCreate.SpellInitData.Add(spellInit);
+            }
+
+            // TODO
+            // entityCreate.CurrentSpellUniqueId
+
+            return entityCreate;
         }
 
         /// <summary>
@@ -231,7 +260,7 @@ namespace NexusForever.Game.Entity
         /// <returns></returns>
         public bool IsCasting()
         {
-            foreach (Spell.Spell spell in pendingSpells)
+            foreach (ISpell spell in spells.Values)
                 if (spell.IsCasting)
                     return true;
 
@@ -239,12 +268,19 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// Return <see cref="ISpell"/> with the supplied casting id.
+        /// </summary>
+        public ISpell GetSpell(uint castingId)
+        {
+            return spells.TryGetValue(castingId, out ISpell spell) ? spell : null;
+        }
+
+        /// <summary>
         /// Check if this <see cref="IUnitEntity"/> has a spell active with the provided <see cref="Spell4Entry"/> Id
         /// </summary>
         public bool HasSpell(uint spell4Id, out ISpell spell, bool isCasting = false)
         {
-            spell = pendingSpells.FirstOrDefault(i => i.IsCasting == isCasting && !i.IsFinished && i.Spell4Id == spell4Id);
-
+            spell = spells.Values.FirstOrDefault(i => i.IsCasting == isCasting && !i.IsFinished && i.Spell4Id == spell4Id);
             return spell != null;
         }
 
@@ -253,8 +289,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public bool HasSpell(CastMethod castMethod, out ISpell spell)
         {
-            spell = pendingSpells.FirstOrDefault(i => !i.IsCasting && !i.IsFinished && i.CastMethod == castMethod);
-
+            spell = spells.Values.FirstOrDefault(i => !i.IsCasting && !i.IsFinished && i.CastMethod == castMethod);
             return spell != null;
         }
 
@@ -263,8 +298,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public bool HasSpell(Func<ISpell, bool> predicate, out ISpell spell)
         {
-            spell = pendingSpells.FirstOrDefault(predicate);
-
+            spell = spells.Values.FirstOrDefault(predicate);
             return spell != null;
         }
 
@@ -338,7 +372,11 @@ namespace NexusForever.Game.Entity
             if (parameters.ClientSideInteraction != null)
                 castMethod = CastMethod.ClientSideInteraction;
 
-            var spell = GlobalSpellManager.Instance.NewSpell(castMethod, this, parameters);
+            ISpell spell = spellFactory.CreateSpell(castMethod);
+            if (spell == null)
+                throw new ArgumentNullException();
+
+            spell.Initialise(this, parameters);
             if (!spell.Cast())
                 return;
 
@@ -354,7 +392,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void CancelSpellsOnMove()
         {
-            foreach (ISpell spell in pendingSpells)
+            foreach (ISpell spell in spells.Values)
                 if (spell.IsMovingInterrupted() && spell.IsCasting)
                     spell.CancelCast(CastResult.CasterMovement);
         }
@@ -365,7 +403,7 @@ namespace NexusForever.Game.Entity
         /// <param name="castingId">Casting ID of the spell to cancel</param>
         public void CancelSpellCast(uint castingId)
         {
-            ISpell spell = pendingSpells.SingleOrDefault(s => s.CastingId == castingId);
+            ISpell spell = spells.Values.SingleOrDefault(s => s.CastingId == castingId);
             spell?.CancelCast(CastResult.SpellCancelled);
         }
 
@@ -374,7 +412,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public ISpell GetActiveSpell(Func<ISpell, bool> func)
         {
-            return pendingSpells.FirstOrDefault(func);
+            return spells.Values.FirstOrDefault(func);
         }
 
         /// <summary>
@@ -439,7 +477,7 @@ namespace NexusForever.Game.Entity
         {
             DeathState = EntityDeathState.JustDied;
 
-            foreach (ISpell spell in pendingSpells)
+            foreach (ISpell spell in spells.Values)
             {
                 if (spell.IsCasting)
                     spell.CancelCast(CastResult.CasterCannotBeDead);

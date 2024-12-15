@@ -3,6 +3,7 @@ using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Effect;
+using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Account;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;

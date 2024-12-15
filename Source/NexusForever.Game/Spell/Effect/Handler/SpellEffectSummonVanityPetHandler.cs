@@ -1,6 +1,7 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Effect;
+using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Map;
 using NexusForever.Game.Static.Spell;
 

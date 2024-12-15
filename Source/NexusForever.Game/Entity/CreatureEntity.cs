@@ -3,6 +3,7 @@ using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Entity.Stat;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Script;
 
@@ -17,8 +18,9 @@ namespace NexusForever.Game.Entity
 
         public CreatureEntity(
             IMovementManager movementManager,
-            IStatUpdateManager statUpdateManager)
-            : base(movementManager, statUpdateManager)
+            IStatUpdateManager statUpdateManager,
+            ISpellFactory spellFactory)
+            : base(movementManager, statUpdateManager, spellFactory)
         {
         }
 

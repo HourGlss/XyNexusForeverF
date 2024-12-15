@@ -4,6 +4,7 @@ using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Event;
 using NexusForever.Game.Map.Instance;
 using NexusForever.Game.Map.Lock;
+using NexusForever.Game.Map.Search;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Map
@@ -14,6 +15,7 @@ namespace NexusForever.Game.Map
         {
             sc.AddGameMapInstance();
             sc.AddGameMapLock();
+            sc.AddGameMapSearch();
 
             sc.AddTransient<IPublicEventManager, PublicEventManager>();
 

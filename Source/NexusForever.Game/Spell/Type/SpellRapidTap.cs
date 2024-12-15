@@ -1,21 +1,31 @@
-﻿using NexusForever.Game.Abstract.Entity;
+﻿using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Spell.Event;
+using NexusForever.Game.Spell.Type;
 using NexusForever.Game.Static.Spell;
-using NLog;
 
 namespace NexusForever.Game.Spell
 {
-    [SpellType(CastMethod.RapidTap)]
-    public partial class SpellRapidTap : SpellThreshold, ISpellType
+    public class SpellRapidTap : SpellThreshold
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-        private static CastMethod castMethod = CastMethod.RapidTap;
+        public override CastMethod CastMethod => CastMethod.RapidTap;
 
-        public SpellRapidTap(IUnitEntity caster, ISpellParameters parameters) 
-            : base(caster, parameters, castMethod)
+        #region Dependency Injection
+
+        private readonly ILogger<SpellRapidTap> log;
+
+        public SpellRapidTap(
+            ILogger<SpellRapidTap> log,
+            ISpellTargetInfoCollection spellTargetInfoCollection,
+            IGlobalSpellManager globalSpellManager,
+            ISpellFactory spellFactory)
+            : base(log, spellTargetInfoCollection, globalSpellManager, spellFactory)
         {
+            this.log = log;
         }
+
+        #endregion
 
         public override bool Cast()
         {
@@ -31,7 +41,7 @@ namespace NexusForever.Game.Spell
             events.EnqueueEvent(new SpellEvent(Parameters.SpellInfo.Entry.CastTime / 1000d, Execute)); // enqueue spell to be executed after cast time
 
             status = SpellStatus.Casting;
-            log.Trace($"Spell {Parameters.SpellInfo.Entry.Id} has started casting.");
+            log.LogTrace($"Spell {Parameters.SpellInfo.Entry.Id} has started casting.");
             return true;
         }
 

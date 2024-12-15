@@ -1,5 +1,6 @@
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Spell;
+using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Shared;
 
@@ -7,11 +8,12 @@ namespace NexusForever.Game.Abstract.Spell
 {
     public interface ISpell : IDisposable, IUpdate
     {
-        ISpellParameters Parameters { get; }
+        CastMethod CastMethod { get; }
 
+        ISpellParameters Parameters { get; }
+        IUnitEntity Caster { get; }
         uint CastingId { get; }
         uint Spell4Id { get; }
-        CastMethod CastMethod { get; }
 
         bool IsCasting { get; }
         bool IsFinished { get; }
@@ -20,7 +22,10 @@ namespace NexusForever.Game.Abstract.Spell
 
         bool HasGroup(uint groupId);
 
-        IUnitEntity Caster { get; }
+        /// <summary>
+        /// Initialise <see cref="ISpell"/> with the supplied <see cref="IUnitEntity"/> and <see cref="ISpellParameters"/>.
+        /// </summary>
+        void Initialise(IUnitEntity caster, ISpellParameters parameters);
 
         /// <summary>
         /// Begin cast, checking prerequisites before initiating.
@@ -37,6 +42,11 @@ namespace NexusForever.Game.Abstract.Spell
         /// </summary>
         void CancelCast(CastResult result);
 
+        /// <summary>
+        /// Finish this <see cref="ISpell"/> and end all effects associated with it.
+        /// </summary>
+        void Finish();
+
         bool IsMovingInterrupted();
 
         /// <summary>
@@ -52,5 +62,7 @@ namespace NexusForever.Game.Abstract.Spell
         /// <param name="count"></param>
         /// <returns></returns>
         bool GetEffectTriggerCount(uint effectId, out uint count);
+
+        SpellInit BuildSpellInit();
     }
 }

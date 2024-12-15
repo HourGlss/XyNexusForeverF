@@ -1,21 +1,29 @@
-﻿using NexusForever.Game.Abstract.Entity;
+﻿using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Spell.Event;
 using NexusForever.Game.Static.Spell;
-using NLog;
 
-namespace NexusForever.Game.Spell
+namespace NexusForever.Game.Spell.Type
 {
-    [SpellType(CastMethod.Normal)]
-    public partial class SpellNormal : Spell, ISpellType
+    public class SpellNormal : Spell
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-        private static CastMethod castMethod = CastMethod.Normal;
+        public override CastMethod CastMethod => CastMethod.Normal;
 
-        public SpellNormal(IUnitEntity caster, ISpellParameters parameters) 
-            : base(caster, parameters, castMethod)
+        #region Dependency Injection
+
+        private readonly ILogger<SpellNormal> log;
+
+        public SpellNormal(
+            ILogger<SpellNormal> log,
+            ISpellTargetInfoCollection spellTargetInfoCollection,
+            IGlobalSpellManager globalSpellManager)
+            : base(log, spellTargetInfoCollection, globalSpellManager)
         {
+            this.log = log;
         }
+
+        #endregion
 
         public override bool Cast()
         {
@@ -26,7 +34,7 @@ namespace NexusForever.Game.Spell
             events.EnqueueEvent(new SpellEvent(castTime / 1000d, () => { Execute(); })); // enqueue spell to be executed after cast time
 
             status = SpellStatus.Casting;
-            log.Trace($"Spell {Parameters.SpellInfo.Entry.Id} has started casting.");
+            log.LogTrace($"Spell {Parameters.SpellInfo.Entry.Id} has started casting.");
             return true;
         }
 

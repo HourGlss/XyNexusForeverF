@@ -1,23 +1,32 @@
-﻿using NexusForever.Game.Abstract.Entity;
+﻿using Microsoft.Extensions.Logging;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Spell.Event;
 using NexusForever.Game.Static.Spell;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Static;
-using NLog;
 
-namespace NexusForever.Game.Spell
+namespace NexusForever.Game.Spell.Type
 {
-    [SpellType(CastMethod.ClientSideInteraction)]
-    public partial class SpellClientSideInteraction : Spell, ISpellType
+    public class SpellClientSideInteraction : Spell
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-        private static CastMethod castMethod = CastMethod.ClientSideInteraction;
+        public override CastMethod CastMethod => CastMethod.ClientSideInteraction;
 
-        public SpellClientSideInteraction(IUnitEntity caster, ISpellParameters parameters) 
-            : base(caster, parameters, castMethod)
+        #region Dependency Injection
+
+        private readonly ILogger<SpellClientSideInteraction> log;
+
+        public SpellClientSideInteraction(
+            ILogger<SpellClientSideInteraction> log,
+            ISpellTargetInfoCollection spellTargetInfoCollection,
+            IGlobalSpellManager globalSpellManager)
+            : base(log, spellTargetInfoCollection, globalSpellManager)
         {
+            this.log = log;
         }
+
+        #endregion
 
         public override bool Cast()
         {
@@ -29,7 +38,7 @@ namespace NexusForever.Game.Spell
                 events.EnqueueEvent(new SpellEvent(castTime, SucceedClientInteraction));
 
             status = SpellStatus.Casting;
-            log.Trace($"Spell {Parameters.SpellInfo.Entry.Id} has started casting.");
+            log.LogTrace($"Spell {Parameters.SpellInfo.Entry.Id} has started casting.");
             return true;
         }
 
@@ -41,13 +50,13 @@ namespace NexusForever.Game.Spell
         private void SendSpellStartClientInteraction()
         {
             // Shoule we actually emit client interaction events to everyone? - Logs suggest that we only see this packet firing when the client interacts with -something- and is likely only sent to them
-            if (caster is IPlayer player)
+            if (Caster is IPlayer player)
             {
                 player.Session.EnqueueMessageEncrypted(new ServerSpellStartClientInteraction
                 {
                     ClientUniqueId = Parameters.ClientSideInteraction.ClientUniqueId,
-                    CastingId      = CastingId,
-                    CasterId       = GetPrimaryTargetId()
+                    CastingId = CastingId,
+                    CasterId = GetPrimaryTargetId()
                 });
             }
         }
@@ -59,7 +68,7 @@ namespace NexusForever.Game.Spell
         {
             Execute();
 
-            if (Parameters.SpellInfo.Effects.FirstOrDefault(x => (SpellEffectType)x.EffectType == SpellEffectType.Activate) == null)
+            if (Parameters.SpellInfo.Effects.FirstOrDefault(x => x.EffectType == SpellEffectType.Activate) == null)
                 Parameters.ClientSideInteraction?.HandleSuccess(this);
         }
 
@@ -88,7 +97,7 @@ namespace NexusForever.Game.Spell
 
         protected override uint GetPrimaryTargetId()
         {
-            return Parameters.ClientSideInteraction.Entry != null ? caster.Guid : Parameters.PrimaryTargetId;
+            return Parameters.ClientSideInteraction.Entry != null ? Caster.Guid : Parameters.PrimaryTargetId;
         }
     }
 }

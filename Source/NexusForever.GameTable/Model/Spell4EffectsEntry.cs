@@ -1,16 +1,18 @@
+using NexusForever.Game.Static.Spell;
+
 namespace NexusForever.GameTable.Model
 {
     public class Spell4EffectsEntry
     {
         public uint Id;
         public uint SpellId;
-        public uint TargetFlags;
-        public uint EffectType;
+        public SpellEffectTargetFlags TargetFlags;
+        public SpellEffectType EffectType;
         public uint DamageType;
         public uint DelayTime;
         public uint TickTime;
         public uint DurationTime;
-        public uint Flags;
+        public SpellEffectFlags Flags;
         public uint DataBits00;
         public uint DataBits01;
         public uint DataBits02;

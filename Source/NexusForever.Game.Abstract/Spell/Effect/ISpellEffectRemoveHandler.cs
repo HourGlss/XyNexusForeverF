@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Spell.Target;
 
 namespace NexusForever.Game.Abstract.Spell.Effect
 {
