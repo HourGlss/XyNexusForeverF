@@ -1,4 +1,4 @@
-﻿namespace NexusForever.Game.Static.Prerequisite
+namespace NexusForever.Game.Static.Prerequisite
 {
     public enum PrerequisiteType
     {
@@ -229,7 +229,7 @@
         Datacube                    = 218, // Datacube requirement not met
         Volume                      = 219, // Volume requirement not met
         Unknown220                  = 220, // Exist in PrerequisiteType.tbl but does not have a description
-        Spell221                    = 221, // Spell requirement not met, Could be SpellBase
+        ActionSetSpell              = 221, // Spell requirement not met
         Unknown222                  = 222, // Requirements not met
         Unknown223                  = 223, // Requirements not met
         LevelGrantAbilityTierPoints = 224, // Level does not grant any ability tier points
