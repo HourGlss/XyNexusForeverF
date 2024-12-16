@@ -15,7 +15,6 @@ namespace NexusForever.Game.Spell
         public Spell4CCConditionsEntry TargetCCConditions { get; }
         public SpellCoolDownEntry GlobalCooldown { get; }
         public Spell4StackGroupEntry StackGroup { get; }
-        public Spell4GroupListEntry GroupList { get; }
         public PrerequisiteEntry CasterCastPrerequisite { get; }
         public PrerequisiteEntry TargetCastPrerequisites { get; }
         public PrerequisiteEntry CasterPersistencePrerequisites { get; }
@@ -31,6 +30,8 @@ namespace NexusForever.Game.Spell
         public List<Spell4VisualEntry> Visuals { get; } = new();
         public List<SpellCoolDownEntry> Cooldowns { get; } = new();
 
+        public HashSet<uint> SpellGroups { get; } = [];
+
         private Dictionary<int /* orderIndex */, ISpellInfo /* spell4Id */> thresholdCache = new();
         private (ISpellInfo, Spell4ThresholdsEntry) maxThresholdSpell;
 
@@ -45,7 +46,6 @@ namespace NexusForever.Game.Spell
             TargetCCConditions             = GameTableManager.Instance.Spell4CCConditions.GetEntry(spell4Entry.Spell4CCConditionsIdTarget);
             GlobalCooldown                 = GameTableManager.Instance.SpellCoolDown.GetEntry(spell4Entry.SpellCoolDownIdGlobal);
             StackGroup                     = GameTableManager.Instance.Spell4StackGroup.GetEntry(spell4Entry.Spell4StackGroupId);
-            GroupList                      = GameTableManager.Instance.Spell4GroupList.GetEntry(spell4Entry.Spell4GroupListId);
             CasterCastPrerequisite         = GameTableManager.Instance.Prerequisite.GetEntry(spell4Entry.PrerequisiteIdCasterCast);
             TargetCastPrerequisites        = GameTableManager.Instance.Prerequisite.GetEntry(spell4Entry.PrerequisiteIdTargetCast);
             CasterPersistencePrerequisites = GameTableManager.Instance.Prerequisite.GetEntry(spell4Entry.PrerequisiteIdCasterPersistence);
@@ -75,6 +75,13 @@ namespace NexusForever.Game.Spell
                     continue;
 
                 Cooldowns.Add(GameTableManager.Instance.SpellCoolDown.GetEntry(cooldownId));
+            }
+
+            if (spell4Entry.Spell4GroupListId != 0)
+            {
+                Spell4GroupListEntry groupList = GameTableManager.Instance.Spell4GroupList.GetEntry(spell4Entry.Spell4GroupListId);
+                if (groupList != null)
+                    SpellGroups.UnionWith(groupList.SpellGroupIds);
             }
         }
 

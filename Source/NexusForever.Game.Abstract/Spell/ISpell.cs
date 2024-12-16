@@ -20,7 +20,6 @@ namespace NexusForever.Game.Abstract.Spell
         bool IsFailed { get; }
         bool IsWaiting { get; }
 
-        bool HasGroup(uint groupId);
 
         /// <summary>
         /// Initialise <see cref="ISpell"/> with the supplied <see cref="IUnitEntity"/> and <see cref="ISpellParameters"/>.

@@ -55,6 +55,21 @@ namespace NexusForever.Game.Abstract.Entity
         ISpell GetSpell(uint castingId);
 
         /// <summary>
+        /// Return <see cref="ISpell"/> with the supplied spell id.
+        /// </summary>
+        ISpell GetSpellBySpellId(uint spellId);
+
+        /// <summary>
+        /// Return <see cref="ISpell"/> with the supplied base spell id.
+        /// </summary>
+        ISpell GetSpellByBaseSpellId(uint baseSpellId);
+
+        /// <summary>
+        /// Return a collection of <see cref="ISpell"/> that are part of the supplied spell group id.
+        /// </summary>
+        IEnumerable<ISpell> GetSpellsByGroupId(uint spellGroupId);
+
+        /// <summary>
         /// Check if this <see cref="IUnitEntity"/> has a spell active with the provided <see cref="Spell4Entry"/> Id
         /// </summary>
         bool HasSpell(uint spell4Id, out ISpell spell, bool isCasting = false);

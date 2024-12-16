@@ -39,7 +39,6 @@ namespace NexusForever.Game.Spell
         public bool IsFinished => status == SpellStatus.Finished || status == SpellStatus.Failed;
         public bool IsFailed => status == SpellStatus.Failed;
         public bool IsWaiting => status == SpellStatus.Waiting;
-        public bool HasGroup(uint groupId) => Parameters.SpellInfo.GroupList?.SpellGroupIds.Contains(groupId) ?? false;
 
         protected SpellStatus status
         {
