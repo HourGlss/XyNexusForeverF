@@ -109,7 +109,15 @@ namespace NexusForever.Game.Spell.Target
                 return;
             }
 
-            handler?.Apply(Target.Collection.Spell, Target.GetTarget(), this);
+            try
+            {
+                handler?.Apply(Target.Collection.Spell, Target.GetTarget(), this);
+            }
+            catch (Exception e)
+            {
+                log.LogError(e, $"An exception occurred applying effect {Entry.EffectType} for target {Target.Guid} for spell {Target.Collection.Spell.Spell4Id}!");
+            }
+
             log.LogTrace($"Applied effect {Entry.EffectType} for target {Target.Guid} for spell {Target.Collection.Spell.Spell4Id}");
         }
 
@@ -137,7 +145,15 @@ namespace NexusForever.Game.Spell.Target
             if (handler == null)
                 return;
 
-            handler?.Remove(Target.Collection.Spell, Target.GetTarget(), this);
+            try
+            {
+                handler?.Remove(Target.Collection.Spell, Target.GetTarget(), this);
+            }
+            catch (Exception e)
+            {
+                log.LogError(e, $"An exception occurred removing effect {Entry.EffectType} for target {Target.Guid} for spell {Target.Collection.Spell.Spell4Id}!");
+            }
+
             log.LogTrace($"Removed effect {Entry.EffectType} for target {Target.Guid} for spell {Target.Collection.Spell.Spell4Id}");
         }
 
