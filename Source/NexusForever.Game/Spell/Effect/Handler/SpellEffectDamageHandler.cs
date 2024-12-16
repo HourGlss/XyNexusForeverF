@@ -1,14 +1,29 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Effect;
+using NexusForever.Game.Abstract.Spell.Proc;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Spell;
+using NexusForever.Game.Static.Spell.Proc;
+using NexusForever.Shared;
 
 namespace NexusForever.Game.Spell.Effect.Handler
 {
     [SpellEffectHandler(SpellEffectType.Damage)]
     public class SpellEffectDamageHandler : ISpellEffectApplyHandler
     {
+        #region Dependency Injection
+
+        private readonly IFactory<IProcParameters> procParameterFactory;
+
+        public SpellEffectDamageHandler(
+            IFactory<IProcParameters> procParameterFactory)
+        {
+            this.procParameterFactory = procParameterFactory;
+        }
+
+        #endregion
+
         /// <summary>
         /// Handle <see cref="ISpell"/> effect apply on <see cref="IUnitEntity"/> target.
         /// </summary>
@@ -30,6 +45,13 @@ namespace NexusForever.Game.Spell.Effect.Handler
             info.AddDamage((DamageType)info.Entry.DamageType, 50);
             info.Damage.ShieldAbsorbAmount = 25;
             info.Damage.AdjustedDamage = 50;
+
+            if (info.Damage.CombatResult == CombatResult.Critical)
+            {
+                IProcParameters parameters = procParameterFactory.Resolve();
+                parameters.Target = target;
+                spell.Caster.ProcManager.TriggerProc(ProcType.CriticalDamage, parameters);
+            }
 
             // TODO: Deal damage
             target.TakeDamage(spell.Caster, info.Damage);

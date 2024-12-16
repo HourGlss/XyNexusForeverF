@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Abstract.Spell.Proc;
 using NexusForever.Game.Spell.Effect;
+using NexusForever.Game.Spell.Proc;
 using NexusForever.Game.Spell.Target;
 using NexusForever.Game.Spell.Type;
 using NexusForever.Game.Static.Spell;
@@ -27,6 +29,10 @@ namespace NexusForever.Game.Spell
             sc.AddKeyedTransient<ISpell, SpellChargeRelease>(CastMethod.ChargeRelease);
             sc.AddKeyedTransient<ISpell, SpellMultiphase>(CastMethod.Multiphase);
             sc.AddKeyedTransient<ISpell, SpellAura>(CastMethod.Aura);
+
+            sc.AddTransient<IProcManager,  ProcManager>();
+            sc.AddTransientFactory<IProcInfo, ProcInfo>();
+            sc.AddTransientFactory<IProcParameters, ProcParameters>();
         }
     }
 }

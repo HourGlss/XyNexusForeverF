@@ -1,8 +1,10 @@
-﻿using NexusForever.Game.Abstract.Combat;
+﻿using Microsoft.Extensions.DependencyInjection;
+using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Entity.Stat;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Abstract.Spell.Proc;
 using NexusForever.Game.Combat;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Static;
@@ -16,6 +18,7 @@ using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Script.Template;
+using NexusForever.Shared;
 
 namespace NexusForever.Game.Entity
 {
@@ -79,6 +82,7 @@ namespace NexusForever.Game.Entity
         private bool inCombat;
 
         public IThreatManager ThreatManager { get; private set; }
+        public IProcManager ProcManager { get; private set; }
 
         private IStatUpdateManager statUpdateManager;
 
@@ -100,7 +104,10 @@ namespace NexusForever.Game.Entity
             this.statUpdateManager = statUpdateManager;
             this.spellFactory      = spellFactory;
 
+            // TODO: find a better way to initialise unit managers...
             ThreatManager = new ThreatManager(this);
+            ProcManager   = LegacyServiceProvider.Provider.GetService<IProcManager>();
+            ProcManager.Initialise(this);
 
             InitialiseHitRadius();
         }
@@ -145,6 +152,8 @@ namespace NexusForever.Game.Entity
             }
 
             statUpdateManager.Update(lastTick);
+
+            ProcManager.Update(lastTick);
         }
 
         public override ServerEntityCreate BuildCreatePacket(bool initialCommands)
@@ -273,6 +282,32 @@ namespace NexusForever.Game.Entity
         public ISpell GetSpell(uint castingId)
         {
             return spells.TryGetValue(castingId, out ISpell spell) ? spell : null;
+        }
+
+        /// <summary>
+        /// Return <see cref="ISpell"/> with the supplied spell id.
+        /// </summary>
+        public ISpell GetSpellBySpellId(uint spellId)
+        {
+            return spells.Values.SingleOrDefault(s => s.Spell4Id == spellId);
+        }
+
+        /// <summary>
+        /// Return <see cref="ISpell"/> with the supplied base spell id.
+        /// </summary>
+        public ISpell GetSpellByBaseSpellId(uint baseSpellId)
+        {
+            return spells.Values.SingleOrDefault(s => s.Parameters.SpellInfo.BaseInfo.Entry.Id == baseSpellId);
+        }
+
+        /// <summary>
+        /// Return a collection of <see cref="ISpell"/> that are part of the supplied spell group id.
+        /// </summary>
+        public IEnumerable<ISpell> GetSpellsByGroupId(uint spellGroupId)
+        {
+            foreach (ISpell spell in spells.Values)
+                if (spell.Parameters.SpellInfo.SpellGroups.Contains(spellGroupId))
+                    yield return spell;
         }
 
         /// <summary>

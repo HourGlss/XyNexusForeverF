@@ -1,5 +1,6 @@
 using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Abstract.Spell.Proc;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
 
@@ -28,6 +29,7 @@ namespace NexusForever.Game.Abstract.Entity
         bool InCombat { get; }
 
         public IThreatManager ThreatManager { get; }
+        public IProcManager ProcManager { get; }
 
         /// <summary>
         /// Add a <see cref="Property"/> modifier given a Spell4Id and <see cref="ISpellPropertyModifier"/> instance.
