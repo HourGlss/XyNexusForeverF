@@ -14,7 +14,7 @@ namespace NexusForever.Game.Spell.Target
         /// <remarks>
         /// The collection will be finalised when no target info remains. 
         /// </remarks>
-        public bool IsFinalised { get; private set; }
+        public bool IsFinalised => spellTargetInfo.Count == 0;
 
         public ISpell Spell { get; private set; }
 
@@ -51,24 +51,10 @@ namespace NexusForever.Game.Spell.Target
                     toRemove.Add(target);
             }
 
-            RemoveFinalised(toRemove);
-        }
-
-        private void RemoveFinalised(List<ISpellTargetInfo> toRemove)
-        {
-            if (toRemove.Count == 0)
-                return;
-
             foreach (ISpellTargetInfo target in toRemove)
             {
                 spellTargetInfo.Remove(target.Guid);
                 log.LogTrace($"Removed SpellTargetInfo for target {target.Guid} for spell {Spell.Spell4Id}.");
-            }
-
-            if (spellTargetInfo.Count == 0)
-            {
-                IsFinalised = true;
-                log.LogTrace($"Finalised SpellTargetInfoCollection for spell {Spell.Spell4Id}.");
             }
         }
 
