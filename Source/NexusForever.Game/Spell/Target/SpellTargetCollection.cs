@@ -35,7 +35,7 @@ namespace NexusForever.Game.Spell.Target
         /// </summary>
         public IEnumerable<ISpellTarget> GetTargets(SpellEffectTargetFlags flags)
         {
-            return targets.Values.Where(t => t.Flags.HasFlag(flags));
+            return targets.Values.Where(t => (t.Flags & flags) != 0);
         }
     }
 }
