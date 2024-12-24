@@ -10,7 +10,7 @@ namespace NexusForever.Game.Spell.Effect.Handler
     [SpellEffectHandler(SpellEffectType.Proc)]
     public class SpellEffectProcHandler : ISpellEffectApplyHandler<ISpellEffectProcData>, ISpellEffectRemoveHandler<ISpellEffectProcData>
     {
-        public void Apply(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectProcData data)
+        public void Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectProcData data)
         {
             target.ProcManager.ApplyProc(data);
         }

@@ -34,12 +34,12 @@ namespace NexusForever.Game.Spell.Effect.Handler
         /// <summary>
         /// Handle <see cref="ISpell"/> effect apply on <see cref="IUnitEntity"/> target.
         /// </summary>
-        public void Apply(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectDefaultData data)
+        public void Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectDefaultData data)
         {
-            if (spell.Parameters.TaxiNode == null)
+            if (executionContext.Spell.Parameters.TaxiNode == null)
                 return;
 
-            TaxiNodeEntry taxiNodeEntry = gameTableManager.TaxiNode.GetEntry(spell.Parameters.TaxiNode.Value);
+            TaxiNodeEntry taxiNodeEntry = gameTableManager.TaxiNode.GetEntry(executionContext.Spell.Parameters.TaxiNode.Value);
             if (taxiNodeEntry == null)
                 return;
 
@@ -59,7 +59,7 @@ namespace NexusForever.Game.Spell.Effect.Handler
 
             if (player.SpellManager.GetSpellCooldown(spellEntry.Dataint0) > 0d)
             {
-                ulong? serviceTokenPrice = rapidTransportCostCalculator.CalculateServiceTokenCost(spell.Parameters.TaxiNode.Value);
+                ulong? serviceTokenPrice = rapidTransportCostCalculator.CalculateServiceTokenCost(executionContext.Spell.Parameters.TaxiNode.Value);
                 if (serviceTokenPrice == null)
                     return;
 
@@ -70,7 +70,7 @@ namespace NexusForever.Game.Spell.Effect.Handler
             }
             else
             {
-                ulong? creditPrice = rapidTransportCostCalculator.CalculateCreditCost(spell.Parameters.TaxiNode.Value, player.Map.Entry.Id, player.Position);
+                ulong? creditPrice = rapidTransportCostCalculator.CalculateCreditCost(executionContext.Spell.Parameters.TaxiNode.Value, player.Map.Entry.Id, player.Position);
                 if (creditPrice == null)
                     return;
 

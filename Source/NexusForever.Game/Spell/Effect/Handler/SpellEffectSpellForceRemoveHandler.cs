@@ -24,7 +24,7 @@ namespace NexusForever.Game.Spell.Effect.Handler
 
         #endregion
 
-        public void Apply(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectSpellForceRemoveData data)
+        public void Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectSpellForceRemoveData data)
         {
             switch (data.Type)
             {

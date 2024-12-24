@@ -5,7 +5,8 @@ using NexusForever.Game.Static.Spell;
 
 namespace NexusForever.Game.Abstract.Spell.Effect
 {
-    public delegate void SpellEffectHandlerDelegate(object handler, ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectData data);
+    public delegate void SpellEffectHandlerApplyDelegate(object handler, ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectData data);
+    public delegate void SpellEffectHandlerRemoveDelegate(object handler, ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectData data);
 
     public interface IGlobalSpellEffectManager
     {
@@ -32,13 +33,13 @@ namespace NexusForever.Game.Abstract.Spell.Effect
         Type GetSpellEffectRemoveHandlerType(SpellEffectType type);
 
         /// <summary>
-        /// Get spell effect apply handler <see cref="SpellEffectHandlerDelegate"/> for supplied <see cref="SpellEffectType"/>.
+        /// Get spell effect apply handler <see cref="SpellEffectHandlerApplyDelegate"/> for supplied <see cref="SpellEffectType"/>.
         /// </summary>
-        SpellEffectHandlerDelegate GetSpellEffectApplyDelegate(SpellEffectType type);
+        SpellEffectHandlerApplyDelegate GetSpellEffectApplyDelegate(SpellEffectType type);
 
         /// <summary>
-        /// Get spell effect remove handler <see cref="SpellEffectHandlerDelegate"/> for supplied <see cref="SpellEffectType"/>.
+        /// Get spell effect remove handler <see cref="SpellEffectHandlerRemoveDelegate"/> for supplied <see cref="SpellEffectType"/>.
         /// </summary>
-        SpellEffectHandlerDelegate GetSpellEffectRemoveDelegate(SpellEffectType type);
+        SpellEffectHandlerRemoveDelegate GetSpellEffectRemoveDelegate(SpellEffectType type);
     }
 }

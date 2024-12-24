@@ -27,7 +27,7 @@ namespace NexusForever.Game.Spell.Effect.Handler
         /// <summary>
         /// Handle <see cref="ISpell"/> effect apply on <see cref="IUnitEntity"/> target.
         /// </summary>
-        public void Apply(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectSummonMountData data)
+        public void Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectSummonMountData data)
         {
             // TODO: handle NPC mounting?
             if (target is not IPlayer player)
@@ -37,7 +37,7 @@ namespace NexusForever.Game.Spell.Effect.Handler
                 return;
 
             var mount = entityFactory.CreateEntity<IMountEntity>();
-            mount.Initialise(player, spell.Parameters.SpellInfo.Entry.Id, data.CreatureId, data.VehicleId, data.ItemDisplayId);
+            mount.Initialise(player, executionContext.Spell.Parameters.SpellInfo.Entry.Id, data.CreatureId, data.VehicleId, data.ItemDisplayId);
             mount.EnqueuePassengerAdd(player, VehicleSeatType.Pilot, 0);
 
             // usually for hover boards

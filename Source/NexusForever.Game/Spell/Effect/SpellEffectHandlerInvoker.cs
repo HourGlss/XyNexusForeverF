@@ -34,7 +34,7 @@ namespace NexusForever.Game.Spell.Effect
         /// <summary>
         /// Invoke the apply handler for the given spell effect.
         /// </summary>
-        public void InvokeApplyHandler(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
+        public void InvokeApplyHandler(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info)
         {
             System.Type handlerType = globalSpellEffectManager.GetSpellEffectApplyHandlerType(info.Entry.EffectType);
             if (handlerType == null)
@@ -43,14 +43,22 @@ namespace NexusForever.Game.Spell.Effect
                 return;
             }
 
-            SpellEffectHandlerDelegate handlerDelegate = globalSpellEffectManager.GetSpellEffectApplyDelegate(info.Entry.EffectType);
+            object handler = CreateHandler(info, handlerType);
+            if (handler == null)
+                return;
+
+            SpellEffectHandlerApplyDelegate handlerDelegate = globalSpellEffectManager.GetSpellEffectApplyDelegate(info.Entry.EffectType);
             if (handlerDelegate == null)
             {
                 log.LogWarning($"Unhandled handler for spell effect {info.Entry.EffectType}, missing delegate!");
                 return;
             }
 
-            InvokeHandler(spell, target, info, handlerType, handlerDelegate);
+            ISpellEffectData data = PopulateData(info);
+            if (data == null)
+                return;
+
+            handlerDelegate.Invoke(handler, executionContext, target, info, data);
         }
 
         /// <summary>
@@ -63,41 +71,54 @@ namespace NexusForever.Game.Spell.Effect
             if (handlerType == null)
                 return;
 
-            SpellEffectHandlerDelegate handlerDelegate = globalSpellEffectManager.GetSpellEffectRemoveDelegate(info.Entry.EffectType);
+            object handler = CreateHandler(info, handlerType);
+            if (handler == null)
+                return;
+
+            SpellEffectHandlerRemoveDelegate handlerDelegate = globalSpellEffectManager.GetSpellEffectRemoveDelegate(info.Entry.EffectType);
             if (handlerDelegate == null)
             {
                 log.LogWarning($"Unhandled handler for spell effect {info.Entry.EffectType}, missing delegate!");
                 return;
             }
 
-            InvokeHandler(spell, target, info, handlerType, handlerDelegate);
+            ISpellEffectData data = PopulateData(info);
+            if (data == null)
+                return;
+
+            handlerDelegate.Invoke(handler, spell, target, info, data);
         }
 
-        private void InvokeHandler(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info, System.Type handlerType, SpellEffectHandlerDelegate handlerDelegate)
+        private ISpellEffectData PopulateData(ISpellTargetEffectInfo info)
         {
-            object handler = serviceProvider.GetKeyedService(handlerType, info.Entry.EffectType);
-            if (handler == null)
-            {
-                log.LogWarning($"Unhandled handler for spell effect {info.Entry.EffectType}, type not registered!");
-                return;
-            }
-
             System.Type dataType = globalSpellEffectManager.GetSpellEffectDataType(info.Entry.EffectType);
             if (dataType == null)
             {
                 log.LogWarning($"Unhandled data for spell effect {info.Entry.EffectType}!");
-                return;
+                return null;
             }
 
             ISpellEffectData data = (ISpellEffectData)serviceProvider.GetService(dataType);
             if (data == null)
             {
                 log.LogWarning($"Unhandled data for spell effect {info.Entry.EffectType}, type not registered!");
-                return;
+                return null;
             }
 
             data.Populate(info.Entry);
-            handlerDelegate.Invoke(handler, spell, target, info, data);
+            return data;
+        }
+
+        private object CreateHandler(ISpellTargetEffectInfo info, System.Type handlerType)
+        {
+            object handler = serviceProvider.GetKeyedService(handlerType, info.Entry.EffectType);
+            if (handler == null)
+            {
+                log.LogWarning($"Unhandled handler for spell effect {info.Entry.EffectType}, type not registered!");
+                return null;
+            }
+
+            return handler;
         }
     }
 }

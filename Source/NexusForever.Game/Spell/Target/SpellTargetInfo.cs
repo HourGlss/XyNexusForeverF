@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable.Model;
@@ -122,7 +123,7 @@ namespace NexusForever.Game.Spell.Target
         /// <summary>
         /// Create and execute the supplied <see cref="Spell4EffectsEntry"/>.
         /// </summary>
-        public void Execute(Spell4EffectsEntry entry)
+        public void Execute(Spell4EffectsEntry entry, ISpellExecutionContext executionContext)
         {
             if (!effects.TryGetValue(entry.Id, out ISpellTargetEffectInfo info))
             {
@@ -133,7 +134,7 @@ namespace NexusForever.Game.Spell.Target
                 log.LogTrace($"Added new SpellTargetEffectInfo for target {Guid} for spell {Collection.Spell.Spell4Id}.");
             }
 
-            info.Execute();
+            info.Execute(executionContext);
         }
 
         /// <summary>

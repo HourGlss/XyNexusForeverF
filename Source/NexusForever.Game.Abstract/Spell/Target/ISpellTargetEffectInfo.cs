@@ -35,7 +35,7 @@ namespace NexusForever.Game.Abstract.Spell.Target
         /// <remarks>
         /// This will also invoke the <see cref="ISpellEffectApplyHandler"/> for the effect type if it exists.
         /// </remarks>
-        void Execute();
+        void Execute(ISpellExecutionContext executionContext);
 
         /// <summary>
         /// Finish the effect.

@@ -34,7 +34,7 @@ namespace NexusForever.Game.Abstract.Spell.Target
         /// <summary>
         /// Create and execute the supplied <see cref="Spell4EffectsEntry"/>.
         /// </summary>
-        void Execute(Spell4EffectsEntry entry);
+        void Execute(Spell4EffectsEntry entry, ISpellExecutionContext executionContext);
 
         /// <summary>
         /// Finish all effects for the target.

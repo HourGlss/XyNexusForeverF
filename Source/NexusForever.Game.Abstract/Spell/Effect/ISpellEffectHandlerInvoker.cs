@@ -8,7 +8,7 @@ namespace NexusForever.Game.Abstract.Spell.Effect
         /// <summary>
         /// Invoke the apply handler for the given spell effect.
         /// </summary>
-        void InvokeApplyHandler(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info);
+        void InvokeApplyHandler(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info);
 
         /// <summary>
         /// Invoke the remove handler for the given spell effect.

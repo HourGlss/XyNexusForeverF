@@ -28,9 +28,9 @@ namespace NexusForever.Game.Spell.Effect.Handler
         /// <summary>
         /// Handle <see cref="ISpell"/> effect apply on <see cref="IUnitEntity"/> target.
         /// </summary>
-        public void Apply(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectDamageData data)
+        public void Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectDamageData data)
         {
-            if (!target.CanAttack(spell.Caster))
+            if (!target.CanAttack(executionContext.Spell.Caster))
                 return;
 
             // TODO: Merge DamageCalculator, uncomment below lines, and delete the hardcoded values before target takes damage.
@@ -51,11 +51,11 @@ namespace NexusForever.Game.Spell.Effect.Handler
             {
                 IProcParameters parameters = procParameterFactory.Resolve();
                 parameters.Target = target;
-                spell.Caster.ProcManager.TriggerProc(ProcType.CriticalDamage, parameters);
+                executionContext.Spell.Caster.ProcManager.TriggerProc(ProcType.CriticalDamage, parameters);
             }
 
             // TODO: Deal damage
-            target.TakeDamage(spell.Caster, info.Damage);
+            target.TakeDamage(executionContext.Spell.Caster, info.Damage);
         }
     }
 }

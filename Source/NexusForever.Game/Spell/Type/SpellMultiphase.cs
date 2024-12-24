@@ -40,7 +40,6 @@ namespace NexusForever.Game.Spell.Type
                 events.EnqueueEvent(new SpellEvent(spellDelay / 1000d, () =>
                 {
                     currentPhase = (byte)spellPhase.OrderIndex;
-                    effectTriggerCount.Clear();
                     Execute();
 
                     if (i == Parameters.SpellInfo.Phases.Count - 1)

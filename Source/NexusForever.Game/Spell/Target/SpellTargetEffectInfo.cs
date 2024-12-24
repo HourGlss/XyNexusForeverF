@@ -100,11 +100,11 @@ namespace NexusForever.Game.Spell.Target
         /// <remarks>
         /// This will also invoke the <see cref="ISpellEffectApplyHandler"/> for the effect type if it exists.
         /// </remarks>
-        public void Execute()
+        public void Execute(ISpellExecutionContext executionContext)
         {
             try
             {
-                spellEffectHandlerInvoker.InvokeApplyHandler(Target.Collection.Spell, Target.GetTarget(), this);
+                spellEffectHandlerInvoker.InvokeApplyHandler(executionContext, Target.GetTarget(), this);
             }
             catch (Exception e)
             {

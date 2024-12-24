@@ -18,13 +18,14 @@ namespace NexusForever.Game.Spell.Effect
         private uint nextEffectId = 1;
 
         private readonly Dictionary<SpellEffectType, System.Type> spellEffectDataTypes = [];
-        private readonly Dictionary<SpellEffectType, SpellEffectHandlerDelegate> spellEffectApplyDelegates = [];
-        private readonly Dictionary<SpellEffectType, SpellEffectHandlerDelegate> spellEffectRemoveDelegates = [];
+        private readonly Dictionary<SpellEffectType, SpellEffectHandlerApplyDelegate> spellEffectApplyDelegates = [];
+        private readonly Dictionary<SpellEffectType, SpellEffectHandlerRemoveDelegate> spellEffectRemoveDelegates = [];
         private readonly Dictionary<SpellEffectType, System.Type> spellEffectApplyTypes = [];
         private readonly Dictionary<SpellEffectType, System.Type> spellEffectRemoveTypes = [];
 
         public void Initialise()
         {
+            // create delegates for each spell effect apply and remove handler that upcasts the handler and data object before invoke.
             foreach (System.Type type in Assembly.GetExecutingAssembly().GetTypes())
             {
                 var attribute = type.GetCustomAttribute<SpellEffectHandlerAttribute>();
@@ -46,28 +47,38 @@ namespace NexusForever.Game.Spell.Effect
                     MethodInfo methodInfo = map.TargetMethods[0];
 
                     ParameterExpression handlerParameter = Expression.Parameter(typeof(object));
-                    ParameterExpression spellParameter   = Expression.Parameter(typeof(ISpell));
                     ParameterExpression entityParameter  = Expression.Parameter(typeof(IUnitEntity));
                     ParameterExpression infoParameter    = Expression.Parameter(typeof(ISpellTargetEffectInfo));
                     ParameterExpression dataParameter    = Expression.Parameter(typeof(ISpellEffectData));
 
-                    MethodCallExpression call =
-                        Expression.Call(Expression.Convert(handlerParameter, type), methodInfo,
-                        spellParameter, entityParameter, infoParameter, Expression.Convert(dataParameter, dataType));
-
-                    Expression<SpellEffectHandlerDelegate> lambda =
-                        Expression.Lambda<SpellEffectHandlerDelegate>(call, handlerParameter, spellParameter,
-                        entityParameter, infoParameter, dataParameter);
-                    SpellEffectHandlerDelegate handlerDelegate = lambda.Compile();
-
                     if (interfaceType.GetGenericTypeDefinition() == typeof(ISpellEffectApplyHandler<>))
                     {
-                        spellEffectApplyDelegates.Add(attribute.SpellEffectType, handlerDelegate);
+                        ParameterExpression executionContextParameter = Expression.Parameter(typeof(ISpellExecutionContext));
+
+                        MethodCallExpression call =
+                            Expression.Call(Expression.Convert(handlerParameter, type), methodInfo,
+                            executionContextParameter, entityParameter, infoParameter, Expression.Convert(dataParameter, dataType));
+
+                        Expression<SpellEffectHandlerApplyDelegate> lambda =
+                            Expression.Lambda<SpellEffectHandlerApplyDelegate>(call, handlerParameter,
+                            executionContextParameter, entityParameter, infoParameter, dataParameter);
+
+                        spellEffectApplyDelegates.Add(attribute.SpellEffectType, lambda.Compile());
                         spellEffectApplyTypes.Add(attribute.SpellEffectType, interfaceType);
                     }
                     else if (interfaceType.GetGenericTypeDefinition() == typeof(ISpellEffectRemoveHandler<>))
                     {
-                        spellEffectRemoveDelegates.Add(attribute.SpellEffectType, handlerDelegate);
+                        ParameterExpression spellParameter = Expression.Parameter(typeof(ISpell));
+
+                        MethodCallExpression call =
+                            Expression.Call(Expression.Convert(handlerParameter, type), methodInfo,
+                            spellParameter, entityParameter, infoParameter, Expression.Convert(dataParameter, dataType));
+
+                        Expression<SpellEffectHandlerRemoveDelegate> lambda =
+                            Expression.Lambda<SpellEffectHandlerRemoveDelegate>(call, handlerParameter, 
+                            spellParameter, entityParameter, infoParameter, dataParameter);
+
+                        spellEffectRemoveDelegates.Add(attribute.SpellEffectType, lambda.Compile());
                         spellEffectRemoveTypes.Add(attribute.SpellEffectType, interfaceType);
                     }
                 }
@@ -99,19 +110,19 @@ namespace NexusForever.Game.Spell.Effect
         }
 
         /// <summary>
-        /// Get spell effect apply handler <see cref="SpellEffectHandlerDelegate"/> for supplied <see cref="SpellEffectType"/>.
+        /// Get spell effect apply handler <see cref="SpellEffectHandlerApplyDelegate"/> for supplied <see cref="SpellEffectType"/>.
         /// </summary>
-        public SpellEffectHandlerDelegate GetSpellEffectApplyDelegate(SpellEffectType type)
+        public SpellEffectHandlerApplyDelegate GetSpellEffectApplyDelegate(SpellEffectType type)
         {
-            return spellEffectApplyDelegates.TryGetValue(type, out SpellEffectHandlerDelegate handler) ? handler : null;
+            return spellEffectApplyDelegates.TryGetValue(type, out SpellEffectHandlerApplyDelegate handler) ? handler : null;
         }
 
         /// <summary>
-        /// Get spell effect remove handler <see cref="SpellEffectHandlerDelegate"/> for supplied <see cref="SpellEffectType"/>.
+        /// Get spell effect remove handler <see cref="SpellEffectHandlerRemoveDelegate"/> for supplied <see cref="SpellEffectType"/>.
         /// </summary>
-        public SpellEffectHandlerDelegate GetSpellEffectRemoveDelegate(SpellEffectType type)
+        public SpellEffectHandlerRemoveDelegate GetSpellEffectRemoveDelegate(SpellEffectType type)
         {
-            return spellEffectRemoveDelegates.TryGetValue(type, out SpellEffectHandlerDelegate handler) ? handler : null;
+            return spellEffectRemoveDelegates.TryGetValue(type, out SpellEffectHandlerRemoveDelegate handler) ? handler : null;
         }
     }
 }

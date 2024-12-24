@@ -61,8 +61,6 @@ namespace NexusForever.Game.Spell
         protected readonly ISpellEventManager events = new SpellEventManager();
 
         protected readonly List<ITelegraph> telegraphs = [];
-        protected readonly List<IProxy> proxies = [];
-        protected Dictionary<uint /*effectId*/, uint/*count*/> effectTriggerCount = [];
 
         private readonly UpdateTimer persistCheck = new(TimeSpan.FromMilliseconds(100));
 
@@ -435,33 +433,36 @@ namespace NexusForever.Game.Spell
                 }
             }
 
-            Execute(Parameters.SpellInfo.Effects);
+            var executionContext = new SpellExecutionContext();
+            executionContext.Initialise(this);
+
+            foreach (Spell4EffectsEntry entry in Parameters.SpellInfo.Effects)
+                executionContext.AddSpellEffect(entry);
+
+            Execute(executionContext);
         }
 
-        protected void Execute(List<Spell4EffectsEntry> effects)
+        protected void Execute(ISpellExecutionContext executionContext)
         {
-            if (effects.Count == 0)
+            if (!executionContext.GetSpellEffects().Any())
                 return;
 
             status = SpellStatus.Executing;
             log.LogTrace($"Spell {Parameters.SpellInfo.Entry.Id} has started executing.");
 
-            var targetCollection = new SpellTargetCollection();
-            SelectTargets(targetCollection);           // First Select Targets
-            ExecuteEffects(effects, targetCollection); // All Effects are evaluated and executed (after SelectTargets())
-            HandleProxies();                           // Any Proxies that are added by Effets are evaluated and executed (after ExecuteEffects())
-            SendSpellGo();                             // Inform the Client once all evaluations are taken place (after Effects & Proxies are executed)
+            SelectTargets(executionContext);  // First Select Targets
+            ExecuteEffects(executionContext); // All Effects are evaluated and executed (after SelectTargets())
+            HandleProxies(executionContext);  // Any Proxies that are added by Effects are evaluated and executed (after ExecuteEffects())
+            SendSpellGo();                    // Inform the Client once all evaluations are taken place (after Effects & Proxies are executed)
         }
 
-        protected void HandleProxies()
+        protected void HandleProxies(ISpellExecutionContext executionContext)
         {
-            foreach (IProxy proxy in proxies)
+            foreach (IProxy proxy in executionContext.GetProxies())
                 proxy.Evaluate();
 
-            foreach (IProxy proxy in proxies)
+            foreach (IProxy proxy in executionContext.GetProxies())
                 proxy.Cast(Caster, events);
-
-            proxies.Clear();
         }
 
         protected void SetCooldown()
@@ -488,20 +489,20 @@ namespace NexusForever.Game.Spell
             }
         }
 
-        protected virtual void SelectTargets(ISpellTargetCollection targetCollection)
+        protected virtual void SelectTargets(ISpellExecutionContext executionContext)
         {
             // Add Caster Entity with the appropriate SpellEffectTargetFlags.
-            targetCollection.AddTarget(SpellEffectTargetFlags.Caster, Caster);
+            executionContext.TargetCollection.AddTarget(SpellEffectTargetFlags.Caster, Caster);
 
             // Add Targeted Entity with the appropriate SpellEffectTargetFlags.
             if (Parameters.PrimaryTargetId > 0)
             {
                 IUnitEntity explicitTargetEntity = Caster.GetVisible<IUnitEntity>(Parameters.PrimaryTargetId);
                 if (explicitTargetEntity != null)
-                    targetCollection.AddTarget(SpellEffectTargetFlags.ExplicitTarget, explicitTargetEntity);
+                    executionContext.TargetCollection.AddTarget(SpellEffectTargetFlags.ExplicitTarget, explicitTargetEntity);
             }
             else
-                targetCollection.AddTarget(SpellEffectTargetFlags.ExplicitTarget, Caster);
+                executionContext.TargetCollection.AddTarget(SpellEffectTargetFlags.ExplicitTarget, Caster);
 
             // TODO: this might not be entirely correct, research this more...
             if (Parameters.SpellInfo.BaseInfo.TargetMechanics.TargetType
@@ -534,14 +535,14 @@ namespace NexusForever.Game.Spell
             // add targets...
             foreach (ISpellTargetImplicit implicitTarget in implicitTargets)
                 if (implicitTarget.Result == null)
-                    targetCollection.AddTarget(SpellEffectTargetFlags.ImplicitTarget, implicitTarget.Entity);
+                    executionContext.TargetCollection.AddTarget(SpellEffectTargetFlags.ImplicitTarget, implicitTarget.Entity);
         }
 
-        private void ExecuteEffects(List<Spell4EffectsEntry> effects, ISpellTargetCollection targetCollection)
+        private void ExecuteEffects(ISpellExecutionContext executionContext)
         {
-            foreach (Spell4EffectsEntry effect in effects)
+            foreach (Spell4EffectsEntry effect in executionContext.GetSpellEffects())
                 if (CanExecuteEffect(effect))
-                    ExecuteEffect(effect, targetCollection);
+                    ExecuteEffect(effect, executionContext);
         }
 
         protected virtual bool CanExecuteEffect(Spell4EffectsEntry spell4EffectsEntry)
@@ -556,11 +557,11 @@ namespace NexusForever.Game.Spell
             return true;
         }
 
-        protected virtual void ExecuteEffect(Spell4EffectsEntry spell4EffectsEntry, ISpellTargetCollection targetCollection)
+        protected virtual void ExecuteEffect(Spell4EffectsEntry spell4EffectsEntry, ISpellExecutionContext executionContext)
         {
             log.LogTrace($"Executing SpellEffect ID {spell4EffectsEntry.Id} ({1 << currentPhase})");
 
-            foreach (ISpellTarget spellTarget in targetCollection.GetTargets(spell4EffectsEntry.TargetFlags))
+            foreach (ISpellTarget spellTarget in executionContext.TargetCollection.GetTargets(spell4EffectsEntry.TargetFlags))
             {
                 if (!CheckEffectApplyPrerequisites(spell4EffectsEntry, spellTarget.Entity, spellTarget.Flags))
                     continue;
@@ -568,14 +569,11 @@ namespace NexusForever.Game.Spell
                 ISpellTargetInfo spellTargetInfo =
                     spellTargetInfoCollection.GetSpellTargetInfo(spellTarget) ??
                     spellTargetInfoCollection.CreateSpellTargetInfo(spellTarget);
-                spellTargetInfo.Execute(spell4EffectsEntry);
+                spellTargetInfo.Execute(spell4EffectsEntry, executionContext);
 
                 // Track the number of times this effect has fired.
                 // Some spell effects have a limited trigger count per spell cast.
-                if (effectTriggerCount.ContainsKey(spell4EffectsEntry.Id))
-                    effectTriggerCount[spell4EffectsEntry.Id]++;
-                else
-                    effectTriggerCount.TryAdd(spell4EffectsEntry.Id, 1);
+                executionContext.IncrementEffectTriggerCount(spell4EffectsEntry.Id);
             }
         }
 
@@ -878,26 +876,6 @@ namespace NexusForever.Game.Spell
                     && !events.HasPendingEvent
                     && !Parameters.ForceCancelOnly)
                 || status == SpellStatus.Finishing;
-        }
-
-        /// <summary>
-        /// Add a <see cref="IProxy"/> to this spell's execution queue.
-        /// </summary>
-        /// <param name="proxy">Proxy instance to add</param>
-        public void AddProxy(IProxy proxy)
-        {
-            proxies.Add(proxy);
-        }
-
-        /// <summary>
-        /// Returns number of times a certain effect has been triggered, for this spell cast, with a given ID.
-        /// </summary>
-        /// <param name="effectId"></param>
-        /// <param name="count"></param>
-        /// <returns></returns>
-        public bool GetEffectTriggerCount(uint effectId, out uint count)
-        {
-            return effectTriggerCount.TryGetValue(effectId, out count);
         }
     }
 }

@@ -27,7 +27,7 @@ namespace NexusForever.Game.Spell.Effect.Handler
         /// <summary>
         /// Handle <see cref="ISpell"/> effect apply on <see cref="IUnitEntity"/> target.
         /// </summary>
-        public void Apply(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectDisguiseData data)
+        public void Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectDisguiseData data)
         {
             Creature2Entry creature2 = gameTableManager.Creature2.GetEntry(data.CreatureId);
             if (creature2 == null)

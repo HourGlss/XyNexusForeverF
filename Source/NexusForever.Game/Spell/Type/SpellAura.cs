@@ -4,7 +4,6 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Spell.Event;
-using NexusForever.Game.Spell.Target;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
@@ -57,12 +56,14 @@ namespace NexusForever.Game.Spell.Type
             if (!auraExecute.HasElapsed)
                 return;
 
-            var targetCollection = new SpellTargetCollection();
-            SelectTargets(targetCollection);
+            var executionContext = new SpellExecutionContext();
+            executionContext.Initialise(this);
+
+            SelectTargets(executionContext);
 
             foreach (ISpellTargetInfo targetInfo in spellTargetInfoCollection)
             {
-                ISpellTarget target = targetCollection.GetTarget(targetInfo.Guid, SpellEffectTargetFlags.ImplicitTarget);
+                ISpellTarget target = executionContext.TargetCollection.GetTarget(targetInfo.Guid, SpellEffectTargetFlags.ImplicitTarget);
                 if (target == null)
                 {
                     targetInfo.Finish();
@@ -77,15 +78,17 @@ namespace NexusForever.Game.Spell.Type
 
         private void HandleEffectTicks(double lastTick)
         {
-            var effects = new List<Spell4EffectsEntry>();
+            var executionContext = new SpellExecutionContext();
+            executionContext.Initialise(this);
+
             foreach ((Spell4EffectsEntry effect, UpdateTimer updateTimer) in effectRetriggerTimers)
             {
                 updateTimer.Update(lastTick);
                 if (updateTimer.HasElapsed)
-                    effects.Add(effect);
+                    executionContext.AddSpellEffect(effect);
             }
 
-            Execute(effects);
+            Execute(executionContext);
         }
 
         public override bool Cast()
@@ -155,9 +158,9 @@ namespace NexusForever.Game.Spell.Type
             return base.CanExecuteEffect(spell4EffectsEntry);
         }
 
-        protected override void ExecuteEffect(Spell4EffectsEntry spell4EffectsEntry, ISpellTargetCollection targetCollection)
+        protected override void ExecuteEffect(Spell4EffectsEntry spell4EffectsEntry, ISpellExecutionContext executionContext)
         {
-            base.ExecuteEffect(spell4EffectsEntry, targetCollection);
+            base.ExecuteEffect(spell4EffectsEntry, executionContext);
 
             if (effectRetriggerTimers.TryGetValue(spell4EffectsEntry, out UpdateTimer updateTimer))
                 updateTimer.Reset();

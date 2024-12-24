@@ -10,7 +10,7 @@ namespace NexusForever.Game.Spell.Effect.Handler
     [SpellEffectHandler(SpellEffectType.VitalModifier)]
     public class SpellEffectVitalModifierHandler : ISpellEffectApplyHandler<ISpellEffectVitalModifierData>
     {
-        public void Apply(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectVitalModifierData data)
+        public void Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectVitalModifierData data)
         {
             target.ModifyVital(data.Vital, data.Value);
         }

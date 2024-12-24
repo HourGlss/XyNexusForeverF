@@ -14,11 +14,11 @@ namespace NexusForever.Game.Spell.Effect.Handler
         /// <summary>
         /// Handle <see cref="ISpell"/> effect apply on <see cref="IUnitEntity"/> target.
         /// </summary>
-        public void Apply(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectUnitPropertyModifierData data)
+        public void Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectUnitPropertyModifierData data)
         {
             // TODO: I suppose these could be cached somewhere instead of generating them every single effect?
             var modifier = new SpellPropertyModifier(data.Property, data.Priority, data.PercentageModifier, data.FlatValueModifier, data.LevelScalingModifier);
-            target.AddSpellModifierProperty(modifier, spell.Parameters.SpellInfo.Entry.Id);
+            target.AddSpellModifierProperty(modifier, executionContext.Spell.Parameters.SpellInfo.Entry.Id);
         }
 
         /// <summary>

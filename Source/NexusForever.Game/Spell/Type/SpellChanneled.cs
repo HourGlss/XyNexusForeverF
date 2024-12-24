@@ -57,7 +57,6 @@ namespace NexusForever.Game.Spell.Type
                         return;
                     }
 
-                    effectTriggerCount.Clear();
                     Execute();
                 }));
 

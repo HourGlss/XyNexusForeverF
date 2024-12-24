@@ -54,20 +54,6 @@ namespace NexusForever.Game.Abstract.Spell
 
         bool IsMovingInterrupted();
 
-        /// <summary>
-        /// Add a <see cref="IProxy"/> to this spell's execution queue.
-        /// </summary>
-        /// <param name="proxy">Proxy instance to add</param>
-        void AddProxy(IProxy proxy);
-
-        /// <summary>
-        /// Returns number of times a certain effect has been triggered, for this spell cast, with a given ID.
-        /// </summary>
-        /// <param name="effectId"></param>
-        /// <param name="count"></param>
-        /// <returns></returns>
-        bool GetEffectTriggerCount(uint effectId, out uint count);
-
         SpellInit BuildSpellInit();
     }
 }
