@@ -4,6 +4,7 @@ using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map.Lock;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Effect;
+using NexusForever.Game.Abstract.Spell.Effect.Data;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
@@ -12,7 +13,7 @@ using NexusForever.GameTable.Model;
 namespace NexusForever.Game.Spell.Effect.Handler
 {
     [SpellEffectHandler(SpellEffectType.Teleport)]
-    public class SpellEffectTeleportHandler : ISpellEffectApplyHandler
+    public class SpellEffectTeleportHandler : ISpellEffectApplyHandler<ISpellEffectTeleportData>
     {
         #region Dependency Injection
 
@@ -35,12 +36,12 @@ namespace NexusForever.Game.Spell.Effect.Handler
         /// <summary>
         /// Handle <see cref="ISpell"/> effect apply on <see cref="IUnitEntity"/> target.
         /// </summary>
-        public void Apply(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
+        public void Apply(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectTeleportData data)
         {
             if (target is not IPlayer player)
                 return;
 
-            WorldLocation2Entry locationEntry = gameTableManager.WorldLocation2.GetEntry(info.Entry.DataBits00);
+            WorldLocation2Entry locationEntry = gameTableManager.WorldLocation2.GetEntry(data.WorldLocationId);
             if (locationEntry == null)
                 return;
 

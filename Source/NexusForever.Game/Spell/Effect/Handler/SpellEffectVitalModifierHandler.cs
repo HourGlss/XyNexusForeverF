@@ -1,19 +1,18 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Effect;
+using NexusForever.Game.Abstract.Spell.Effect.Data;
 using NexusForever.Game.Abstract.Spell.Target;
-using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
 
 namespace NexusForever.Game.Spell.Effect.Handler
 {
     [SpellEffectHandler(SpellEffectType.VitalModifier)]
-    public class SpellEffectVitalModifierHandler : ISpellEffectApplyHandler
+    public class SpellEffectVitalModifierHandler : ISpellEffectApplyHandler<ISpellEffectVitalModifierData>
     {
-        public void Apply(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
+        public void Apply(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectVitalModifierData data)
         {
-            Vital vital = (Vital)info.Entry.DataBits00;
-            target.ModifyVital(vital, info.Entry.DataBits01);
+            target.ModifyVital(data.Vital, data.Value);
         }
     }
 }

@@ -5,7 +5,6 @@ using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Shared;
-using static NexusForever.Network.World.Message.Model.ServerSpellBuffsApply;
 
 namespace NexusForever.Game.Spell.Target
 {

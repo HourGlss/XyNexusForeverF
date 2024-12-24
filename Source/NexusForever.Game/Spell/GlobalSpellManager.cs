@@ -20,14 +20,7 @@ namespace NexusForever.Game.Spell
         /// Id to be assigned to the next spell cast.
         /// </summary>
         public uint NextCastingId => nextCastingId++;
-
-        /// <summary>
-        /// Id to be assigned to the next spell effect.
-        /// </summary>
-        public uint NextEffectId => nextEffectId++;
-
         private uint nextCastingId = 1;
-        private uint nextEffectId = 1;
 
         private readonly Dictionary<uint, ISpellBaseInfo> spellBaseInfoStore = new();
 
@@ -187,7 +180,6 @@ namespace NexusForever.Game.Spell
             
             return spellBaseInfo;
         }
-
 
         /// <summary>
         /// Return <see cref="CastResult"/> for failed cast on supplied <see cref="Vital"/>.

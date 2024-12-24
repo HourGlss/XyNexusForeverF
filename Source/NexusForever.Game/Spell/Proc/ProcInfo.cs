@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Prerequisite;
+using NexusForever.Game.Abstract.Spell.Effect.Data;
 using NexusForever.Game.Abstract.Spell.Proc;
 using NexusForever.Game.Static.Spell.Proc;
-using NexusForever.GameTable.Model;
 using NexusForever.Shared.Game;
 
 namespace NexusForever.Game.Spell.Proc
@@ -11,7 +11,7 @@ namespace NexusForever.Game.Spell.Proc
     public class ProcInfo : IProcInfo
     {
         public IUnitEntity Owner { get; private set; }
-        public Spell4EffectsEntry Effect { get; private set; }
+        public ISpellEffectProcData Data { get; private set; }
         public ProcType Type { get; private set; }
 
         private UpdateTimer triggerTimer;
@@ -32,18 +32,18 @@ namespace NexusForever.Game.Spell.Proc
         #endregion
 
         /// <summary>
-        /// Initialise <see cref="IProcInfo"/> with supplied <see cref="IUnitEntity"/> owner and <see cref="Spell4EffectsEntry"/>.
+        /// Initialise <see cref="IProcInfo"/> with supplied <see cref="IUnitEntity"/> owner and <see cref="ISpellEffectProcData"/>.
         /// </summary>
-        public void Initialise(IUnitEntity owner, Spell4EffectsEntry entry)
+        public void Initialise(IUnitEntity owner, ISpellEffectProcData data)
         {
             if (Owner != null)
                 throw new InvalidOperationException("ProcInfo already initialised.");
 
             Owner        = owner;
-            Effect       = entry;
-            Type         = (ProcType)entry.DataBits00;
+            Data         = data;
+            Type         = data.ProcType;
 
-            triggerTimer = new UpdateTimer(entry.DataBits04 / 1000d, false);
+            triggerTimer = new UpdateTimer(TimeSpan.FromMilliseconds(Data.TriggerTime).TotalSeconds, false);
         }
 
         /// <summary>
@@ -57,9 +57,9 @@ namespace NexusForever.Game.Spell.Proc
 
             triggerTimer.Reset(false);
 
-            log.LogTrace($"Triggering Proc {Effect.Id} of {Type}.");
+            log.LogTrace($"Triggering Proc {Data.Entry.Id} of {Type}.");
 
-            Owner.CastSpell(Effect.DataBits01, new SpellParameters
+            Owner.CastSpell(Data.SpellId, new SpellParameters
             {
                 UserInitiatedSpellCast = false
             });
@@ -70,7 +70,7 @@ namespace NexusForever.Game.Spell.Proc
         /// </summary>
         public void Trigger(IProcParameters parameters)
         {
-            log.LogWarning($"Attempting to trigger proc {Effect.Id} of {Type}.");
+            log.LogWarning($"Attempting to trigger proc {Data.Entry.Id} of {Type}.");
 
             if (CanTrigger(parameters))
                 triggerTimer.Reset(true);
@@ -78,16 +78,16 @@ namespace NexusForever.Game.Spell.Proc
 
         private bool CanTrigger(IProcParameters parameters)
         {
-            if (Effect.DataBits06 != 0)
+            if (Data.TargetPrerequisiteId != 0)
             {
                 // TODO: once the prerequisite system is updated to handle IUnitEntity, this needs to be updated
-                if (parameters.Target is IPlayer player && !prerequisiteManager.Meets(player, Effect.DataBits06))
+                if (parameters.Target is IPlayer player && !prerequisiteManager.Meets(player, Data.TargetPrerequisiteId))
                     return false;
             }
 
-            if (Effect.DataBits09 != 0)
+            if (Data.CasterPrerequisiteId != 0)
             {
-                if (Owner is IPlayer player && !prerequisiteManager.Meets(player, Effect.DataBits09))
+                if (Owner is IPlayer player && !prerequisiteManager.Meets(player, Data.CasterPrerequisiteId))
                     return false;
             }
 

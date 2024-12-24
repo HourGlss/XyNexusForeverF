@@ -2,6 +2,7 @@
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Effect;
+using NexusForever.Game.Abstract.Spell.Effect.Data;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Spell;
 using NexusForever.Game.Static.Spell.Effect;
@@ -9,7 +10,7 @@ using NexusForever.Game.Static.Spell.Effect;
 namespace NexusForever.Game.Spell.Effect.Handler
 {
     [SpellEffectHandler(SpellEffectType.SpellForceRemove)]
-    public class SpellEffectSpellForceRemoveHandler : ISpellEffectApplyHandler
+    public class SpellEffectSpellForceRemoveHandler : ISpellEffectApplyHandler<ISpellEffectSpellForceRemoveData>
     {
         #region Dependency Injection
 
@@ -23,30 +24,30 @@ namespace NexusForever.Game.Spell.Effect.Handler
 
         #endregion
 
-        public void Apply(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
+        public void Apply(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectSpellForceRemoveData data)
         {
-            switch ((SpellEffectForceSpellRemoveType)info.Entry.DataBits00)
+            switch (data.Type)
             {
                 case SpellEffectForceSpellRemoveType.SpellGroupId:
                 {
-                    foreach (ISpell spellToRemove in target.GetSpellsByGroupId(info.Entry.DataBits01))
+                    foreach (ISpell spellToRemove in target.GetSpellsByGroupId(data.Data))
                         spellToRemove.Finish();
                     break;
                 }
                 case SpellEffectForceSpellRemoveType.Spell4:
                 {
-                    ISpell spellToRemove = target.GetSpellBySpellId(info.Entry.DataBits01);
+                    ISpell spellToRemove = target.GetSpellBySpellId(data.Data);
                     spellToRemove?.Finish();
                     break;
                 }
                 case SpellEffectForceSpellRemoveType.SpellBase:
                 {
-                    ISpell spellToRemove = target.GetSpellByBaseSpellId(info.Entry.DataBits01);
+                    ISpell spellToRemove = target.GetSpellByBaseSpellId(data.Data);
                     spellToRemove?.Finish();
                     break;
                 }
                 default:
-                    log.LogWarning($"Unhandled EffectForceSpellRemoveType Type {(SpellEffectForceSpellRemoveType)info.Entry.DataBits00}");
+                    log.LogWarning($"Unhandled EffectForceSpellRemoveType Type {data.Type}");
                     break;
             }
         }

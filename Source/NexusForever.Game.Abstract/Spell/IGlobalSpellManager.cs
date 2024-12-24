@@ -1,6 +1,6 @@
-﻿using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Static.Spell;
+﻿using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable.Model;
+using NexusForever.Network.World.Message.Static;
 
 namespace NexusForever.Game.Abstract.Spell
 {
@@ -10,11 +10,6 @@ namespace NexusForever.Game.Abstract.Spell
         /// Id to be assigned to the next spell cast.
         /// </summary>
         uint NextCastingId { get; }
-
-        /// <summary>
-        /// Id to be assigned to the next spell effect.
-        /// </summary>
-        uint NextEffectId { get; }
 
         void Initialise();
 
@@ -46,5 +41,10 @@ namespace NexusForever.Game.Abstract.Spell
         /// Return <see cref="ISpellBaseInfo"/>, if not already cached it will be generated before being returned.
         /// </summary>
         ISpellBaseInfo GetSpellBaseInfo(uint spell4BaseId);
+
+        /// <summary>
+        /// Return <see cref="CastResult"/> for failed cast on supplied <see cref="Vital"/>.
+        /// </summary>
+        CastResult GetFailedCastResultForVital(Vital vital);
     }
 }

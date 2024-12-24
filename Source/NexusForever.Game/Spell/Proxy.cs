@@ -1,26 +1,26 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Abstract.Spell.Effect.Data;
 using NexusForever.Game.Abstract.Spell.Event;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Spell.Event;
 using NexusForever.Game.Static.Spell;
-using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Spell
 {
     public class Proxy : IProxy
     {
         public IUnitEntity Target { get; }
-        public Spell4EffectsEntry Entry { get; }
+        public ISpellEffectProxyData Data { get; }
         public ISpell ParentSpell { get; }
         public bool CanCast { get; private set; } = false;
 
         private ISpellParameters proxyParameters;
 
-        public Proxy(IUnitEntity target, Spell4EffectsEntry entry, ISpell parentSpell, ISpellParameters parameters)
+        public Proxy(IUnitEntity target, ISpellEffectProxyData data, ISpell parentSpell, ISpellParameters parameters)
         {
             Target = target;
-            Entry = entry;
+            Data = data;
             ParentSpell = parentSpell;
 
             proxyParameters = new SpellParameters
@@ -38,13 +38,13 @@ namespace NexusForever.Game.Spell
             if (Target is not IPlayer)
                 CanCast = true;
 
-            if (Entry.DataBits06 == 0)
+            if (Data.PrerequisiteId == 0)
                 CanCast = true;
 
             if (CanCast)
                 return;
 
-            if (PrerequisiteManager.Instance.Meets(Target as IPlayer, Entry.DataBits06))
+            if (PrerequisiteManager.Instance.Meets(Target as IPlayer, Data.PrerequisiteId))
                 CanCast = true;
         }
 
@@ -53,33 +53,35 @@ namespace NexusForever.Game.Spell
             if (!CanCast)
                 return;
 
-            if (ParentSpell.CastMethod == CastMethod.Aura && Entry.TickTime > 0)
+            if (ParentSpell.CastMethod == CastMethod.Aura && Data.Entry.TickTime > 0)
             {
-                caster.CastSpell(Entry.DataBits01, proxyParameters);
+                caster.CastSpell(Data.PeriodicSpellId, proxyParameters);
                 return;
             }
 
-            events.EnqueueEvent(new SpellEvent(Entry.DelayTime / 1000d, () =>
+            events.EnqueueEvent(new SpellEvent(Data.Entry.DelayTime / 1000d, () =>
             {
-                if (Entry.TickTime > 0)
+                if (Data.Entry.TickTime > 0)
                 {
-                    double tickTime = Entry.TickTime;
-                    if (Entry.DurationTime > 0)
+                    double tickTime = Data.Entry.TickTime;
+                    if (Data.Entry.DurationTime > 0)
                     {
-                        for (int i = 1; i >= Entry.DurationTime / tickTime; i++)
+                        for (int i = 1; i >= Data.Entry.DurationTime / tickTime; i++)
+                        {
                             events.EnqueueEvent(new SpellEvent(tickTime * i / 1000d, () =>
                             {
-                                caster.CastSpell(Entry.DataBits01, proxyParameters);
+                                caster.CastSpell(Data.PeriodicSpellId, proxyParameters);
                             }));
+                        }
                     }
                     else
                         events.EnqueueEvent(TickingEvent(tickTime, () =>
                         {
-                            caster.CastSpell(Entry.DataBits01, proxyParameters);
+                            caster.CastSpell(Data.PeriodicSpellId, proxyParameters);
                         }));
                 }
                 else
-                    caster.CastSpell(Entry.DataBits00, proxyParameters);
+                    caster.CastSpell(Data.SpellId, proxyParameters);
             }));
         }
 

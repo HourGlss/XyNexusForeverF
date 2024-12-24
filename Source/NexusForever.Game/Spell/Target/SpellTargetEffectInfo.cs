@@ -29,17 +29,17 @@ namespace NexusForever.Game.Spell.Target
         #region Dependency Injection
 
         private ILogger<SpellTargetEffectInfo> log;
-        private ISpellEffectHandlerFactory spellEffectHandlerFactory;
-        private IGlobalSpellManager globalSpellManager;
+        private ISpellEffectHandlerInvoker spellEffectHandlerInvoker;
+        private IGlobalSpellEffectManager globalSpellEffectManager;
 
         public SpellTargetEffectInfo(
             ILogger<SpellTargetEffectInfo> log,
-            ISpellEffectHandlerFactory spellEffectHandlerFactory,
-            IGlobalSpellManager globalSpellManager)
+            ISpellEffectHandlerInvoker spellEffectHandlerInvoker,
+            IGlobalSpellEffectManager globalSpellEffectManager)
         {
             this.log                       = log;
-            this.spellEffectHandlerFactory = spellEffectHandlerFactory;
-            this.globalSpellManager        = globalSpellManager;
+            this.spellEffectHandlerInvoker = spellEffectHandlerInvoker;
+            this.globalSpellEffectManager  = globalSpellEffectManager;
         }
 
         #endregion
@@ -52,7 +52,7 @@ namespace NexusForever.Game.Spell.Target
             if (EffectId != 0)
                 throw new InvalidOperationException("SpellTargetEffectInfo has already been initialised!");
 
-            EffectId = globalSpellManager.NextEffectId;
+            EffectId = globalSpellEffectManager.NextEffectId;
             Target   = target;
             Entry    = entry;
 
@@ -102,16 +102,9 @@ namespace NexusForever.Game.Spell.Target
         /// </remarks>
         public void Execute()
         {
-            ISpellEffectApplyHandler handler = spellEffectHandlerFactory.CreateSpellEffectApplyHandler(Entry.EffectType);
-            if (handler == null)
-            {
-                log.LogWarning($"Unhandled spell effect {Entry.EffectType}");
-                return;
-            }
-
             try
             {
-                handler?.Apply(Target.Collection.Spell, Target.GetTarget(), this);
+                spellEffectHandlerInvoker.InvokeApplyHandler(Target.Collection.Spell, Target.GetTarget(), this);
             }
             catch (Exception e)
             {
@@ -140,14 +133,9 @@ namespace NexusForever.Game.Spell.Target
 
         private void HandleSpellEffectRemove()
         {
-            ISpellEffectRemoveHandler handler = spellEffectHandlerFactory.CreateSpellEffectRemovalHandler(Entry.EffectType);
-            // not every effect has a removal handler, fine to just return without warning
-            if (handler == null)
-                return;
-
             try
             {
-                handler?.Remove(Target.Collection.Spell, Target.GetTarget(), this);
+                spellEffectHandlerInvoker.InvokeRemoveHandler(Target.Collection.Spell, Target.GetTarget(), this);
             }
             catch (Exception e)
             {

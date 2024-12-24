@@ -1,6 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Spell.Effect.Data;
 using NexusForever.Game.Static.Spell.Proc;
-using NexusForever.GameTable.Model;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Abstract.Spell.Proc
@@ -8,13 +8,13 @@ namespace NexusForever.Game.Abstract.Spell.Proc
     public interface IProcInfo : IUpdate
     {
         IUnitEntity Owner { get; }
-        Spell4EffectsEntry Effect { get; }
+        ISpellEffectProcData Data { get; }
         ProcType Type { get; }
 
         /// <summary>
-        /// Initialise <see cref="IProcInfo"/> with supplied <see cref="IUnitEntity"/> owner and <see cref="Spell4EffectsEntry"/>.
+        /// Initialise <see cref="IProcInfo"/> with supplied <see cref="IUnitEntity"/> owner and <see cref="ISpellEffectProcData"/>.
         /// </summary>
-        void Initialise(IUnitEntity owner, Spell4EffectsEntry entry);
+        void Initialise(IUnitEntity owner, ISpellEffectProcData data);
 
         /// <summary>
         /// Trigger the <see cref="IProcInfo"/> with supplied <see cref="IProcParameters"/>.

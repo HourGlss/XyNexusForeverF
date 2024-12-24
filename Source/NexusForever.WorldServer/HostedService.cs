@@ -10,6 +10,7 @@ using NexusForever.Game;
 using NexusForever.Game.Abstract.Event;
 using NexusForever.Game.Abstract.Matching.Match;
 using NexusForever.Game.Abstract.Matching.Queue;
+using NexusForever.Game.Abstract.Spell.Effect;
 using NexusForever.Game.Achievement;
 using NexusForever.Game.Character;
 using NexusForever.Game.Cinematic;
@@ -55,8 +56,10 @@ namespace NexusForever.WorldServer
         private readonly IMatchingManager matchingManager;
         private readonly IMatchManager matchManager;
         private readonly IPublicEventTemplateManager publicEventManager;
+        private readonly IGlobalSpellEffectManager globalSpellEffectManager;
         private readonly IWorldManager worldManager;
 
+        // TODO: this really should be split into multiple HostedServices
         public HostedService(
             ILogger<IHostedService> log,
             IServiceProvider serviceProvider,
@@ -67,20 +70,22 @@ namespace NexusForever.WorldServer
             IMatchingManager matchingManager,
             IMatchManager matchManager,
             IPublicEventTemplateManager publicEventManager,
+            IGlobalSpellEffectManager globalSpellEffectManager,
             IWorldManager worldManager)
         {
             this.log               = log;
 
             LegacyServiceProvider.Provider = serviceProvider;
 
-            this.scriptManager      = scriptManager;
-            this.loginQueueManager  = loginQueueManager;
-            this.networkManager     = networkManager;
-            this.messageManager     = messageManager;
-            this.matchingManager    = matchingManager;
-            this.matchManager       = matchManager;
-            this.publicEventManager = publicEventManager;
-            this.worldManager       = worldManager;
+            this.scriptManager            = scriptManager;
+            this.loginQueueManager        = loginQueueManager;
+            this.networkManager           = networkManager;
+            this.messageManager           = messageManager;
+            this.matchingManager          = matchingManager;
+            this.matchManager             = matchManager;
+            this.publicEventManager       = publicEventManager;
+            this.globalSpellEffectManager = globalSpellEffectManager;
+            this.worldManager             = worldManager;
         }
 
         #endregion
@@ -127,6 +132,7 @@ namespace NexusForever.WorldServer
             AssetManager.Instance.Initialise();
             ItemManager.Instance.Initialise();
             GlobalSpellManager.Instance.Initialise();
+            globalSpellEffectManager.Initialise();
             GlobalQuestManager.Instance.Initialise();
 
             GlobalStorefrontManager.Instance.Initialise();

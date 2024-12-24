@@ -17,7 +17,7 @@ namespace NexusForever.Game.Spell.Target
             sc.AddTransient<ISpellTargetInfoCollection, SpellTargetInfoCollection>();
             sc.AddTransientFactory<ISpellTargetInfo, SpellTargetInfo>();
             sc.AddTransientFactory<ISpellTargetEffectInfo, SpellTargetEffectInfo>();
-            sc.AddTransient<ISpellEffectHandlerFactory, SpellEffectHandlerFactory>();
+            sc.AddTransient<ISpellEffectHandlerInvoker, SpellEffectHandlerInvoker>();
 
             sc.AddTransientFactory<ISpellTargetImplicitSelector, SpellTargetImplicitSelector>();
             sc.AddTransientFactory<ISpellTargetImplicitTelegraphFilter, SpellTargetImplicitTelegraphFilter>();

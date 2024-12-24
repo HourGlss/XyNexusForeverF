@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Spell.Effect.Data;
 using NexusForever.Game.Abstract.Spell.Proc;
 using NexusForever.Game.Static.Spell.Proc;
-using NexusForever.GameTable.Model;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Spell.Proc
@@ -52,41 +52,39 @@ namespace NexusForever.Game.Spell.Proc
         }
 
         /// <summary>
-        /// Apply <see cref="IProcInfo"/> for supplied <see cref="Spell4EffectsEntry"/>.
+        /// Apply <see cref="IProcInfo"/> for supplied <see cref="ISpellEffectProcData"/>.
         /// </summary>
-        public void ApplyProc(Spell4EffectsEntry entry)
+        public void ApplyProc(ISpellEffectProcData data)
         {
-            ProcType procType = (ProcType)entry.DataBits00;
-
-            if (!procs.TryGetValue(procType, out Dictionary<uint, IProcInfo> procList))
+            if (!procs.TryGetValue(data.ProcType, out Dictionary<uint, IProcInfo> procList))
             {
                 procList = [];
-                procs.Add(procType, procList);
+                procs.Add(data.ProcType, procList);
             }
 
-            if (procList.ContainsKey(entry.Id))
+            if (procList.ContainsKey(data.Entry.Id))
             {
-                log.LogWarning($"Failed to apply proc {entry.Id} to owner {Owner.Guid}, it already exists!");
+                log.LogWarning($"Failed to apply proc {data.Entry.Id} to owner {Owner.Guid}, it already exists!");
                 return;
             }
 
             IProcInfo proc = procFactory.Resolve();
-            proc.Initialise(Owner, entry);
-            procList.Add(entry.Id, proc);
+            proc.Initialise(Owner, data);
+            procList.Add(data.Entry.Id, proc);
 
-            log.LogTrace($"Applied proc {entry.Id} to owner {Owner.Guid}.");
+            log.LogTrace($"Applied proc {data.Entry.Id} to owner {Owner.Guid}.");
         }
 
         /// <summary>
-        /// Remove <see cref="IProcInfo"/> for supplied <see cref="Spell4EffectsEntry"/>.
+        /// Remove <see cref="IProcInfo"/> for supplied <see cref="ISpellEffectProcData"/>.
         /// </summary>
-        public void RemoveProc(Spell4EffectsEntry entry)
+        public void RemoveProc(ISpellEffectProcData data)
         {
-            if (!procs.TryGetValue((ProcType)entry.DataBits00, out Dictionary<uint, IProcInfo> procList))
+            if (!procs.TryGetValue(data.ProcType, out Dictionary<uint, IProcInfo> procList))
                 return;
 
-            procList.Remove(entry.Id);
-            log.LogTrace($"Removed proc {entry.Id} from owner {Owner.Guid}.");
+            procList.Remove(data.Entry.Id);
+            log.LogTrace($"Removed proc {data.Entry.Id} from owner {Owner.Guid}.");
         }
 
         /// <summary>

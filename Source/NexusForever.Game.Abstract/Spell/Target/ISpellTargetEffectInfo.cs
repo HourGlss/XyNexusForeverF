@@ -1,5 +1,4 @@
-﻿using NexusForever.Game.Abstract.Spell.Effect;
-using NexusForever.Game.Static.Spell;
+﻿using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;

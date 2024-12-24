@@ -1,6 +1,7 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Effect;
+using NexusForever.Game.Abstract.Spell.Effect.Data;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Map;
 using NexusForever.Game.Static.Entity;
@@ -9,7 +10,7 @@ using NexusForever.Game.Static.Spell;
 namespace NexusForever.Game.Spell.Effect.Handler
 {
     [SpellEffectHandler(SpellEffectType.SummonMount)]
-    public class SpellEffectSummonMountHandler : ISpellEffectApplyHandler
+    public class SpellEffectSummonMountHandler : ISpellEffectApplyHandler<ISpellEffectSummonMountData>
     {
         #region Dependency Injection
 
@@ -26,7 +27,7 @@ namespace NexusForever.Game.Spell.Effect.Handler
         /// <summary>
         /// Handle <see cref="ISpell"/> effect apply on <see cref="IUnitEntity"/> target.
         /// </summary>
-        public void Apply(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
+        public void Apply(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectSummonMountData data)
         {
             // TODO: handle NPC mounting?
             if (target is not IPlayer player)
@@ -36,7 +37,7 @@ namespace NexusForever.Game.Spell.Effect.Handler
                 return;
 
             var mount = entityFactory.CreateEntity<IMountEntity>();
-            mount.Initialise(player, spell.Parameters.SpellInfo.Entry.Id, info.Entry.DataBits00, info.Entry.DataBits01, info.Entry.DataBits04);
+            mount.Initialise(player, spell.Parameters.SpellInfo.Entry.Id, data.CreatureId, data.VehicleId, data.ItemDisplayId);
             mount.EnqueuePassengerAdd(player, VehicleSeatType.Pilot, 0);
 
             // usually for hover boards
