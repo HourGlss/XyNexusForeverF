@@ -1,4 +1,6 @@
-﻿using NexusForever.Network.Message;
+﻿using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Static.Spell;
+using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Entity.Vehicle
@@ -12,7 +14,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity.Vehicle
             if (session.Player.PlatformGuid == null)
                 return;
 
-            session.Player.Dismount();
+            foreach (ISpell spell in session.Player.GetSpellsByEffect(SpellEffectType.SummonMount))
+                spell.Finish();
         }
     }
 }

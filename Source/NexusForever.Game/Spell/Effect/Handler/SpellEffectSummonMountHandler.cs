@@ -10,7 +10,7 @@ using NexusForever.Game.Static.Spell;
 namespace NexusForever.Game.Spell.Effect.Handler
 {
     [SpellEffectHandler(SpellEffectType.SummonMount)]
-    public class SpellEffectSummonMountHandler : ISpellEffectApplyHandler<ISpellEffectSummonMountData>
+    public class SpellEffectSummonMountHandler : ISpellEffectApplyHandler<ISpellEffectSummonMountData>, ISpellEffectRemoveHandler<ISpellEffectSummonMountData>
     {
         #region Dependency Injection
 
@@ -63,6 +63,14 @@ namespace NexusForever.Game.Spell.Effect.Handler
 
             player.CastSpell(52539, new SpellParameters());
             player.CastSpell(80530, new SpellParameters());
+        }
+
+        public void Remove(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectSummonMountData data)
+        {
+            if (target is not IPlayer player)
+                return;
+
+            player.Dismount();
         }
     }
 }

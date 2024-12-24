@@ -152,6 +152,14 @@ namespace NexusForever.Game.Spell
         }
 
         /// <summary>
+        /// Return <see cref="ISpellTargetInfo"/> for the supplied <see cref="IUnitEntity"/>.
+        /// </summary>
+        public ISpellTargetInfo GetTarget(IUnitEntity entity)
+        {
+            return spellTargetInfoCollection.GetSpellTargetInfo(new SpellTarget(entity, SpellEffectTargetFlags.None));
+        }
+
+        /// <summary>
         /// Begin cast, checking prerequisites before initiating.
         /// </summary>
         protected bool CanCast()
@@ -557,7 +565,9 @@ namespace NexusForever.Game.Spell
                 if (!CheckEffectApplyPrerequisites(spell4EffectsEntry, spellTarget.Entity, spellTarget.Flags))
                     continue;
 
-                ISpellTargetInfo spellTargetInfo = spellTargetInfoCollection.GetSpellTargetInfo(spellTarget);
+                ISpellTargetInfo spellTargetInfo =
+                    spellTargetInfoCollection.GetSpellTargetInfo(spellTarget) ??
+                    spellTargetInfoCollection.CreateSpellTargetInfo(spellTarget);
                 spellTargetInfo.Execute(spell4EffectsEntry);
 
                 // Track the number of times this effect has fired.

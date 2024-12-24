@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Target;
+using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Spell.Target
@@ -86,20 +87,26 @@ namespace NexusForever.Game.Spell.Target
         }
 
         /// <summary>
-        /// Return or create a <see cref="ISpellTargetInfo"/> for the supplied <see cref="ISpellTarget"/>.
+        /// Create a new <see cref="ISpellTargetInfo"/> for the supplied <see cref="ISpellTarget"/>.
+        /// </summary>
+        public ISpellTargetInfo CreateSpellTargetInfo(ISpellTarget spellTarget)
+        {
+            ISpellTargetInfo targetInfo = spellTargetInfoFactory.Resolve();
+            targetInfo.Initialise(this, (byte)spellTargetInfo.Count, spellTarget);
+            spellTargetInfo.Add(spellTarget.Entity.Guid, targetInfo);
+
+            log.LogTrace($"Added new SpellTargetInfo for target {spellTarget.Entity.Guid} for spell {Spell.Spell4Id}.");
+
+            return targetInfo;
+        }
+
+
+        /// <summary>
+        /// Return an existing <see cref="ISpellTargetInfo"/> for the supplied <see cref="ISpellTarget"/>.
         /// </summary>
         public ISpellTargetInfo GetSpellTargetInfo(ISpellTarget spellTarget)
         {
-            if (!spellTargetInfo.TryGetValue(spellTarget.Entity.Guid, out ISpellTargetInfo targetInfo))
-            {
-                targetInfo = spellTargetInfoFactory.Resolve();
-                targetInfo.Initialise(this, (byte)spellTargetInfo.Count, spellTarget);
-                spellTargetInfo.Add(spellTarget.Entity.Guid, targetInfo);
-
-                log.LogTrace($"Added new SpellTargetInfo for target {spellTarget.Entity.Guid} for spell {Spell.Spell4Id}.");
-            }
-
-            return targetInfo;
+            return spellTargetInfo.TryGetValue(spellTarget.Entity.Guid, out ISpellTargetInfo targetInfo) ? targetInfo : null;
         }
 
         public IEnumerator<ISpellTargetInfo> GetEnumerator()

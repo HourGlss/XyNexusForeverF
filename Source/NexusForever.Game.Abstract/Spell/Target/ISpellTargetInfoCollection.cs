@@ -25,7 +25,12 @@ namespace NexusForever.Game.Abstract.Spell.Target
         void Cancel();
 
         /// <summary>
-        /// Return or create a <see cref="ISpellTargetInfo"/> for the supplied <see cref="ISpellTarget"/>.
+        /// Create a new <see cref="ISpellTargetInfo"/> for the supplied <see cref="ISpellTarget"/>.
+        /// </summary>
+        ISpellTargetInfo CreateSpellTargetInfo(ISpellTarget spellTarget);
+
+        /// <summary>
+        /// Return an existing <see cref="ISpellTargetInfo"/> for the supplied <see cref="ISpellTarget"/>.
         /// </summary>
         ISpellTargetInfo GetSpellTargetInfo(ISpellTarget spellTarget);
     }

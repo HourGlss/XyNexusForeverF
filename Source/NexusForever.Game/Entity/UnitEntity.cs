@@ -5,6 +5,7 @@ using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Entity.Stat;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Proc;
+using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Combat;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Static;
@@ -308,6 +309,19 @@ namespace NexusForever.Game.Entity
             foreach (ISpell spell in spells.Values)
                 if (spell.Parameters.SpellInfo.SpellGroups.Contains(spellGroupId))
                     yield return spell;
+        }
+
+        /// <summary>
+        /// Return a collection of <see cref="ISpell"/> that are applying the supplied <see cref="SpellEffectType"/> to entity.
+        /// </summary>
+        public IEnumerable<ISpell> GetSpellsByEffect(SpellEffectType type)
+        {
+            foreach (ISpell spell in spells.Values)
+            {
+                ISpellTargetInfo target = spell.GetTarget(this);
+                if (target.GetEffectsByType(type).Any())
+                    yield return spell;
+            }
         }
 
         /// <summary>

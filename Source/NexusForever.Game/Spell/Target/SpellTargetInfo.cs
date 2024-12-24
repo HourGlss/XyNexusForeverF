@@ -112,6 +112,14 @@ namespace NexusForever.Game.Spell.Target
         }
 
         /// <summary>
+        /// Return any <see cref="ISpellTargetEffectInfo"/> for the target of the supplied <see cref="SpellEffectType"/>.
+        /// </summary>
+        public IEnumerable<ISpellTargetEffectInfo> GetEffectsByType(SpellEffectType type)
+        {
+            return effects.Values.Where(x => x.Entry.EffectType == type);
+        }
+
+        /// <summary>
         /// Create and execute the supplied <see cref="Spell4EffectsEntry"/>.
         /// </summary>
         public void Execute(Spell4EffectsEntry entry)

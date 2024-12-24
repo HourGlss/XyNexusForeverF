@@ -27,6 +27,11 @@ namespace NexusForever.Game.Abstract.Spell.Target
         void Initialise(ISpellTargetInfoCollection collection, byte index, ISpellTarget target);
 
         /// <summary>
+        /// Return any <see cref="ISpellTargetEffectInfo"/> for the target of the supplied <see cref="SpellEffectType"/>.
+        /// </summary>
+        IEnumerable<ISpellTargetEffectInfo> GetEffectsByType(SpellEffectType type);
+
+        /// <summary>
         /// Create and execute the supplied <see cref="Spell4EffectsEntry"/>.
         /// </summary>
         void Execute(Spell4EffectsEntry entry);

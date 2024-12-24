@@ -1,4 +1,5 @@
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Spell;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
@@ -27,14 +28,19 @@ namespace NexusForever.Game.Abstract.Spell
         void Initialise(IUnitEntity caster, ISpellParameters parameters);
 
         /// <summary>
-        /// Begin cast, checking prerequisites before initiating.
-        /// </summary>
-        bool Cast();
-
-        /// <summary>
         /// Invoked each world tick, after Update() for this <see cref="ISpell"/>, with the delta since the previous tick occurred.
         /// </summary>
         void LateUpdate(double lastTick);
+
+        /// <summary>
+        /// Return <see cref="ISpellTargetInfo"/> for the supplied <see cref="IUnitEntity"/>.
+        /// </summary>
+        ISpellTargetInfo GetTarget(IUnitEntity entity);
+
+        /// <summary>
+        /// Begin cast, checking prerequisites before initiating.
+        /// </summary>
+        bool Cast();
 
         /// <summary>
         /// Cancel cast with supplied <see cref="CastResult"/>.

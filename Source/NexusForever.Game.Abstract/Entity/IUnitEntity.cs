@@ -72,6 +72,11 @@ namespace NexusForever.Game.Abstract.Entity
         IEnumerable<ISpell> GetSpellsByGroupId(uint spellGroupId);
 
         /// <summary>
+        /// Return a collection of <see cref="ISpell"/> that are applying the supplied <see cref="SpellEffectType"/> to entity.
+        /// </summary>
+        IEnumerable<ISpell> GetSpellsByEffect(SpellEffectType type);
+
+        /// <summary>
         /// Check if this <see cref="IUnitEntity"/> has a spell active with the provided <see cref="Spell4Entry"/> Id
         /// </summary>
         bool HasSpell(uint spell4Id, out ISpell spell, bool isCasting = false);
