@@ -17,7 +17,7 @@ namespace NexusForever.Game.Map.Search
 
         public virtual bool CheckEntity(T entity)
         {
-            return radius == null || Vector3.Distance(vector, entity.Position) < radius;
+            return radius == null || Vector3.DistanceSquared(vector, entity.Position) < radius * radius; // Checking squared distance avoids a slow sqrt operation.
         }
     }
 }

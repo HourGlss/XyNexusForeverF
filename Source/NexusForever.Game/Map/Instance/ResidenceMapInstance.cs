@@ -442,7 +442,7 @@ namespace NexusForever.Game.Map.Instance
                     }
 
                     // crate->world
-                    decor.Move(update.DecorType, update.Position, update.Rotation, update.Scale);
+                    decor.Move(update.DecorType, update.Position, update.Rotation, update.Scale, update.PlotIndex);
                 }
                 else
                 {
@@ -451,7 +451,7 @@ namespace NexusForever.Game.Map.Instance
                     else
                     {
                         // world->world
-                        decor.Move(update.DecorType, update.Position, update.Rotation, update.Scale);
+                        decor.Move(update.DecorType, update.Position, update.Rotation, update.Scale, update.PlotIndex);
                         decor.DecorParentId = update.ParentDecorId;
                     }
                 }
