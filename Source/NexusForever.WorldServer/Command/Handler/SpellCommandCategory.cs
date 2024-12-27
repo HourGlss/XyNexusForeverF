@@ -1,7 +1,9 @@
-﻿using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Abstract.Spell;
+﻿using Microsoft.Extensions.DependencyInjection;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Static.RBAC;
+using NexusForever.Shared;
 using NexusForever.WorldServer.Command.Context;
 
 namespace NexusForever.WorldServer.Command.Handler
@@ -19,7 +21,7 @@ namespace NexusForever.WorldServer.Command.Handler
         {
             tier ??= 1;
 
-            ISpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
+            ISpellBaseInfo spellBaseInfo = LegacyServiceProvider.Provider.GetService<ISpellInfoManager>().GetSpellBaseInfo(spell4BaseId);
             if (spellBaseInfo == null)
             {
                 context.SendMessage($"Invalid spell base id {spell4BaseId}!");
@@ -46,7 +48,7 @@ namespace NexusForever.WorldServer.Command.Handler
         {
             tier ??= 1;
 
-            ISpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
+            ISpellBaseInfo spellBaseInfo = LegacyServiceProvider.Provider.GetService<ISpellInfoManager>().GetSpellBaseInfo(spell4BaseId);
             if (spellBaseInfo == null)
             {
                 context.SendMessage($"Invalid spell base id {spell4BaseId}!");

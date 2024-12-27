@@ -1,5 +1,6 @@
 ﻿using NexusForever.Game.Abstract.CSI;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Network.World.Entity;
 
 namespace NexusForever.Game.Spell

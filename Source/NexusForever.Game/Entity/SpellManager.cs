@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Static.Entity;
@@ -12,6 +14,7 @@ using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
+using NexusForever.Shared;
 using NLog;
 
 namespace NexusForever.Game.Entity
@@ -88,7 +91,7 @@ namespace NexusForever.Game.Entity
 
             foreach (CharacterSpellModel spellModel in model.Spell)
             {
-                ISpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spellModel.Spell4BaseId);
+                ISpellBaseInfo spellBaseInfo = LegacyServiceProvider.Provider.GetService<ISpellInfoManager>().GetSpellBaseInfo(spellModel.Spell4BaseId);
                 IItem item = player.Inventory.SpellCreate(spellBaseInfo.Entry, ItemUpdateReason.NoReason);
                 spells.Add(spellModel.Spell4BaseId, new CharacterSpell(owner, spellModel, spellBaseInfo, item));
             }
@@ -255,7 +258,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void AddSpell(uint spell4BaseId, byte tier = 1)
         {
-            ISpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
+            ISpellBaseInfo spellBaseInfo = LegacyServiceProvider.Provider.GetService<ISpellInfoManager>().GetSpellBaseInfo(spell4BaseId);
             if (spellBaseInfo == null)
                 throw new ArgumentOutOfRangeException();
 
@@ -287,7 +290,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void UpdateSpell(uint spell4BaseId, byte tier, byte? actionSetIndex)
         {
-            ISpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
+            ISpellBaseInfo spellBaseInfo = LegacyServiceProvider.Provider.GetService<ISpellInfoManager>().GetSpellBaseInfo(spell4BaseId);
             if (spellBaseInfo == null)
                 throw new ArgumentOutOfRangeException();
 
@@ -429,7 +432,7 @@ namespace NexusForever.Game.Entity
             if (entry == null)
                 throw new InvalidOperationException($"Spell4 with ID ({spell4Id}) does not exist.");
 
-            ISpellBaseInfo baseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(entry.Spell4BaseIdBaseSpell);
+            ISpellBaseInfo baseInfo = LegacyServiceProvider.Provider.GetService<ISpellInfoManager>().GetSpellBaseInfo(entry.Spell4BaseIdBaseSpell);
             if (baseInfo == null)
                 throw new InvalidOperationException($"BaseInfo with ID ({entry.Spell4BaseIdBaseSpell}) does not exist.");
 
@@ -467,7 +470,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void SetSpellCooldownByBaseSpell(uint spell4BaseId, uint type, double cooldown)
         {
-            ISpellBaseInfo baseSpellInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
+            ISpellBaseInfo baseSpellInfo = LegacyServiceProvider.Provider.GetService<ISpellInfoManager>().GetSpellBaseInfo(spell4BaseId);
             if (baseSpellInfo == null)
                 throw new ArgumentNullException();
 
@@ -630,7 +633,7 @@ namespace NexusForever.Game.Entity
             var serverSpellList = new ServerSpellList();
             foreach ((uint spell4BaseId, ICharacterSpell spell) in spells)
             {
-                ISpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
+                ISpellBaseInfo spellBaseInfo = LegacyServiceProvider.Provider.GetService<ISpellInfoManager>().GetSpellBaseInfo(spell4BaseId);
                 if (spellBaseInfo == null)
                     continue;
 

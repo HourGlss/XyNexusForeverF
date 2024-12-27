@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable.Model;

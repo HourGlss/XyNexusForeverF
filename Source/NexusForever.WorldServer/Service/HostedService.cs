@@ -10,7 +10,6 @@ using NexusForever.Game;
 using NexusForever.Game.Abstract.Event;
 using NexusForever.Game.Abstract.Matching.Match;
 using NexusForever.Game.Abstract.Matching.Queue;
-using NexusForever.Game.Abstract.Spell.Effect;
 using NexusForever.Game.Achievement;
 using NexusForever.Game.Character;
 using NexusForever.Game.Cinematic;
@@ -24,11 +23,9 @@ using NexusForever.Game.RBAC;
 using NexusForever.Game.Reputation;
 using NexusForever.Game.Server;
 using NexusForever.Game.Social;
-using NexusForever.Game.Spell;
 using NexusForever.Game.Storefront;
 using NexusForever.Game.Text.Filter;
 using NexusForever.Game.Text.Search;
-using NexusForever.GameTable;
 using NexusForever.Network.Message;
 using NexusForever.Network.Session;
 using NexusForever.Network.World.Entity;
@@ -41,7 +38,7 @@ using NexusForever.WorldServer.Command;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Handler.Character;
 
-namespace NexusForever.WorldServer
+namespace NexusForever.WorldServer.Service
 {
     public class HostedService : IHostedService
     {
@@ -56,7 +53,6 @@ namespace NexusForever.WorldServer
         private readonly IMatchingManager matchingManager;
         private readonly IMatchManager matchManager;
         private readonly IPublicEventTemplateManager publicEventManager;
-        private readonly IGlobalSpellEffectManager globalSpellEffectManager;
         private readonly IWorldManager worldManager;
 
         // TODO: this really should be split into multiple HostedServices
@@ -70,22 +66,20 @@ namespace NexusForever.WorldServer
             IMatchingManager matchingManager,
             IMatchManager matchManager,
             IPublicEventTemplateManager publicEventManager,
-            IGlobalSpellEffectManager globalSpellEffectManager,
             IWorldManager worldManager)
         {
-            this.log               = log;
+            this.log = log;
 
             LegacyServiceProvider.Provider = serviceProvider;
 
-            this.scriptManager            = scriptManager;
-            this.loginQueueManager        = loginQueueManager;
-            this.networkManager           = networkManager;
-            this.messageManager           = messageManager;
-            this.matchingManager          = matchingManager;
-            this.matchManager             = matchManager;
-            this.publicEventManager       = publicEventManager;
-            this.globalSpellEffectManager = globalSpellEffectManager;
-            this.worldManager             = worldManager;
+            this.scriptManager      = scriptManager;
+            this.loginQueueManager  = loginQueueManager;
+            this.networkManager     = networkManager;
+            this.messageManager     = messageManager;
+            this.matchingManager    = matchingManager;
+            this.matchManager       = matchManager;
+            this.publicEventManager = publicEventManager;
+            this.worldManager       = worldManager;
         }
 
         #endregion
@@ -96,8 +90,6 @@ namespace NexusForever.WorldServer
         public Task StartAsync(CancellationToken cancellationToken)
         {
             log.LogInformation("Starting...");
-
-            SharedConfiguration.Instance.Initialise<WorldServerConfiguration>();
 
             RealmContext.Instance.Initialise();
 
@@ -111,7 +103,6 @@ namespace NexusForever.WorldServer
 
             scriptManager.Initialise();
 
-            GameTableManager.Instance.Initialise();
             publicEventManager.Initialise();
             MapIOManager.Instance.Initialise();
             SearchManager.Instance.Initialise();
@@ -131,8 +122,6 @@ namespace NexusForever.WorldServer
 
             AssetManager.Instance.Initialise();
             ItemManager.Instance.Initialise();
-            GlobalSpellManager.Instance.Initialise();
-            globalSpellEffectManager.Initialise();
             GlobalQuestManager.Instance.Initialise();
 
             GlobalStorefrontManager.Instance.Initialise();

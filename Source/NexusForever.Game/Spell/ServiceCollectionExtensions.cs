@@ -2,6 +2,7 @@
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Proc;
 using NexusForever.Game.Spell.Effect;
+using NexusForever.Game.Spell.Info;
 using NexusForever.Game.Spell.Proc;
 using NexusForever.Game.Spell.Target;
 using NexusForever.Game.Spell.Type;
@@ -15,6 +16,7 @@ namespace NexusForever.Game.Spell
         public static void AddGameSpell(this IServiceCollection sc)
         {
             sc.AddGameSpellEffect();
+            sc.AddGameSpellInfo();
             sc.AddGameSpellTarget();
 
             sc.AddSingletonLegacy<IGlobalSpellManager, GlobalSpellManager>();

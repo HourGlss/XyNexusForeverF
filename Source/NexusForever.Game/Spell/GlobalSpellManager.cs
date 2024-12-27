@@ -1,91 +1,26 @@
 ﻿using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Reflection;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Entity;
-using NexusForever.GameTable;
-using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Shared;
-using NLog;
 
 namespace NexusForever.Game.Spell
 {
     public sealed class GlobalSpellManager : Singleton<GlobalSpellManager>, IGlobalSpellManager
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-
         /// <summary>
         /// Id to be assigned to the next spell cast.
         /// </summary>
         public uint NextCastingId => nextCastingId++;
         private uint nextCastingId = 1;
 
-        private readonly Dictionary<uint, ISpellBaseInfo> spellBaseInfoStore = new();
-
-        // entry caches
-        private ImmutableDictionary<uint, ImmutableList<Spell4Entry>> spellEntries;
-        private ImmutableDictionary<uint, ImmutableList<Spell4EffectsEntry>> spellEffectEntries;
-        private ImmutableDictionary<uint, ImmutableList<TelegraphDamageEntry>> spellTelegraphEntries;
-        private ImmutableDictionary<uint, ImmutableList<Spell4ThresholdsEntry>> spellThresholdEntries;
-        private ImmutableDictionary<uint, ImmutableList<SpellPhaseEntry>> spellPhaseEntries;
         private ImmutableDictionary<Vital, CastResult> vitalCastResults;
 
         public void Initialise()
         {
-            CacheSpellEntries();
-            InitialiseSpellInfo();
             InitialiseVitalCastResults();
-        }
-
-        private void CacheSpellEntries()
-        {
-            // caching is required as most of the spell tables have 50k+ entries, calculating for each spell is SLOW
-            spellEntries = GameTableManager.Instance.Spell4.Entries
-                .GroupBy(e => e.Spell4BaseIdBaseSpell)
-                .ToImmutableDictionary(g => g.Key, g => g
-                    .OrderByDescending(e => e.TierIndex)
-                    .ToImmutableList());
-
-            spellEffectEntries = GameTableManager.Instance.Spell4Effects.Entries
-                .GroupBy(e => e.SpellId)
-                .ToImmutableDictionary(g => g.Key, g => g
-                    .OrderBy(e => e.OrderIndex)
-                    .ToImmutableList());
-
-            spellTelegraphEntries = GameTableManager.Instance.Spell4Telegraph.Entries
-                .GroupBy(e => e.Spell4Id)
-                .ToImmutableDictionary(g => g.Key, g => g
-                    .Select(e => GameTableManager.Instance.TelegraphDamage.GetEntry(e.TelegraphDamageId))
-                    .Where(e => e != null)
-                    .ToImmutableList());
-
-            spellThresholdEntries = GameTableManager.Instance.Spell4Thresholds.Entries
-                .GroupBy(e => e.Spell4IdParent)
-                .ToImmutableDictionary(g => g.Key, g => g
-                    .OrderBy(e => e.OrderIndex)
-                    .ToImmutableList());
-
-            spellPhaseEntries = GameTableManager.Instance.SpellPhase.Entries
-                .GroupBy(e => e.Spell4IdOwner)
-                .ToImmutableDictionary(g => g.Key, g => g
-                    .OrderBy(e => e.OrderIndex)
-                    .ToImmutableList());
-        }
-
-        private void InitialiseSpellInfo()
-        {
-            Stopwatch sw = Stopwatch.StartNew();
-            log.Info("Generating spell info...");
-
-            foreach (Spell4BaseEntry entry in GameTableManager.Instance.Spell4Base.Entries)
-                spellBaseInfoStore.Add(entry.Id, new SpellBaseInfo(entry));
-
-            foreach (SpellBaseInfo spellBaseInfo in spellBaseInfoStore.Values)
-                spellBaseInfo.Intitialise();
-
-            log.Info($"Cached {spellBaseInfoStore.Count} spells in {sw.ElapsedMilliseconds}ms.");
         }
 
         private void InitialiseVitalCastResults()
@@ -101,84 +36,6 @@ namespace NexusForever.Game.Spell
             }
 
             vitalCastResults = builder.ToImmutable();
-        }
-
-        /// <summary>
-        /// Return all <see cref="Spell4Entry"/>'s for the supplied spell base id.
-        /// </summary>
-        /// <remarks>
-        /// This should only be used for cache related code, if you want an overview of a spell use <see cref="ISpellBaseInfo"/>.
-        /// </remarks>
-        public IEnumerable<Spell4Entry> GetSpell4Entries(uint spell4BaseId)
-        {
-            return spellEntries.TryGetValue(spell4BaseId, out ImmutableList<Spell4Entry> entries)
-                ? entries : Enumerable.Empty<Spell4Entry>();
-        }
-
-        /// <summary>
-        /// Return all <see cref="Spell4EffectsEntry"/>'s for the supplied spell id.
-        /// </summary>
-        /// <remarks>
-        /// This should only be used for cache related code, if you want an overview of a spell use <see cref="ISpellBaseInfo"/>.
-        /// </remarks>
-        public IEnumerable<Spell4EffectsEntry> GetSpell4EffectEntries(uint spell4Id)
-        {
-            return spellEffectEntries.TryGetValue(spell4Id, out ImmutableList<Spell4EffectsEntry> entries)
-                ? entries : Enumerable.Empty<Spell4EffectsEntry>();
-        }
-
-        /// <summary>
-        /// Return all <see cref="TelegraphDamageEntry"/>'s for the supplied spell id.
-        /// </summary>
-        /// <remarks>
-        /// This should only be used for cache related code, if you want an overview of a spell use <see cref="ISpellBaseInfo"/>.
-        /// </remarks>
-        public IEnumerable<TelegraphDamageEntry> GetTelegraphDamageEntries(uint spell4Id)
-        {
-            return spellTelegraphEntries.TryGetValue(spell4Id, out ImmutableList<TelegraphDamageEntry> entries)
-                ? entries : Enumerable.Empty<TelegraphDamageEntry>();
-        }
-
-        /// <summary>
-        /// Return all <see cref="Spell4ThresholdsEntry"/>'s for the supplied spell id.
-        /// </summary>
-        /// <remarks>
-        /// This should only be used for cache related code, if you want an overview of a spell use <see cref="SpellBaseInfo"/>.
-        /// </remarks>
-        public IEnumerable<Spell4ThresholdsEntry> GetSpell4ThresholdEntries(uint spell4Id)
-        {
-            return spellThresholdEntries.TryGetValue(spell4Id, out ImmutableList<Spell4ThresholdsEntry> entries)
-                ? entries : Enumerable.Empty<Spell4ThresholdsEntry>();
-        }
-
-        /// <summary>
-        /// Return all <see cref="SpellPhaseEntry"/>'s for the supplied spell id.
-        /// </summary>
-        /// <remarks>
-        /// This should only be used for cache related code, if you want an overview of a spell use <see cref="SpellBaseInfo"/>.
-        /// </remarks>
-        public IEnumerable<SpellPhaseEntry> GetSpellPhaseEntries(uint spell4Id)
-        {
-            return spellPhaseEntries.TryGetValue(spell4Id, out ImmutableList<SpellPhaseEntry> entries)
-                ? entries : Enumerable.Empty<SpellPhaseEntry>();
-        }
-
-        /// <summary>
-        /// Return <see cref="ISpellBaseInfo"/>, if not already cached it will be generated before being returned.
-        /// </summary>
-        public ISpellBaseInfo GetSpellBaseInfo(uint spell4BaseId)
-        {
-            Spell4BaseEntry spell4BaseEntry = GameTableManager.Instance.Spell4Base.GetEntry(spell4BaseId);
-            if (spell4BaseEntry == null)
-                throw new ArgumentOutOfRangeException();
-
-            if (!spellBaseInfoStore.TryGetValue(spell4BaseId, out ISpellBaseInfo spellBaseInfo))
-            {
-                spellBaseInfo = new SpellBaseInfo(spell4BaseEntry);
-                spellBaseInfoStore.Add(spell4BaseId, spellBaseInfo);
-            }
-            
-            return spellBaseInfo;
         }
 
         /// <summary>

@@ -1,7 +1,7 @@
-﻿using NexusForever.Game.Static.Spell;
+﻿using NexusForever.Game.Spell.Info;
 using NexusForever.GameTable.Model;
 
-namespace NexusForever.Game.Abstract.Spell
+namespace NexusForever.Game.Abstract.Spell.Info
 {
     public interface ISpellBaseInfo : IEnumerable<ISpellInfo>
     {
@@ -16,11 +16,15 @@ namespace NexusForever.Game.Abstract.Spell
         TargetGroupEntry AoeGroup { get; }
         Spell4BaseEntry PrerequisiteSpell { get; }
         Spell4SpellTypesEntry SpellType { get; }
-        SpellClass SpellClass { get; }
         bool HasIcon { get; }
         bool IsDebuff { get; }
         bool IsBuff { get; }
         bool IsDispellable { get; }
+
+        /// <summary>
+        /// Initialise the <see cref="ISpellBaseInfo"/> with the supplied <see cref="Spell4BaseEntry"/> and <see cref="ISpellInfoCache"/>.
+        /// </summary>
+        void Initialise(Spell4BaseEntry spell4BaseEntry, ISpellInfoCache spellInfoCache);
 
         /// <summary>
         /// Return <see cref="ISpellInfo"/> for the supplied spell tier.

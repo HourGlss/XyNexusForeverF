@@ -1,5 +1,6 @@
 ﻿using NexusForever.Database.Character;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Abstract.Spell

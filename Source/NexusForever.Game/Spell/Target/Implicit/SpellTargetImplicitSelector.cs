@@ -2,6 +2,7 @@
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map.Search;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Game.Abstract.Spell.Target.Implicit;
 
 namespace NexusForever.Game.Spell.Target.Implicit

@@ -4,6 +4,7 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Entity.Stat;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Game.Abstract.Spell.Proc;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Combat;
@@ -374,7 +375,7 @@ namespace NexusForever.Game.Entity
             if (parameters == null)
                 throw new ArgumentNullException();
 
-            ISpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
+            ISpellBaseInfo spellBaseInfo = LegacyServiceProvider.Provider.GetService<ISpellInfoManager>().GetSpellBaseInfo(spell4BaseId);
             if (spellBaseInfo == null)
                 throw new ArgumentOutOfRangeException();
 

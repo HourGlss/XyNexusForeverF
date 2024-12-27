@@ -1,5 +1,6 @@
 ﻿using NexusForever.Database.Character;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Shared;
 
