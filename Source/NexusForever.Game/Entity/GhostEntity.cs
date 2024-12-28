@@ -62,9 +62,9 @@ namespace NexusForever.Game.Entity
 
             SetBaseProperty(Property.BaseHealth, 101.0f);
 
-            SetStat(Stat.Health, 101u);
-            SetStat(Stat.Level, owner.Level);
-            SetStat(Stat.Sheathed, 1);
+            SetStat(Static.Entity.Stat.Health, 101u);
+            SetStat(Static.Entity.Stat.Level, owner.Level);
+            SetStat(Static.Entity.Stat.Sheathed, 1);
         }
 
         protected override IEntityModel BuildEntityModel()

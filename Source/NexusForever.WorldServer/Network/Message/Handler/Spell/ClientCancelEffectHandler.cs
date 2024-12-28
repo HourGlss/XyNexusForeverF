@@ -1,4 +1,5 @@
-﻿using NexusForever.Network.Message;
+﻿using NexusForever.Game.Abstract.Spell;
+using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Spell
@@ -7,11 +8,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Spell
     {
         public void HandleMessage(IWorldSession session, ClientCancelEffect cancelSpell)
         {
-            //TODO: integrate into some Spell System removal queue & do the checks & handle stopped effects
-            session.Player.EnqueueToVisible(new ServerSpellFinish
-            {
-                ServerUniqueId = cancelSpell.ServerUniqueId
-            }, true);
+            ISpell spell = session.Player.GetSpell(cancelSpell.ServerUniqueId);
+            if (spell == null)
+                return;
+
+            spell.Finish();
         }
     }
 }

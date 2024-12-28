@@ -20,7 +20,7 @@ namespace NexusForever.Game.Entity
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private ImmutableDictionary<Stat, StatAttribute> statAttributes;
+        private ImmutableDictionary<Static.Entity.Stat, StatAttribute> statAttributes;
 
         public delegate void VitalSetHandler(WorldEntity instance, float value);
         public delegate float VitalGetHandler(WorldEntity instance);
@@ -37,15 +37,15 @@ namespace NexusForever.Game.Entity
 
         private void InitialiseEntityStats()
         {
-            var builder = ImmutableDictionary.CreateBuilder<Stat, StatAttribute>();
+            var builder = ImmutableDictionary.CreateBuilder<Static.Entity.Stat, StatAttribute>();
 
-            foreach (FieldInfo field in typeof(Stat).GetFields())
+            foreach (FieldInfo field in typeof(Static.Entity.Stat).GetFields())
             {
                 StatAttribute attribute = field.GetCustomAttribute<StatAttribute>();
                 if (attribute == null)
                     continue;
 
-                Stat stat = (Stat)field.GetValue(null);
+                var stat = (Static.Entity.Stat)field.GetValue(null);
                 builder.Add(stat, attribute);
             }
 
@@ -113,7 +113,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Return <see cref="StatAttribute"/> for supplied <see cref="Stat"/>.
         /// </summary>
-        public StatAttribute GetStatAttribute(Stat stat)
+        public StatAttribute GetStatAttribute(Static.Entity.Stat stat)
         {
             return statAttributes.TryGetValue(stat, out StatAttribute value) ? value : null;
         }

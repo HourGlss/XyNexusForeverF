@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Abstract.CSI;
+using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Network.World.Entity;
 
 namespace NexusForever.Game.Abstract.Spell
@@ -13,7 +14,8 @@ namespace NexusForever.Game.Abstract.Spell
         uint PrimaryTargetId { get; set; }
         Position TargetPosition { get; set; }
         uint PositionalUnitId { get; set; }
-        ushort TaxiNode { get; set; }
+        ushort? TaxiNode { get; set; }
+        ulong SpellCost { get; set; }
         uint ThresholdValue { get; set; }
         bool IsProxy { get; set; }
         bool ForceCancelOnly { get; set; }

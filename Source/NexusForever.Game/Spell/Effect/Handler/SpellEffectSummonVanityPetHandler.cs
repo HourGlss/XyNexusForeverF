@@ -1,12 +1,14 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Effect;
+using NexusForever.Game.Abstract.Spell.Effect.Data;
+using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Spell;
 
 namespace NexusForever.Game.Spell.Effect.Handler
 {
     [SpellEffectHandler(SpellEffectType.SummonVanityPet)]
-    public class SpellEffectSummonVanityPetHandler : ISpellEffectApplyHandler
+    public class SpellEffectSummonVanityPetHandler : ISpellEffectApplyHandler<ISpellEffectSummonVanityPetData>
     {
         #region Dependency Injection
 
@@ -23,7 +25,7 @@ namespace NexusForever.Game.Spell.Effect.Handler
         /// <summary>
         /// Handle <see cref="ISpell"/> effect apply on <see cref="IUnitEntity"/> target.
         /// </summary>
-        public void Apply(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
+        public void Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectSummonVanityPetData data)
         {
             if (target is not IPlayer player)
                 return;
@@ -37,7 +39,7 @@ namespace NexusForever.Game.Spell.Effect.Handler
             }
 
             var pet = entityFactory.CreateEntity<IPetEntity>();
-            pet.Initialise(player, info.Entry.DataBits00);
+            pet.Initialise(player, data.CreatureId);
             pet.AddToMap(player.Map, player.Position);
         }
     }

@@ -18,6 +18,7 @@ using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Entity.Movement.Command.Mode;
 using NexusForever.Game.Static.Entity.Movement.Command.State;
 using NexusForever.Game.Static.Entity.Movement.Spline;
+using NexusForever.Game.Static.Spell.Proc;
 using NexusForever.Network.Session;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Command;
@@ -439,6 +440,25 @@ namespace NexusForever.Game.Entity.Movement
             positionCommandGroup.SetPositionProjectile(flightTime, gravity, position);
         }
 
+        public bool HasVelocity
+        {
+            get => hasVelocity;
+            set
+            {
+                if (hasVelocity != value && Owner is IUnitEntity unit)
+                {
+                    if (value == true)
+                        unit.ProcManager.TriggerProc(ProcType.BeginMoving);
+                    else
+                        unit.ProcManager.TriggerProc(ProcType.StopsMoving);
+                }
+
+                hasVelocity = value;
+            }
+        }
+
+        private bool hasVelocity;
+
         /// <summary>
         /// Return the current velocity.
         /// </summary>
@@ -453,6 +473,7 @@ namespace NexusForever.Game.Entity.Movement
         public void SetVelocity(Vector3 velocity, bool blend)
         {
             velocityCommandGroup.SetVelocity(velocity, blend);
+            HasVelocity = velocity.Length() > 0;
         }
 
         /// <summary>

@@ -8,7 +8,8 @@ namespace NexusForever.Game.Map.Search
         public static void AddGameMapSearch(this IServiceCollection sc)
         {
             sc.AddTransient<ISearchCheckFactory, SearchCheckFactory>();
-            sc.AddTransient(typeof(ISearchCheckRange<>), typeof(SearchCheckRange<>));
+            sc.AddTransient<ISearchCheckTelegraph, SearchCheckTelegraph>();
+            sc.AddTransient<ISearchCheckSpellTargetImplicit, SearchCheckSpellTargetImplicit>();
         }
     }
 }

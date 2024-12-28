@@ -38,6 +38,8 @@ namespace NexusForever.Game
             sc.AddSingletonLegacy<IStoryBuilder, StoryBuilder>();
             sc.AddSingletonLegacy<IDamageCalculator, DamageCalculator>();
 
+            sc.AddTransient<IRapidTransportCostCalculator, RapidTransportCostCalculator>();
+
             sc.AddGameAchievement();
             sc.AddGameCharacter();
             sc.AddGameCinematic();

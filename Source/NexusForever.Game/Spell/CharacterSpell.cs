@@ -1,13 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Shared;
 using NexusForever.Shared.Game;
 
 namespace NexusForever.Game.Spell
@@ -67,7 +70,7 @@ namespace NexusForever.Game.Spell
             if (SpellInfo.Entry.Spell4IdMechanicAlternateSpell > 0)
             {
                 Spell4Entry alternativeEntry = GameTableManager.Instance.Spell4.GetEntry(SpellInfo.Entry.Spell4IdMechanicAlternateSpell);
-                AlternateSpellInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(alternativeEntry.Spell4BaseIdBaseSpell).GetSpellInfo(tier);
+                AlternateSpellInfo = LegacyServiceProvider.Provider.GetService<ISpellInfoManager>().GetSpellBaseInfo(alternativeEntry.Spell4BaseIdBaseSpell).GetSpellInfo(tier);
             }
 
             InitialiseAbilityCharges();
@@ -87,7 +90,7 @@ namespace NexusForever.Game.Spell
             if (SpellInfo.Entry.Spell4IdMechanicAlternateSpell > 0)
             {
                 Spell4Entry alternativeEntry = GameTableManager.Instance.Spell4.GetEntry(SpellInfo.Entry.Spell4IdMechanicAlternateSpell);
-                AlternateSpellInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(alternativeEntry.Spell4BaseIdBaseSpell).GetSpellInfo(tier);
+                AlternateSpellInfo = LegacyServiceProvider.Provider.GetService<ISpellInfoManager>().GetSpellBaseInfo(alternativeEntry.Spell4BaseIdBaseSpell).GetSpellInfo(tier);
             }
 
             InitialiseAbilityCharges();

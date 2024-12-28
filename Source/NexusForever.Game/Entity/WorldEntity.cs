@@ -95,10 +95,10 @@ namespace NexusForever.Game.Entity
 
         public virtual uint Health
         {
-            get => GetStatInteger(Stat.Health) ?? 0u;
+            get => GetStatInteger(Static.Entity.Stat.Health) ?? 0u;
             protected set
             {
-                SetStat(Stat.Health, Math.Clamp(value, 0u, MaxHealth)); // TODO: Confirm MaxHealth is actually the maximum health would be at.
+                SetStat(Static.Entity.Stat.Health, Math.Clamp(value, 0u, MaxHealth)); // TODO: Confirm MaxHealth is actually the maximum health would be at.
                 EnqueueToVisible(new ServerEntityHealthUpdate
                 {
                     UnitId = Guid,
@@ -115,8 +115,8 @@ namespace NexusForever.Game.Entity
 
         public uint Shield
         {
-            get => GetStatInteger(Stat.Shield) ?? 0u;
-            set => SetStat(Stat.Shield, Math.Clamp(value, 0u, MaxShieldCapacity)); // TODO: Handle overshield
+            get => GetStatInteger(Static.Entity.Stat.Shield) ?? 0u;
+            set => SetStat(Static.Entity.Stat.Shield, Math.Clamp(value, 0u, MaxShieldCapacity)); // TODO: Handle overshield
         }
 
         public uint MaxShieldCapacity
@@ -125,15 +125,37 @@ namespace NexusForever.Game.Entity
             set => SetBaseProperty(Property.ShieldCapacityMax, value);
         }
 
+        [Vital(Vital.Endurance)]
+        public float Endurance
+        {
+            get => GetStatFloat(Static.Entity.Stat.Resource0) ?? 0u;
+            set
+            {
+                float newVal = Math.Clamp(value, 0f, GetPropertyValue(Property.ResourceMax0));
+                SetStat(Static.Entity.Stat.Resource0, newVal);
+            }
+        }
+
+        [Vital(Vital.Focus)]
+        public float Focus
+        {
+            get => GetStatFloat(Static.Entity.Stat.Focus) ?? 0u;
+            set 
+            {
+                float newVal = Math.Clamp(value, 0f, GetPropertyValue(Property.BaseFocusPool));
+                SetStat(Static.Entity.Stat.Focus, newVal);
+            }
+        }
+
         [Vital(Vital.Dash)]
         public float Dash
         {
-            get => GetStatFloat(Stat.Dash) ?? 0f;
+            get => GetStatFloat(Static.Entity.Stat.Dash) ?? 0f;
             set
             {
                 // TODO: Validate prior to setting
                 float newVal = Math.Clamp(value, 0f, GetPropertyValue(Property.ResourceMax7));
-                SetStat(Stat.Dash, newVal);
+                SetStat(Static.Entity.Stat.Dash, newVal);
             }
         }
 
@@ -144,12 +166,12 @@ namespace NexusForever.Game.Entity
         [Vital(Vital.Actuator2)]
         public float Resource1
         {
-            get => GetStatFloat(Stat.Resource1) ?? 0f;
+            get => GetStatFloat(Static.Entity.Stat.Resource1) ?? 0f;
             set
             {
                 // TODO: Validate prior to setting
                 float newVal = Math.Clamp(value, 0f, GetPropertyValue(Property.ResourceMax1));
-                SetStat(Stat.Resource1, newVal);
+                SetStat(Static.Entity.Stat.Resource1, newVal);
             }
         }
 
@@ -157,12 +179,12 @@ namespace NexusForever.Game.Entity
         [Vital(Vital.SuitPower)]
         public float Resource3
         {
-            get => GetStatFloat(Stat.Resource3) ?? 0f;
+            get => GetStatFloat(Static.Entity.Stat.Resource3) ?? 0f;
             set
             {
                 // TODO: Validate prior to setting
                 float newVal = Math.Clamp(value, 0f, GetPropertyValue(Property.ResourceMax3));
-                SetStat(Stat.Resource3, newVal);
+                SetStat(Static.Entity.Stat.Resource3, newVal);
             }
         }
 
@@ -170,40 +192,40 @@ namespace NexusForever.Game.Entity
         [Vital(Vital.SpellSurge)]
         public float Resource4
         {
-            get => GetStatFloat(Stat.Resource4) ?? 0f;
+            get => GetStatFloat(Static.Entity.Stat.Resource4) ?? 0f;
             set
             {
                 // TODO: Validate prior to setting
                 float newVal = Math.Clamp(value, 0f, GetPropertyValue(Property.ResourceMax4));
-                SetStat(Stat.Resource4, newVal);
+                SetStat(Static.Entity.Stat.Resource4, newVal);
             }
         }
 
         [Vital(Vital.InterruptArmor)]
         public float InterruptArmor
         {
-            get => (float)(GetStatInteger(Stat.InterruptArmor) ?? 0f);
-            set => SetStat(Stat.InterruptArmor, (uint)value);
+            get => (float)(GetStatInteger(Static.Entity.Stat.InterruptArmor) ?? 0f);
+            set => SetStat(Static.Entity.Stat.InterruptArmor, (uint)value);
         }
 
         public virtual uint Level
         {
-            get => GetStatInteger(Stat.Level) ?? 1u;
-            set => SetStat(Stat.Level, value);
+            get => GetStatInteger(Static.Entity.Stat.Level) ?? 1u;
+            set => SetStat(Static.Entity.Stat.Level, value);
         }
 
         public bool Sheathed
         {
-            get => Convert.ToBoolean(GetStatInteger(Stat.Sheathed) ?? 0u);
-            set => SetStat(Stat.Sheathed, Convert.ToUInt32(value));
+            get => Convert.ToBoolean(GetStatInteger(Static.Entity.Stat.Sheathed) ?? 0u);
+            set => SetStat(Static.Entity.Stat.Sheathed, Convert.ToUInt32(value));
         }
 
         public StandState StandState
         {
-            get => (StandState)(GetStatInteger(Stat.StandState) ?? 0u);
+            get => (StandState)(GetStatInteger(Static.Entity.Stat.StandState) ?? 0u);
             set
             {
-                SetStat(Stat.StandState, (uint)value);
+                SetStat(Static.Entity.Stat.StandState, (uint)value);
 
                 EnqueueToVisible(new ServerEmote
                 {
@@ -263,7 +285,7 @@ namespace NexusForever.Game.Entity
         public IEnumerable<uint> PlatformPassengerGuids => platformPassengerGuids;
         private readonly HashSet<uint> platformPassengerGuids = new();
 
-        protected readonly Dictionary<Stat, IStatValue> stats = new Dictionary<Stat, IStatValue>();
+        protected readonly Dictionary<Static.Entity.Stat, IStatValue> stats = [];
 
         private readonly Dictionary<Property, IPropertyValue> properties = new ();
         private readonly HashSet<Property> dirtyProperties = new();
@@ -321,7 +343,7 @@ namespace NexusForever.Game.Entity
             Spline            = model.EntitySpline;
 
             foreach (EntityStatModel statModel in model.EntityStat)
-                stats.Add((Stat)statModel.Stat, new StatValue(statModel));
+                stats.Add((Static.Entity.Stat)statModel.Stat, new StatValue(statModel));
 
             CalculateDefaultProperties();
 
@@ -861,7 +883,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Return the <see cref="float"/> value of the supplied <see cref="Stat"/>.
         /// </summary>
-        protected float? GetStatFloat(Stat stat)
+        protected float? GetStatFloat(Static.Entity.Stat stat)
         {
             StatAttribute attribute = EntityManager.Instance.GetStatAttribute(stat);
             if (attribute?.Type != StatType.Float)
@@ -876,7 +898,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Return the <see cref="uint"/> value of the supplied <see cref="Stat"/>.
         /// </summary>
-        protected uint? GetStatInteger(Stat stat)
+        protected uint? GetStatInteger(Static.Entity.Stat stat)
         {
             StatAttribute attribute = EntityManager.Instance.GetStatAttribute(stat);
             if (attribute?.Type != StatType.Integer)
@@ -891,7 +913,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Return the <see cref="uint"/> value of the supplied <see cref="Stat"/> as an <see cref="Enum"/>.
         /// </summary>
-        public T? GetStatEnum<T>(Stat stat) where T : struct, Enum
+        public T? GetStatEnum<T>(Static.Entity.Stat stat) where T : struct, Enum
         {
             uint? value = GetStatInteger(stat);
             if (value == null)
@@ -903,14 +925,18 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Set <see cref="Stat"/> to the supplied <see cref="float"/> value.
         /// </summary>
-        protected void SetStat(Stat stat, float value)
+        protected void SetStat(Static.Entity.Stat stat, float value)
         {
             StatAttribute attribute = EntityManager.Instance.GetStatAttribute(stat);
             if (attribute?.Type != StatType.Float)
                 throw new ArgumentException();
 
+            float previousValue = 0f;
             if (stats.TryGetValue(stat, out IStatValue statValue))
+            {
+                previousValue   = statValue.Value;
                 statValue.Value = value;
+            }
             else
             {
                 statValue = new StatValue(stat, value);
@@ -930,19 +956,25 @@ namespace NexusForever.Game.Entity
                     }
                 }, true);
             }
+
+            OnStatUpdate(statValue, previousValue);
         }
 
         /// <summary>
         /// Set <see cref="Stat"/> to the supplied <see cref="uint"/> value.
         /// </summary>
-        protected void SetStat(Stat stat, uint value)
+        protected void SetStat(Static.Entity.Stat stat, uint value)
         {
             StatAttribute attribute = EntityManager.Instance.GetStatAttribute(stat);
             if (attribute?.Type != StatType.Integer)
                 throw new ArgumentException();
 
+            float previousValue = 0f;
             if (stats.TryGetValue(stat, out IStatValue statValue))
+            {
+                previousValue   = statValue.Value;
                 statValue.Value = value;
+            }
             else
             {
                 statValue = new StatValue(stat, value);
@@ -962,12 +994,22 @@ namespace NexusForever.Game.Entity
                     }
                 }, true);
             }
+
+            OnStatUpdate(statValue, previousValue);
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/> has a <see cref="Stat"/> updated.
+        /// </summary>
+        protected virtual void OnStatUpdate(IStatValue statValue, float previousValue)
+        {
+            // deliberately empty
         }
 
         /// <summary>
         /// Set <see cref="Stat"/> to the supplied <see cref="Enum"/> value.
         /// </summary>
-        protected void SetStat<T>(Stat stat, T value) where T : Enum, IConvertible
+        protected void SetStat<T>(Static.Entity.Stat stat, T value) where T : Enum, IConvertible
         {
             SetStat(stat, value.ToUInt32(null));
         }

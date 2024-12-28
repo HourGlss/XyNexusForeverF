@@ -16,6 +16,7 @@ namespace NexusForever.Game.Map
             sc.AddGameMapInstance();
             sc.AddGameMapSearch();
             sc.AddGameMapLock();
+            sc.AddGameMapSearch();
 
             sc.AddTransient<IPublicEventManager, PublicEventManager>();
 

@@ -15,7 +15,7 @@ namespace NexusForever.Game.Entity
     {
         public override EntityType Type => EntityType.Door;
 
-        public bool IsOpen => GetStatEnum<StandState>(Stat.StandState) == StandState.State1;
+        public bool IsOpen => GetStatEnum<StandState>(Static.Entity.Stat.StandState) == StandState.State1;
 
         #region Dependency Injection
 
@@ -36,7 +36,7 @@ namespace NexusForever.Game.Entity
         {
             base.Initialise(model);
 
-            SetStat(Stat.StandState, StandState.State0); // Closed on spawn
+            SetStat(Static.Entity.Stat.StandState, StandState.State0); // Closed on spawn
             SetBaseProperty(Property.BaseHealth, 101f); // Sniffs showed all doors had 101hp for me.
         }
 
@@ -62,7 +62,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void OpenDoor()
         {
-            SetStat(Stat.StandState, StandState.State1);
+            SetStat(Static.Entity.Stat.StandState, StandState.State1);
             EnqueueToVisible(new ServerEmote
             {
                 Guid       = Guid,
@@ -77,7 +77,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void CloseDoor()
         {
-            SetStat(Stat.StandState, StandState.State0);
+            SetStat(Static.Entity.Stat.StandState, StandState.State0);
             EnqueueToVisible(new ServerEmote
             {
                 Guid       = Guid,

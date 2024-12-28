@@ -5,7 +5,7 @@ namespace NexusForever.Game.Abstract.Entity
 {
     public interface IStatValue
     {
-        Stat Stat { get; }
+        Static.Entity.Stat Stat { get; }
         StatType Type { get; }
         float Value { get; set; }
         uint Data { get; set; }

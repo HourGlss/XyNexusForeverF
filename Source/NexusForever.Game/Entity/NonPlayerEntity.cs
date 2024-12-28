@@ -1,13 +1,15 @@
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Abstract.Entity.Stat;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
-using NexusForever.Script.Template.Collection;
 using NexusForever.Script;
+using NexusForever.Script.Template.Collection;
 
 namespace NexusForever.Game.Entity
 {
@@ -21,9 +23,12 @@ namespace NexusForever.Game.Entity
 
         public NonPlayerEntity(
             IMovementManager movementManager,
-            IEntitySummonFactory entitySummonFactory)
-            : base(movementManager, entitySummonFactory)
+            IEntitySummonFactory entitySummonFactory,
+            IStatUpdateManager<IUnitEntity> statUpdateManager,
+            ISpellFactory spellFactory)
+            : base(movementManager, entitySummonFactory, statUpdateManager, spellFactory)
         {
+            statUpdateManager.Initialise(this);
         }
 
         #endregion

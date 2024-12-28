@@ -1,7 +1,9 @@
 using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Abstract.Entity.Stat;
 using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -20,9 +22,12 @@ namespace NexusForever.Game.Entity
 
         public SimpleEntity(
             IMovementManager movementManager,
-            IEntitySummonFactory entitySummonFactory)
-            : base(movementManager, entitySummonFactory)
+            IEntitySummonFactory entitySummonFactory,
+            IStatUpdateManager<IUnitEntity> statUpdateManager,
+            ISpellFactory spellFactory)
+            : base(movementManager, entitySummonFactory, statUpdateManager, spellFactory)
         {
+            statUpdateManager.Initialise(this);
         }
 
         #endregion
@@ -38,8 +43,8 @@ namespace NexusForever.Game.Entity
 
             SetBaseProperty(Property.BaseHealth, 101.0f);
 
-            SetStat(Stat.Health, 101u);
-            SetStat(Stat.Level, 1u);
+            SetStat(Static.Entity.Stat.Health, 101u);
+            SetStat(Static.Entity.Stat.Level, 1u);
 
             Creature2DisplayGroupEntryEntry displayGroupEntry = GameTableManager.Instance.
                 Creature2DisplayGroupEntry.

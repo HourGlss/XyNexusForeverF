@@ -2,7 +2,7 @@
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
-using NexusForever.Game.Spell;
+using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
@@ -17,43 +17,43 @@ namespace NexusForever.Game.Combat
 
         private readonly ILogger<DamageCalculator> log;
         private readonly IGameTableManager gameTableManager;
+        private readonly IDamageDescription damageDescription;
 
         public DamageCalculator(
             ILogger<DamageCalculator> log,
-            IGameTableManager gameTableManager)
+            IGameTableManager gameTableManager,
+            IDamageDescription damageDescription)
         {
-            this.log              = log;
-            this.gameTableManager = gameTableManager;
+            this.log               = log;
+            this.gameTableManager  = gameTableManager;
+            this.damageDescription = damageDescription;
         }
 
         #endregion
 
         /// <summary>
-        /// Returns the calculated damage and updates the referenced <see cref="SpellTargetInfo.SpellTargetEffectInfo"/> appropriately.
+        /// Returns the calculated damage and updates the referenced <see cref="ISpellTargetEffectInfo"/> appropriately.
         /// </summary>
         /// <remarks>
         /// TODO: This should probably return an instance of a Class which describes all the damage done to both entities. Attackers can have reflected damage from this, etc.
         /// </remarks>
-        public void CalculateDamage(IUnitEntity attacker, IUnitEntity victim, ISpell spell, ISpellTargetEffectInfo info)
+        public void CalculateDamage(ISpellExecutionContext executionContext, IUnitEntity victim, ISpellTargetEffectInfo info)
         {
-            IDamageDescription damageDescription = new SpellTargetInfo.SpellTargetEffectInfo.DamageDescription
-            {
-                DamageType   = info.Entry.DamageType,
-                CombatResult = CombatResult.Hit
-            };
+            damageDescription.DamageType   = info.Entry.DamageType;
+            damageDescription.CombatResult = CombatResult.Hit;
 
             var castData = new CombatLogCastData
             {
-                CasterId     = attacker.Guid,
+                CasterId     = executionContext.Spell.Caster.Guid,
                 TargetId     = victim.Guid,
-                SpellId      = spell.Parameters.SpellInfo.Entry.Id, // TODO: This was updated in order to use ISpell, check if correct
-                CombatResult = CombatResult.Hit
+                SpellId      = executionContext.Spell.Parameters.SpellInfo.Entry.Id, // TODO: This was updated in order to use ISpell, check if correct
+                CombatResult = damageDescription.CombatResult
             };
 
-            if (CalculateDeflect(attacker, victim))
+            if (CalculateDeflect(executionContext.Spell.Caster, victim))
             {
-                info.DropEffect = true;
-                info.AddCombatLog(new CombatLogDeflect
+                damageDescription.CombatResult = CombatResult.Avoid;
+                executionContext.AddCombatLog(new CombatLogDeflect
                     {
                         BMultiHit = false,
                         CastData  = castData
@@ -61,7 +61,7 @@ namespace NexusForever.Game.Combat
                 return;
             }
 
-            uint damage = CalculateBaseDamage(attacker, victim, info.Entry);
+            uint damage = CalculateBaseDamage(executionContext.Spell.Caster, victim, info.Entry);
             damageDescription.RawDamage       = damage;
             damageDescription.RawScaledDamage = damage;
 
@@ -71,11 +71,11 @@ namespace NexusForever.Game.Combat
 
             // TODO: Add in other attacking modifiers like Armor Pierce, Strikethrough, Multi-Hit, etc.
 
-            if (CalculateCrit(ref damage, attacker, victim))
+            if (CalculateCrit(ref damage, executionContext.Spell.Caster, victim))
                 damageDescription.CombatResult = CombatResult.Critical;
 
             uint preGlanceDamage = damage;
-            if (CalculateGlance(ref damage, attacker, victim))
+            if (CalculateGlance(ref damage, executionContext.Spell.Caster, victim))
             {
                 uint glanceDamage = preGlanceDamage - damage;
                 // TODO: Add CombatLog

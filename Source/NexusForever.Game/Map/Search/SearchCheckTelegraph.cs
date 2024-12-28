@@ -5,13 +5,16 @@ using NexusForever.Game.Static.Spell;
 
 namespace NexusForever.Game.Map.Search
 {
-    public class SearchCheckTelegraph : ISearchCheck<IUnitEntity>
+    public class SearchCheckTelegraph : ISearchCheckTelegraph
     {
-        private readonly ITelegraph telegraph;
-        private readonly IUnitEntity caster;
+        private ITelegraph telegraph;
+        private IUnitEntity caster;
 
-        public SearchCheckTelegraph(ITelegraph telegraph, IUnitEntity caster)
+        public void Initialise(ITelegraph telegraph, IUnitEntity caster)
         {
+            if (this.telegraph != null)
+                throw new InvalidOperationException("SearchCheckTelegraph has already been initialised.");
+
             this.telegraph = telegraph;
             this.caster    = caster;
         }

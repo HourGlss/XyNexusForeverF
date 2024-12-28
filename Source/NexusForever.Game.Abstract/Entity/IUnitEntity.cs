@@ -1,5 +1,6 @@
 using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Abstract.Spell.Proc;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
 
@@ -28,6 +29,7 @@ namespace NexusForever.Game.Abstract.Entity
         bool InCombat { get; }
 
         public IThreatManager ThreatManager { get; }
+        public IProcManager ProcManager { get; }
 
         /// <summary>
         /// Add a <see cref="Property"/> modifier given a Spell4Id and <see cref="ISpellPropertyModifier"/> instance.
@@ -48,6 +50,31 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         /// <returns></returns>
         bool IsCasting();
+
+        /// <summary>
+        /// Return <see cref="ISpell"/> with the supplied casting id.
+        /// </summary>
+        ISpell GetSpell(uint castingId);
+
+        /// <summary>
+        /// Return <see cref="ISpell"/> with the supplied spell id.
+        /// </summary>
+        ISpell GetSpellBySpellId(uint spellId);
+
+        /// <summary>
+        /// Return <see cref="ISpell"/> with the supplied base spell id.
+        /// </summary>
+        ISpell GetSpellByBaseSpellId(uint baseSpellId);
+
+        /// <summary>
+        /// Return a collection of <see cref="ISpell"/> that are part of the supplied spell group id.
+        /// </summary>
+        IEnumerable<ISpell> GetSpellsByGroupId(uint spellGroupId);
+
+        /// <summary>
+        /// Return a collection of <see cref="ISpell"/> that are applying the supplied <see cref="SpellEffectType"/> to entity.
+        /// </summary>
+        IEnumerable<ISpell> GetSpellsByEffect(SpellEffectType type);
 
         /// <summary>
         /// Check if this <see cref="IUnitEntity"/> has a spell active with the provided <see cref="Spell4Entry"/> Id

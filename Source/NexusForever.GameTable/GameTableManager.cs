@@ -624,6 +624,7 @@ namespace NexusForever.GameTable
 
         [GameData]
         public GameTable<TaxiNodeEntry> TaxiNode { get; private set; }
+        [GameData]
         public GameTable<TaxiRouteEntry> TaxiRoute { get; private set; }
 
         [GameData]
@@ -715,14 +716,14 @@ namespace NexusForever.GameTable
         [GameData("de-DE.bin")]
         public TextTable TextGerman { get; private set; }
 
-        public void Initialise()
+        public async Task Initialise()
         {
             log.Info("Loading GameTables...");
 
             Stopwatch sw = Stopwatch.StartNew();
             try
             {
-                LoadGameTablesAsync().GetAwaiter().GetResult();
+                await LoadGameTablesAsync();
                 Debug.Assert(WorldLocation2 != null);
             }
             catch (Exception exception)

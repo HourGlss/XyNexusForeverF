@@ -1,9 +1,11 @@
-﻿using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Abstract.Spell;
+﻿using Microsoft.Extensions.DependencyInjection;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
+using NexusForever.Shared;
 using NexusForever.WorldServer.Command.Context;
 
 namespace NexusForever.WorldServer.Command.Handler
@@ -12,7 +14,7 @@ namespace NexusForever.WorldServer.Command.Handler
     public class SpellCommandCategory : CommandCategory
     {
         [Command(Permission.SpellCast, "A collection of commands to cast spells.", "cast")]
-        public class CurrencyAccountCommandCategory : CommandCategory
+        public class SpellCastCommandCategory : CommandCategory
         {
             [Command(Permission.SpellCast, "Cast a base spell for target, optionally supplying the tier.", "base")]
             [CommandTarget(typeof(IUnitEntity))]
@@ -44,7 +46,7 @@ namespace NexusForever.WorldServer.Command.Handler
 
             private void CastSpell(ICommandContext context, uint spell4BaseId, byte? tier)
             {
-                ISpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
+                ISpellBaseInfo spellBaseInfo = LegacyServiceProvider.Provider.GetService<ISpellInfoManager>().GetSpellBaseInfo(spell4BaseId);
                 if (spellBaseInfo == null)
                 {
                     context.SendMessage($"Invalid spell base id {spell4BaseId}!");
@@ -75,7 +77,7 @@ namespace NexusForever.WorldServer.Command.Handler
         {
             tier ??= 1;
 
-            ISpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
+            ISpellBaseInfo spellBaseInfo = LegacyServiceProvider.Provider.GetService<ISpellInfoManager>().GetSpellBaseInfo(spell4BaseId);
             if (spellBaseInfo == null)
             {
                 context.SendMessage($"Invalid spell base id {spell4BaseId}!");

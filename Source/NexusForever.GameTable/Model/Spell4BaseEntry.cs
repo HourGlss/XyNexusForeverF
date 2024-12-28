@@ -1,3 +1,5 @@
+using NexusForever.Game.Static.Spell;
+
 namespace NexusForever.GameTable.Model
 {
     public class Spell4BaseEntry
@@ -20,9 +22,9 @@ namespace NexusForever.GameTable.Model
         public uint WorldZoneIdZoneRequired;
         public uint Spell4SpellTypesIdSpellType;
         public string Icon;
-        public uint CastMethod;
+        public CastMethod CastMethod;
         public uint School;
-        public uint SpellClass;
+        public SpellClass SpellClass;
         public uint WeaponSlot;
         public uint CastBarType;
         public float MechanicAggressionMagnitude;

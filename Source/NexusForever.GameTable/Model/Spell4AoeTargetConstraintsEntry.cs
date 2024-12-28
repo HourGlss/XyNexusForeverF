@@ -1,3 +1,5 @@
+using NexusForever.Game.Static.Spell;
+
 namespace NexusForever.GameTable.Model
 {
     public class Spell4AoeTargetConstraintsEntry
@@ -7,6 +9,6 @@ namespace NexusForever.GameTable.Model
         public uint TargetCount;
         public float MinRange;
         public float MaxRange;
-        public uint TargetSelection;
+        public AoeSelectionType TargetSelection;
     }
 }

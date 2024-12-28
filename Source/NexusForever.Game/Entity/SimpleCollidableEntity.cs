@@ -1,5 +1,7 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Abstract.Entity.Stat;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
@@ -13,9 +15,12 @@ namespace NexusForever.Game.Entity
         #region Dependency Injection
 
         public SimpleCollidableEntity(IMovementManager movementManager,
-            IEntitySummonFactory entitySummonFactory)
-            : base(movementManager, entitySummonFactory)
+            IEntitySummonFactory entitySummonFactory,
+            IStatUpdateManager<IUnitEntity> statUpdateManager,
+            ISpellFactory spellFactory)
+            : base(movementManager, entitySummonFactory, statUpdateManager, spellFactory)
         {
+            statUpdateManager.Initialise(this);
         }
 
         #endregion

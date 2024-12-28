@@ -6,13 +6,13 @@ namespace NexusForever.GameTable.Model
     {
         public uint Id;
         public uint SpellId;
-        public uint TargetFlags;
+        public SpellEffectTargetFlags TargetFlags;
         public SpellEffectType EffectType;
         public DamageType DamageType;
         public uint DelayTime;
         public uint TickTime;
         public uint DurationTime;
-        public uint Flags;
+        public SpellEffectFlags Flags;
         public uint DataBits00;
         public uint DataBits01;
         public uint DataBits02;

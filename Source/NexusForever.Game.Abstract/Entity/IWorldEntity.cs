@@ -46,6 +46,8 @@ namespace NexusForever.Game.Abstract.Entity
         uint Shield { get; set; }
         uint MaxShieldCapacity { get; set; }
 
+        float Endurance { get; set; }
+        float Focus { get; set; }
         float Dash { get; set; }
         float Resource1 { get; set; }
         float Resource3 { get; set; }
@@ -188,7 +190,7 @@ namespace NexusForever.Game.Abstract.Entity
         /// <summary>
         /// Return the <see cref="uint"/> value of the supplied <see cref="Stat"/> as an <see cref="Enum"/>.
         /// </summary>
-        T? GetStatEnum<T>(Stat stat) where T : struct, Enum;
+        T? GetStatEnum<T>(Static.Entity.Stat stat) where T : struct, Enum;
 
         /// <summary>
         /// Get the current value of the <see cref="Stat"/> mapped to <see cref="Vital"/>.

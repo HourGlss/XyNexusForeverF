@@ -1,6 +1,8 @@
 ﻿using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Abstract.Entity.Stat;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
@@ -18,10 +20,14 @@ namespace NexusForever.Game.Entity
         public CollectableUnitEntity(
             IMovementManager movementManager,
             IEntitySummonFactory entitySummonFactory,
+            IStatUpdateManager<IUnitEntity> statUpdateManager,
+            ISpellFactory spellFactory,
             IAssetManager assetManager)
-            : base(movementManager, entitySummonFactory)
+            : base(movementManager, entitySummonFactory, statUpdateManager, spellFactory)
         {
             this.assetManager = assetManager;
+
+            statUpdateManager.Initialise(this);
         }
 
         #endregion

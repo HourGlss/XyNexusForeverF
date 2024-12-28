@@ -8,6 +8,7 @@ using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Achievement;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Abstract.Entity.Stat;
 using NexusForever.Game.Abstract.Group;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
@@ -18,6 +19,7 @@ using NexusForever.Game.Abstract.Matching.Match;
 using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Abstract.Social;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Achievement;
 using NexusForever.Game.Character;
 using NexusForever.Game.Configuration.Model;
@@ -254,19 +256,26 @@ namespace NexusForever.Game.Entity
         private readonly IMatchingManager matchingManager;
         private readonly IMatchManager matchManager;
 
+        private readonly IStatUpdateManager<IPlayer> statUpdateManager;
+
         public Player(
             IMovementManager movementManager,
             IEntitySummonFactory entitySummonFactory,
+            IStatUpdateManager<IPlayer> statUpdateManager,
+            ISpellFactory spellFactory,
             IEntityFactory entityFactory,
             IMatchingManager matchingManager,
             IMatchManager matchManager,
             ICurrencyManager currencyManager,
             IResurrectionManager resurrectionManager)
-            : base(movementManager, entitySummonFactory)
+            : base(movementManager, entitySummonFactory, statUpdateManager, spellFactory)
         {
-            this.entityFactory   = entityFactory;
-            this.matchingManager = matchingManager;
-            this.matchManager    = matchManager;
+            // TODO: can this be replaced by IEntitySummonFactory?
+            this.entityFactory     = entityFactory;
+            this.matchingManager   = matchingManager;
+            this.matchManager      = matchManager;
+
+            this.statUpdateManager = statUpdateManager;
 
             // managers
             CurrencyManager     = currencyManager;
@@ -301,14 +310,16 @@ namespace NexusForever.Game.Entity
             TimePlayedTotal   = model.TimePlayedTotal;
             TimePlayedLevel   = model.TimePlayedLevel;
 
-            foreach (CharacterStatModel statModel in model.Stat)
-                stats.Add((Stat)statModel.Stat, new StatValue(statModel));
+            statUpdateManager.Initialise(this);
 
-            SetStat(Stat.Sheathed, 1u);
+            foreach (CharacterStatModel statModel in model.Stat)
+                stats.Add((Static.Entity.Stat)statModel.Stat, new StatValue(statModel));
+
+            SetStat(Static.Entity.Stat.Sheathed, 1u);
             // temp
-            SetStat(Stat.Dash, 200F);
+            SetStat(Static.Entity.Stat.Dash, 200F);
             // sprint
-            SetStat(Stat.Resource0, 500f);
+            SetStat(Static.Entity.Stat.Resource0, 500f);
 
             CalculateDefaultProperties();
             SetBaseCharacterProperties();
@@ -1405,21 +1416,6 @@ namespace NexusForever.Game.Entity
             if (itemProperties.TryGetValue(propertyValue.Property, out Dictionary<ItemSlot, float> properties))
                 foreach (float values in properties.Values)
                     propertyValue.Value += values;
-        }
-
-        /// <summary>
-        /// Handles regeneration of Stat Values. Used to provide a hook into the Update method, for future implementation.
-        /// </summary>
-        protected override void HandleStatUpdate(double lastTick)
-        {
-            base.HandleStatUpdate(lastTick);
-
-            float dashRemaining = GetStatFloat(Stat.Dash) ?? 0f;
-            if (dashRemaining < GetPropertyValue(Property.ResourceMax7))
-            {
-                float dashRegenAmount = GetPropertyValue(Property.ResourceMax7) * GetPropertyValue(Property.ResourceRegenMultiplier7);
-                SetStat(Stat.Dash, (float)Math.Min(dashRemaining + dashRegenAmount, (float)GetPropertyValue(Property.ResourceMax7)));
-            }
         }
 
         /// <summary>

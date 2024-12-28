@@ -1,9 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using NexusForever.Game.Static.Entity;
+﻿using NexusForever.Game.Static.Entity;
 
 namespace NexusForever.Network.World.Message.Static
 {
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
     public enum CastResult
     {
         Ok                                    = 0x0000,
