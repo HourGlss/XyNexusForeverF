@@ -36,6 +36,8 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
 
         private uint floatingKatjaGuid;
 
+        private List<uint> ravenousRefugeeGuids = [];
+
         #region Dependency Injection
 
         private readonly ICinematicFactory cinematicFactory;
@@ -84,6 +86,10 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
             {
                 case PublicEventCreature.GatherRing:
                     gatherRingGuid = worldEntity.Guid;
+                    break;
+                case PublicEventCreature.RavenousRefugeeM:
+                case PublicEventCreature.RavenousRefugeeF:
+                    ravenousRefugeeGuids.Add(worldEntity.Guid);
                     break;
                 case PublicEventCreature.FloatingKatja:
                     floatingKatjaGuid = worldEntity.Guid;
@@ -303,6 +309,12 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
 
             foreach (IPlayer player in mapInstance.GetPlayers())
                 player.CinematicManager.QueueCinematic(cinematicFactory.CreateCinematic<IEvilFromTheEtherOnOpenMedbay>());
+
+            foreach (uint guid in ravenousRefugeeGuids)
+            {
+                INonPlayerEntity ravenousRefugee = mapInstance.GetEntity<INonPlayerEntity>(guid);
+                ravenousRefugee?.InvokeScriptCollection<RavenousRefugeeEntityScript>(s => s.Awaken());
+            }
         }
 
         private void OnPhaseRepairDoor()
