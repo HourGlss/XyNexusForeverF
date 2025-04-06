@@ -1,5 +1,6 @@
 using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Static.Entity;
@@ -34,19 +35,15 @@ namespace NexusForever.Game.Entity
 
         #endregion
 
-        public void Initialise(IPlayer owner, uint spell4Id, uint creatureId, uint vehicleId, uint itemDisplayId)
+        public void Initialise(IPlayer owner, uint spell4Id, ICreatureInfo creatureInfo, uint vehicleId, uint itemDisplayId)
         {
-            Initialise(creatureId, vehicleId, spell4Id);
+            Initialise(creatureInfo, vehicleId, spell4Id);
 
             OwnerGuid        = owner.Guid;
             MountType        = vehicleId == 411 ? PetType.HoverBoard : PetType.GroundMount;
             PilotDisplayInfo = GameTableManager.Instance.ItemDisplay.GetEntry(itemDisplayId);
             Rotation         = owner.Rotation;
             Position         = owner.Position;
-
-            Creature2DisplayGroupEntryEntry displayGroupEntry = GameTableManager.Instance.Creature2DisplayGroupEntry.Entries
-                .SingleOrDefault(x => x.Creature2DisplayGroupId == CreatureEntry.Creature2DisplayGroupId);
-            DisplayInfo = displayGroupEntry?.Creature2DisplayInfoId ?? 0u;
 
             CreateFlags |= EntityCreateFlag.SpawnAnimation;
         }
@@ -55,7 +52,7 @@ namespace NexusForever.Game.Entity
         {
             return new MountEntityModel
             {
-                CreatureId    = CreatureEntry.Id,
+                CreatureId    = CreatureId,
                 UnitVehicleId = (ushort)VehicleEntry.Id,
                 OwnerId       = OwnerGuid,
                 Passengers    = passengers

@@ -2,6 +2,5 @@
 {
     public interface ISimpleEntity : IUnitEntity
     {
-        void Initialise(uint creatureId, Action<ISimpleEntity> actionAfterAddToMap = null);
     }
 }

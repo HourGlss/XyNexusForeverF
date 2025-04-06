@@ -25,7 +25,7 @@ namespace NexusForever.Game.Entity
         {
             return new AiTurretEntityModel
             {
-                CreatureId = CreatureId,
+                CreatureId        = CreatureId,
                 QuestChecklistIdx = 0
             };
         }

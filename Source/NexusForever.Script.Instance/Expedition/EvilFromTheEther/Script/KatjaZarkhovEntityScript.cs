@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
@@ -22,6 +23,11 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther.Script
             RavenousBurst  = 82855
         }
 
+        private enum Creature
+        {
+            EtherDriveSchematics = 71821,
+        }
+
         private bool hasEnraged;
 
         #region Dependency Injection
@@ -29,7 +35,7 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther.Script
         private readonly IScriptEventFactory eventFactory;
         private readonly IScriptEventManager eventManager;
         private readonly IEntitySummonFactory entitySummonFactory;
-        private readonly IEntityTemplateManager entityTemplateManager;
+        private readonly ICreatureInfoManager creatureInfoManager;
 
         public KatjaZarkhovEntityScript(
             IFactory<ISpellParameters> spellParametersFactory,
@@ -37,14 +43,14 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther.Script
             IScriptEventFactory eventFactory,
             IScriptEventManager eventManager,
             IEntitySummonFactory entitySummonFactory,
-            IEntityTemplateManager entityTemplateManager)
+            ICreatureInfoManager creatureInfoManager)
             : base(spellParametersFactory, gameTableManager)
         {
-            this.eventFactory          = eventFactory;
-            this.entitySummonFactory   = entitySummonFactory;
-            this.entityTemplateManager = entityTemplateManager;
+            this.eventFactory        = eventFactory;
+            this.entitySummonFactory = entitySummonFactory;
+            this.creatureInfoManager = creatureInfoManager;
 
-            this.eventManager          = eventManager;
+            this.eventManager        = eventManager;
             this.eventManager.OnScriptEvent += OnScriptEvent;
         }
 
@@ -148,8 +154,11 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther.Script
         /// </summary>
         public override void OnDeath()
         {
-            IEntityTemplate template = entityTemplateManager.GetEntityTemplate(71821);
-            entitySummonFactory.Summon(template, entity.Position, entity.Rotation);
+            ICreatureInfo creatureInfo = creatureInfoManager.GetCreatureInfo(Creature.EtherDriveSchematics);
+            if (creatureInfo == null)
+                return;
+
+            entitySummonFactory.Summon(creatureInfo, entity.Position, entity.Rotation);
         }
     }
 }

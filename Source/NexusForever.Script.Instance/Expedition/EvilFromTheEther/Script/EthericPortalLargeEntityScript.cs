@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Script.Template.Event;
@@ -15,9 +16,9 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther.Script
         public EthericPortalLargeEntityScript(
             IScriptEventFactory eventFactory,
             IScriptEventManager eventManager,
-            IEntityTemplateManager entityTemplateManager,
+            ICreatureInfoManager creatureInfoManager,
             IFactory<ISpellParameters> spellParameterFactory)
-            : base(eventFactory, eventManager, entityTemplateManager, spellParameterFactory)
+            : base(eventFactory, eventManager, creatureInfoManager, spellParameterFactory)
         {
         }
 

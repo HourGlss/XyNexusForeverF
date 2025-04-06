@@ -1,4 +1,5 @@
-﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Effect;
 using NexusForever.Game.Abstract.Spell.Effect.Data;
@@ -14,11 +15,14 @@ namespace NexusForever.Game.Spell.Effect.Handler
         #region Dependency Injection
 
         private readonly IEntityFactory entityFactory;
+        private readonly ICreatureInfoManager creatureInfoManager;
 
         public SpellEffectSummonMountHandler(
-            IEntityFactory entityFactory)
+            IEntityFactory entityFactory,
+            ICreatureInfoManager creatureInfoManager)
         {
-            this.entityFactory = entityFactory;
+            this.entityFactory       = entityFactory;
+            this.creatureInfoManager = creatureInfoManager;
         }
 
         #endregion
@@ -34,9 +38,10 @@ namespace NexusForever.Game.Spell.Effect.Handler
 
             if (!player.CanMount())
                 return;
+            ICreatureInfo creatureInfo = creatureInfoManager.GetCreatureInfo(data.CreatureId);
 
             var mount = entityFactory.CreateEntity<IMountEntity>();
-            mount.Initialise(player, executionContext.Spell.Parameters.SpellInfo.Entry.Id, data.CreatureId, data.VehicleId, data.ItemDisplayId);
+            mount.Initialise(player, executionContext.Spell.Parameters.SpellInfo.Entry.Id, creatureInfo, data.VehicleId, data.ItemDisplayId);
             mount.EnqueuePassengerAdd(player, VehicleSeatType.Pilot, 0);
 
             // usually for hover boards

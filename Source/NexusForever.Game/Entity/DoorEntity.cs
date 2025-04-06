@@ -1,5 +1,6 @@
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network.World.Entity;
@@ -32,9 +33,9 @@ namespace NexusForever.Game.Entity
 
         #endregion
 
-        public override void Initialise(EntityModel model)
+        public override void Initialise(ICreatureInfo creatureInfo, EntityModel model)
         {
-            base.Initialise(model);
+            base.Initialise(creatureInfo, model);
 
             SetStat(Static.Entity.Stat.StandState, StandState.State0); // Closed on spawn
             SetBaseProperty(Property.BaseHealth, 101f); // Sniffs showed all doors had 101hp for me.

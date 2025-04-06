@@ -1,5 +1,6 @@
 using System.Numerics;
 using NexusForever.Database.World.Model;
+using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Static.Entity;
@@ -21,12 +22,14 @@ namespace NexusForever.Game.Abstract.Entity
         public WorldZoneEntry Zone { get; }
 
         uint EntityId { get; }
-        uint CreatureId { get; set; }
-        Creature2Entry CreatureEntry { get; }
-        uint DisplayInfo { get; set; }
-        Creature2DisplayInfoEntry CreatureDisplayEntry { get; }
-        ushort OutfitInfo { get; set; }
-        Creature2OutfitInfoEntry CreatureOutfitEntry { get; }
+
+        uint CreatureId { get; }
+        ICreatureInfo CreatureInfo { get; set; }
+        uint DisplayInfoId { get; }
+        Creature2DisplayInfoEntry CreatureDisplayEntry { get; set; }
+        ushort OutfitInfoId { get; }
+        Creature2OutfitInfoEntry CreatureOutfitEntry { get; set; }
+
         Faction Faction1 { get; set; }
         Faction Faction2 { get; set; }
 
@@ -88,19 +91,14 @@ namespace NexusForever.Game.Abstract.Entity
         IEntitySummonFactory SummonFactory { get; }
 
         /// <summary>
-        /// Initialise <see cref="IWorldEntity"/> with supplied data.
+        /// Initialise <see cref="IWorldEntity"/> with supplied <see cref="ICreatureInfo"/>.
         /// </summary>
-        void Initialise(uint creatureId);
+        void Initialise(ICreatureInfo creatureInfo);
 
         /// <summary>
         /// Initialise <see cref="IWorldEntity"/> from an existing database model.
         /// </summary>
-        void Initialise(EntityModel model);
-
-        /// <summary>
-        /// Initialise <see cref="IWorldEntity"/> from an existing entity template.
-        /// </summary>
-        void Initialise(IEntityTemplate template);
+        void Initialise(ICreatureInfo creatureInfo, EntityModel model);
 
         ServerEntityCreate BuildCreatePacket(bool initialCommands);
 
@@ -133,11 +131,6 @@ namespace NexusForever.Game.Abstract.Entity
         /// Set <see cref="IWorldEntity"/> to broadcast all <see cref="IItemVisual"/> on next world update.
         /// </summary>
         void SetVisualEmit(bool status);
-
-        /// <summary>
-        /// Set visual info of <see cref="IWorldEntity"/> with supplied data.
-        /// </summary>
-        public void SetVisualInfo(uint displayInfo, ushort outfitInfo);
 
         /// <summary>
         /// Add or update <see cref="IItemVisual"/> at <see cref="ItemSlot"/> with supplied data.
@@ -274,5 +267,15 @@ namespace NexusForever.Game.Abstract.Entity
         /// Remove <see cref="IWorldEntity"/> as a passenger on this <see cref="IWorldEntity"/>.
         /// </summary>
         void RemovePlatformPassenger(IWorldEntity passenger);
+
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/> summons another <see cref="IWorldEntity"/>.
+        /// </summary>
+        void OnSummon(IWorldEntity entity);
+
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/> unsummons another <see cref="IWorldEntity"/>.
+        /// </summary>
+        void OnUnsummon(IWorldEntity entity);
     }
 }

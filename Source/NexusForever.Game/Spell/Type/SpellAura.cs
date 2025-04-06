@@ -1,11 +1,14 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Numerics;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Creature;
+using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Target;
+using NexusForever.Game.Entity.Creature;
 using NexusForever.Game.Spell.Event;
 using NexusForever.Game.Static.Spell;
-using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Shared;
@@ -24,15 +27,18 @@ namespace NexusForever.Game.Spell.Type
 
         private readonly ILogger<SpellAura> log;
         private readonly ISpellTargetInfoCollection spellTargetInfoCollection;
+        private readonly ICreatureInfoManager creatureInfoManager;
 
         public SpellAura(
             ILogger<SpellAura> log,
             ISpellTargetInfoCollection spellTargetInfoCollection,
+            ICreatureInfoManager creatureInfoManager,
             IGlobalSpellManager globalSpellManager)
             : base(log, spellTargetInfoCollection, globalSpellManager)
         {
             this.log                       = log;
             this.spellTargetInfoCollection = spellTargetInfoCollection;
+            this.creatureInfoManager       = creatureInfoManager;
         }
 
         #endregion
@@ -117,17 +123,17 @@ namespace NexusForever.Game.Spell.Type
 
             if (Parameters.SpellInfo.BaseInfo.Entry.Creature2IdPositionalAoe > 0)
             {
-                var factory = LegacyServiceProvider.Provider.GetService<IEntityFactory>();
-                var positionalEntity = factory.CreateEntity<ISimpleEntity>();
-                positionalEntity.Initialise(Parameters.SpellInfo.BaseInfo.Entry.Creature2IdPositionalAoe, (entity) =>
+                ICreatureInfo creatureInfo = creatureInfoManager.GetCreatureInfo(Parameters.SpellInfo.BaseInfo.Entry.Creature2IdPositionalAoe);
+                if (creatureInfo == null)
+                    return false;
+
+                Caster.SummonFactory.Summon(creatureInfo, Caster.Position, Caster.Rotation, (IBaseMap map, uint guid, Vector3 vector) =>
                 {
-                    entity.Rotation = Caster.Rotation;
-                    Parameters.PositionalUnitId = entity.Guid;
+                    Parameters.PositionalUnitId = guid;
 
                     status = SpellStatus.Casting;
                     log.LogTrace($"Spell {Parameters.SpellInfo.Entry.Id} has started casting.");
                 });
-                positionalEntity.AddToMap(Caster.Map, Caster.Position);
             }
             else
             {

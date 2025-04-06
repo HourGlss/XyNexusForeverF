@@ -4,10 +4,6 @@
     /// Values must be explicitly numbered!
     /// This is to prevent new entries shifting the ids of old ones.
     /// </remarks>
-    /// <remarks>
-    /// IDs to reuse:
-    /// 38
-    /// </remarks>
     public enum Permission
     {
         None,
@@ -83,6 +79,7 @@
         EntityThreatList            = 123,
         EntityThreatClear           = 124,
         EntityThreatRemove          = 125,
+        EntitySummon                = 38,
 
         // generic unlock
         Generic                     = 46,

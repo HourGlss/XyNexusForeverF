@@ -1,6 +1,7 @@
 using System.Numerics;
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Reputation;
@@ -43,41 +44,47 @@ namespace NexusForever.Game.Entity
         public WorldZoneEntry Zone { get; private set; }
         public uint EntityId { get; protected set; }
 
-        public uint CreatureId
+        public ICreatureInfo CreatureInfo
         {
-            get => CreatureEntry?.Id ?? 0;
+            get => creatureInfo;
             set
             {
-                CreatureEntry = GameTableManager.Instance.Creature2.GetEntry(value);
+                creatureInfo = value;
                 SetVisualEmit(true);
             }
         }
 
-        public Creature2Entry CreatureEntry { get; private set; }
+        private ICreatureInfo creatureInfo;
 
-        public uint DisplayInfo
+        public uint CreatureId => CreatureInfo?.Entry.Id ?? 0u;
+
+        public Creature2DisplayInfoEntry CreatureDisplayEntry
         {
-            get => CreatureDisplayEntry?.Id ?? 0;
+            get => creatureDisplayEntry;
             set
             {
-                CreatureDisplayEntry = GameTableManager.Instance.Creature2DisplayInfo.GetEntry(value);
+                creatureDisplayEntry = value;
                 SetVisualEmit(true);
             }
         }
 
-        public Creature2DisplayInfoEntry CreatureDisplayEntry { get; private set; }
+        public uint DisplayInfoId => CreatureDisplayEntry?.Id ?? 0u;
 
-        public ushort OutfitInfo
+        private Creature2DisplayInfoEntry creatureDisplayEntry;
+
+        public Creature2OutfitInfoEntry CreatureOutfitEntry
         {
-            get => (ushort)(CreatureOutfitEntry?.Id ?? 0);
+            get => creatureOutfitEntry;
             set
             {
-                CreatureOutfitEntry = GameTableManager.Instance.Creature2OutfitInfo.GetEntry(value);
+                creatureOutfitEntry = value;
                 SetVisualEmit(true);
             }
         }
 
-        public Creature2OutfitInfoEntry CreatureOutfitEntry { get; private set; }
+        private Creature2OutfitInfoEntry creatureOutfitEntry;
+
+        public ushort OutfitInfoId => (ushort)(CreatureOutfitEntry?.Id ?? 0u);
 
         public Faction Faction1 { get; set; }
         public Faction Faction2 { get; set; }
@@ -310,13 +317,25 @@ namespace NexusForever.Game.Entity
         #endregion
 
         /// <summary>
-        /// Initialise <see cref="IWorldEntity"/> with supplied data.
+        /// Initialise <see cref="IWorldEntity"/> with supplied <see cref="ICreatureInfo"/>.
         /// </summary>
-        public void Initialise(uint creatureId)
+        public virtual void Initialise(ICreatureInfo creatureInfo)
         {
-            CreatureId = creatureId;
+            CreatureInfo         = creatureInfo;
+            CreatureDisplayEntry = creatureInfo.GetDisplayInfoEntry();
+            CreatureOutfitEntry  = creatureInfo.GetOutfitInfoEntry();
+            Faction1             = creatureInfo.Entry.FactionId;
+            Faction2             = creatureInfo.Entry.FactionId;
+
+            SetStat(Static.Entity.Stat.Level, creatureInfo.GetLevel());
+
+            foreach (ICreatureInfoStat stat in creatureInfo.GetStatOverrides())
+                stats.Add(stat.Stat, new StatValue(stat));
 
             CalculateDefaultProperties();
+
+            foreach (ICreatureInfoProperty property in creatureInfo.GetPropertyOverrides())
+                SetBaseProperty(property.Property, property.Value);
 
             // TODO: handle this better
             Health = MaxHealth;
@@ -328,19 +347,19 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Initialise <see cref="IWorldEntity"/> from an existing database model.
         /// </summary>
-        public virtual void Initialise(EntityModel model)
+        public virtual void Initialise(ICreatureInfo creatureInfo, EntityModel model)
         {
-            EntityId          = model.Id;
-            CreatureId        = model.Creature;
-            Rotation          = new Vector3(model.Rx, model.Ry, model.Rz);
-            DisplayInfo       = model.DisplayInfo;
-            OutfitInfo        = model.OutfitInfo;
-            Faction1          = (Faction)model.Faction1;
-            Faction2          = (Faction)model.Faction2;
-            QuestChecklistIdx = model.QuestChecklistIdx;
-            ActivePropId      = model.ActivePropId;
-            WorldSocketId     = model.WorldSocketId;
-            Spline            = model.EntitySpline;
+            CreatureInfo         = creatureInfo;
+            EntityId             = model.Id;
+            Rotation             = new Vector3(model.Rx, model.Ry, model.Rz);
+            CreatureDisplayEntry = GameTableManager.Instance.Creature2DisplayInfo.GetEntry(model.DisplayInfo);
+            CreatureOutfitEntry  = GameTableManager.Instance.Creature2OutfitInfo.GetEntry(model.OutfitInfo);
+            Faction1             = (Faction)model.Faction1;
+            Faction2             = (Faction)model.Faction2;
+            QuestChecklistIdx    = model.QuestChecklistIdx;
+            ActivePropId         = model.ActivePropId;
+            WorldSocketId        = model.WorldSocketId;
+            Spline               = model.EntitySpline;
 
             foreach (EntityStatModel statModel in model.EntityStat)
                 stats.Add((Static.Entity.Stat)statModel.Stat, new StatValue(statModel));
@@ -358,32 +377,6 @@ namespace NexusForever.Game.Entity
                 .Select(e => e.ScriptName)
                 .ToList();
             InitialiseScriptCollection(scriptNames.Count > 0 ? scriptNames : null);
-        }
-
-        /// <summary>
-        /// Initialise <see cref="IWorldEntity"/> from an existing entity template.
-        /// </summary>
-        public void Initialise(IEntityTemplate template)
-        {
-            CreatureId  = template.CreatureId;
-            DisplayInfo = template.DisplayInfoId;
-            OutfitInfo  = template.OutfitInfoId;
-            Faction1    = template.Faction1;
-            Faction2    = template.Faction2;
-
-            foreach (IEntityTemplateStat templateStat in template.Stats)
-                stats.Add(templateStat.Stat, new StatValue(templateStat));
-
-            CalculateDefaultProperties();
-
-            foreach (IEntityTemplateProperty templateProperty in template.Properties)
-                SetBaseProperty(templateProperty.Property, templateProperty.Value);
-
-            // TODO: handle this better
-            Health = MaxHealth;
-            Shield = MaxShieldCapacity;
-
-            InitialiseScriptCollection(null);
         }
 
         /// <summary>
@@ -406,6 +399,12 @@ namespace NexusForever.Game.Entity
             base.OnAddToMap(map, guid, vector);
 
             UpdateZone(vector);
+
+            if (SummonerGuid.HasValue)
+            {
+                IWorldEntity summoner = map.GetEntity<IWorldEntity>(SummonerGuid.Value);
+                summoner?.OnSummon(this);
+            }
         }
 
         /// <summary>
@@ -428,7 +427,7 @@ namespace NexusForever.Game.Entity
             if (SummonerGuid.HasValue)
             {
                 IWorldEntity summoner = Map.GetEntity<IWorldEntity>(SummonerGuid.Value);
-                summoner?.SummonFactory.UntrackSummon(Guid);
+                summoner.OnUnsummon(this);
             }
 
             base.OnRemoveFromMap();
@@ -507,8 +506,8 @@ namespace NexusForever.Game.Entity
                     .ToList(),
                 Faction1     = Faction1,
                 Faction2     = Faction2,
-                DisplayInfo  = DisplayInfo,
-                OutfitInfo   = OutfitInfo
+                DisplayInfo  = DisplayInfoId,
+                OutfitInfo   = OutfitInfoId,
             };
 
             // Plugs should not have this portion of the packet set by this Class. The Plug Class should set it itself.
@@ -545,29 +544,27 @@ namespace NexusForever.Game.Entity
         public virtual void OnActivateCast(IPlayer activator, uint interactionId)
         {
             // Handle CSI
-            Creature2Entry entry = GameTableManager.Instance.Creature2.GetEntry(CreatureId);
-
             uint spell4Id = 0;
-            for (int i = 0; i < entry.Spell4IdActivate.Length; i++)
+            for (int i = 0; i < CreatureInfo.Entry.Spell4IdActivate.Length; i++)
             {
-                if (spell4Id > 0u || i == entry.Spell4IdActivate.Length)
+                if (spell4Id > 0u || i == CreatureInfo.Entry.Spell4IdActivate.Length)
                     break;
 
-                if (entry.PrerequisiteIdActivateSpells[i] > 0 && PrerequisiteManager.Instance.Meets(activator, entry.PrerequisiteIdActivateSpells[i]))
-                    spell4Id = entry.Spell4IdActivate[i];
+                if (CreatureInfo.Entry.PrerequisiteIdActivateSpells[i] > 0 && PrerequisiteManager.Instance.Meets(activator, CreatureInfo.Entry.PrerequisiteIdActivateSpells[i]))
+                    spell4Id = CreatureInfo.Entry.Spell4IdActivate[i];
 
-                if (spell4Id == 0u && entry.Spell4IdActivate[i] == 0u && i > 0)
-                    spell4Id = entry.Spell4IdActivate[i - 1];
+                if (spell4Id == 0u && CreatureInfo.Entry.Spell4IdActivate[i] == 0u && i > 0)
+                    spell4Id = CreatureInfo.Entry.Spell4IdActivate[i - 1];
             }
 
             if (spell4Id == 0)
-                throw new InvalidOperationException($"Spell4Id should not be 0. Unhandled Creature ActivateCast {CreatureId}");
+                throw new InvalidOperationException($"Spell4Id should not be 0. Unhandled Creature ActivateCast {CreatureInfo.Entry.Id}");
 
             SpellParameters parameters = new SpellParameters
             {
                 PrimaryTargetId        = Guid,
                 ClientSideInteraction  = new ClientSideInteraction(activator, this, interactionId),
-                CastTimeOverride       = (int)entry.ActivateSpellCastTime,
+                CastTimeOverride       = (int)CreatureInfo.Entry.ActivateSpellCastTime,
                 UserInitiatedSpellCast = true
             };
             activator.CastSpell(spell4Id, parameters);
@@ -578,16 +575,19 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public virtual void OnActivateSuccess(IPlayer activator)
         {
-            activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateEntity, CreatureId, 1u);
-            activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateTargetGroupChecklist, CreatureId, QuestChecklistIdx);
-            activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.SucceedCSI, CreatureId, 1u);
-
-            foreach (uint targetGroupId in AssetManager.Instance.GetTargetGroupsForCreatureId(CreatureId))
+            if (CreatureInfo.Entry != null)
             {
-                activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateTargetGroup, targetGroupId, 1u); // Updates the objective, but seems to disable all the other targets. TODO: Investigate
+                activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateEntity, CreatureInfo.Entry.Id, 1u);
+                activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateTargetGroupChecklist, CreatureInfo.Entry.Id, QuestChecklistIdx);
+                activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.SucceedCSI, CreatureInfo.Entry.Id, 1u);
 
-                Map.PublicEventManager.UpdateObjective(activator, PublicEventObjectiveType.ActivateTargetGroup, targetGroupId, 1);
-                Map.PublicEventManager.UpdateObjective(activator, PublicEventObjectiveType.ActivateTargetGroupChecklist, targetGroupId, QuestChecklistIdx);
+                foreach (uint targetGroupId in AssetManager.Instance.GetTargetGroupsForCreatureId(CreatureInfo.Entry.Id))
+                {
+                    activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateTargetGroup, targetGroupId, 1u); // Updates the objective, but seems to disable all the other targets. TODO: Investigate
+
+                    Map.PublicEventManager.UpdateObjective(activator, PublicEventObjectiveType.ActivateTargetGroup, targetGroupId, 1);
+                    Map.PublicEventManager.UpdateObjective(activator, PublicEventObjectiveType.ActivateTargetGroupChecklist, targetGroupId, QuestChecklistIdx);
+                }
             }
 
             scriptCollection?.Invoke<IWorldEntityScript>(s => s.OnActivateSuccess(activator));
@@ -619,15 +619,6 @@ namespace NexusForever.Game.Entity
                 return;
 
             emitVisual = status;
-        }
-
-        /// <summary>
-        /// Set visual info of <see cref="IWorldEntity"/> with supplied data.
-        /// </summary>
-        public void SetVisualInfo(uint displayInfo, ushort outfitInfo)
-        {
-            DisplayInfo = displayInfo;
-            OutfitInfo = outfitInfo;
         }
 
         /// <summary>
@@ -672,8 +663,8 @@ namespace NexusForever.Game.Entity
             {
                 UnitId      = Guid,
                 CreatureId  = CreatureId,
-                DisplayInfo = DisplayInfo,
-                OutfitInfo  = OutfitInfo,
+                DisplayInfo = DisplayInfoId,
+                OutfitInfo  = OutfitInfoId,
                 ItemVisuals = itemVisuals.Values
                     .Select(v => v.Build())
                     .ToList()
@@ -1148,7 +1139,7 @@ namespace NexusForever.Game.Entity
                 Text     = text,
                 Guid     = Guid,
                 // TODO: should this be based on the players session language?
-                FromName = GameTableManager.Instance.TextEnglish.GetEntry(CreatureEntry.LocalizedTextIdName)
+                FromName = GameTableManager.Instance.TextEnglish.GetEntry(CreatureInfo.Entry.LocalizedTextIdName)
             };
         }
 
@@ -1157,7 +1148,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void NpcSay(string text, float range = 155f)
         {
-            if (CreatureEntry == null)
+            if (CreatureInfo == null)
                 return;
 
             Talk(BuildNpcChat(text, ChatChannelType.NPCSay), range);
@@ -1168,7 +1159,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void NpcYell(string text, float range = 310f)
         {
-            if (CreatureEntry == null)
+            if (CreatureInfo == null)
                 return;
 
             Talk(BuildNpcChat(text, ChatChannelType.NPCYell), range);
@@ -1251,6 +1242,24 @@ namespace NexusForever.Game.Entity
         public void RemovePlatformPassenger(IWorldEntity passenger)
         {
             platformPassengerGuids.Remove(passenger.Guid);
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/> summons another <see cref="IWorldEntity"/>.
+        /// </summary>
+        public virtual void OnSummon(IWorldEntity entity)
+        {
+            SummonFactory.TrackSummon(entity);
+            scriptCollection.Invoke<IWorldEntityScript>(s => s.OnSummon(entity));
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/> unsummons another <see cref="IWorldEntity"/>.
+        /// </summary>
+        public virtual void OnUnsummon(IWorldEntity entity)
+        {
+            SummonFactory.UntrackSummon(entity);
+            scriptCollection.Invoke<IWorldEntityScript>(s => s.OnUnsummon(entity));
         }
     }
 }

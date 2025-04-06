@@ -32,5 +32,20 @@ namespace NexusForever.Script.Template
         void OnEnterZone(IWorldEntity entity, uint zone)
         {
         }
+
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/> summons another <see cref="IWorldEntity"/>.
+        /// </summary>
+        /// <param name="entity"></param>
+        void OnSummon(IWorldEntity summoned)
+        {
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/> unsummons another <see cref="IWorldEntity"/>.
+        /// </summary>
+        void OnUnsummon(IWorldEntity summoned)
+        {
+        }
     }
 }

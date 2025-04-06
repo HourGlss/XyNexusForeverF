@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
@@ -32,11 +33,11 @@ namespace NexusForever.Game.Entity
 
         #endregion
 
-        public void Initialise(uint creatureId, uint vehicleId, uint spell4Id)
+        public void Initialise(ICreatureInfo creatureInfo, uint vehicleId, uint spell4Id)
         {
-            Initialise(creatureId);
+            Initialise(creatureInfo);
 
-            VehicleEntry = GameTableManager.Instance.UnitVehicle.GetEntry(vehicleId != 0u ? vehicleId : CreatureEntry.UnitVehicleId);
+            VehicleEntry = GameTableManager.Instance.UnitVehicle.GetEntry(vehicleId != 0u ? vehicleId : CreatureInfo.Entry.UnitVehicleId);
             SpellEntry   = GameTableManager.Instance.Spell4.GetEntry(spell4Id);
 
             // temp
@@ -51,7 +52,7 @@ namespace NexusForever.Game.Entity
         {
             return new VehicleEntityModel
             {
-                CreatureId    = CreatureEntry.Id,
+                CreatureId    = CreatureId,
                 UnitVehicleId = (ushort)VehicleEntry.Id,
                 Passengers    = passengers
                     .Select(p => new NetworkVehiclePassenger

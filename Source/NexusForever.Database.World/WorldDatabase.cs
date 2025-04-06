@@ -138,12 +138,18 @@ namespace NexusForever.Database.World
                 .ToImmutableList();
         }
 
-        public ImmutableList<EntityTemplateModel> GetEntityTemplates()
+        public ImmutableList<CreatureInfoPropertyModel> GetCreateInfoProperties()
         {
             using var context = new WorldContext(config);
-            return context.EntityTemplate
-                .Include(e => e.EntityProperty)
-                .Include(e => e.EntityStat)
+            return context.CreatureInfoProperty
+                .AsNoTracking()
+                .ToImmutableList();
+        }
+
+        public ImmutableList<CreatureInfoStatModel> GetCreateInfoStats()
+        {
+            using var context = new WorldContext(config);
+            return context.CreatureInfoStat
                 .AsNoTracking()
                 .ToImmutableList();
         }

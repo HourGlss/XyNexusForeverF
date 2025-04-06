@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Entity.Trigger;
+using NexusForever.Game.Entity.Creature;
 using NexusForever.Game.Entity.Movement;
 using NexusForever.Game.Entity.Stat;
 using NexusForever.Game.Entity.Trigger;
@@ -64,10 +66,10 @@ namespace NexusForever.Game.Entity
             sc.AddSingletonLegacy<IPlayerManager, PlayerManager>();
 
             sc.AddTransient<IEntitySummonFactory, EntitySummonFactory>();
-            sc.AddTransientFactory<IEntityTemplate, EntityTemplate>();
-            sc.AddTransientFactory<IEntityTemplateProperty, EntityTemplateProperty>();
-            sc.AddTransientFactory<IEntityTemplateStat, EntityTemplateStat>();
-            sc.AddSingleton<IEntityTemplateManager, EntityTemplateManager>();
+            sc.AddSingleton<ICreatureInfoManager, CreatureInfoManager>();
+            sc.AddTransientFactory<ICreatureInfo, CreatureInfo>();
+            sc.AddTransientFactory<ICreatureInfoProperty, CreatureInfoProperty>();
+            sc.AddTransientFactory<ICreatureInfoStat, CreatureInfoStat>();
 
             sc.AddTransient<ICurrencyManager, CurrencyManager>();
             sc.AddTransient<IResurrectionManager, ResurrectionManager>();

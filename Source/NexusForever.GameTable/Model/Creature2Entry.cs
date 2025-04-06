@@ -1,9 +1,12 @@
+using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Reputation;
+
 namespace NexusForever.GameTable.Model
 {
     public class Creature2Entry
     {
         public uint Id;
-        public uint CreationTypeEnum;
+        public EntityType CreationTypeEnum;
         public string Description;
         public uint LocalizedTextIdName;
         public uint Creature2AoiSizeEnum;
@@ -51,7 +54,7 @@ namespace NexusForever.GameTable.Model
         public uint PathScientistExperimentationId;
         public uint DatacubeId;
         public uint DatacubeVolumeId;
-        public uint FactionId;
+        public Faction FactionId;
         public uint MinLevel;
         public uint MaxLevel;
         public uint RescanCooldownTypeEnum;

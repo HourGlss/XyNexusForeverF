@@ -3,6 +3,7 @@ using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Static.Entity;
 
 namespace NexusForever.Game.Entity
@@ -59,7 +60,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Create a new <see cref="IStatValue"/> from an existing entity template.
         /// </summary>
-        public StatValue(IEntityTemplateStat template)
+        public StatValue(ICreatureInfoStat template)
         {
             Stat  = template.Stat;
             Type  = EntityManager.Instance.GetStatAttribute(Stat).Type;

@@ -24,7 +24,7 @@ namespace NexusForever.Game.Entity
         {
             return new PlatformEntityModel
             {
-                CreatureId = CreatureId,
+                CreatureId        = CreatureId,
                 QuestChecklistIdx = 0
             };
         }

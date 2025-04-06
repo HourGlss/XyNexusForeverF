@@ -1,10 +1,9 @@
 using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Static.Entity;
-using NexusForever.GameTable;
-using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
 using NexusForever.Network.World.Message.Model;
@@ -24,7 +23,6 @@ namespace NexusForever.Game.Entity
         public override EntityType Type => EntityType.Pet;
 
         public uint OwnerGuid { get; private set; }
-        public Creature2DisplayGroupEntryEntry Creature2DisplayGroup { get; private set; }
 
         private readonly UpdateTimer followTimer = new(1d);
 
@@ -38,13 +36,10 @@ namespace NexusForever.Game.Entity
 
         #endregion
 
-        public void Initialise(IPlayer owner, uint creature)
+        public void Initialise(IPlayer owner, ICreatureInfo creatureInfo)
         {
             OwnerGuid = owner.Guid;
-            Initialise(creature);
-
-            Creature2DisplayGroup = GameTableManager.Instance.Creature2DisplayGroupEntry.Entries.SingleOrDefault(x => x.Creature2DisplayGroupId == CreatureEntry.Creature2DisplayGroupId);
-            SetVisualInfo(Creature2DisplayGroup?.Creature2DisplayInfoId ?? 0u, 0);
+            Initialise(creatureInfo);
 
             SetBaseProperty(Property.BaseHealth, 800.0f);
 
@@ -57,7 +52,7 @@ namespace NexusForever.Game.Entity
         {
             return new PetEntityModel
             {
-                CreatureId  = CreatureEntry.Id,
+                CreatureId  = CreatureId,
                 OwnerId     = OwnerGuid,
                 Name        = ""
             };

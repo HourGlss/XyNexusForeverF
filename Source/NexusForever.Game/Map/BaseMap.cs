@@ -2,13 +2,16 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Numerics;
 using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Event;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Abstract.Map.Search;
 using NexusForever.Game.Configuration.Model;
+using NexusForever.Game.Entity.Creature;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Map;
 using NexusForever.Game.Static.Spell;
@@ -432,10 +435,16 @@ namespace NexusForever.Game.Map
 
         protected virtual void SpawnGrid(uint gridX, uint gridZ)
         {
+            var creatureInfoManager = LegacyServiceProvider.Provider.GetService<ICreatureInfoManager>();
+
             foreach (EntityModel model in entityCache.GetEntities(gridX, gridZ))
             {
+                ICreatureInfo creatureInfo = creatureInfoManager.GetCreatureInfo(model.Creature);
+                if (creatureInfo == null)
+                    continue;
+
                 IWorldEntity entity = entityFactory.CreateWorldEntity(model.Type);
-                entity.Initialise(model);
+                entity.Initialise(creatureInfo, model);
                 entity.AddToMap(this, new Vector3(model.X, model.Y, model.Z));
             }
         }

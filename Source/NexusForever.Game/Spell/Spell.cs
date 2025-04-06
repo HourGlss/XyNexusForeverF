@@ -143,7 +143,7 @@ namespace NexusForever.Game.Spell
                 status = SpellStatus.Finished;
 
                 if (Parameters.PositionalUnitId > 0)
-                    Caster.GetVisible<IWorldEntity>(Parameters.PositionalUnitId)?.RemoveFromMap();
+                    Caster.SummonFactory.Unsummon(Parameters.PositionalUnitId);
 
                 SendSpellFinish();
                 log.LogTrace($"Spell {Parameters.SpellInfo.Entry.Id} has finished.");

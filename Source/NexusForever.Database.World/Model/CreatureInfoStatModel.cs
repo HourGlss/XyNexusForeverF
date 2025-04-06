@@ -2,12 +2,10 @@
 
 namespace NexusForever.Database.World.Model
 {
-    public class EntityTemplateStatModel
+    public class CreatureInfoStatModel
     {
-        public uint Id { get; set; }
+        public uint CreatureId { get; set; }
         public Stat Stat { get; set; }
         public float Value { get; set; }
-
-        public EntityTemplateModel Entity { get; set; }
     }
 }

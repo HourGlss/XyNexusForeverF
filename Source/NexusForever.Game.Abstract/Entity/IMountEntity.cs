@@ -1,4 +1,5 @@
-﻿using NexusForever.Game.Static.Entity;
+﻿using NexusForever.Game.Abstract.Entity.Creature;
+using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Abstract.Entity
@@ -13,6 +14,6 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         ItemDisplayEntry PilotDisplayInfo { get; }
 
-        void Initialise(IPlayer owner, uint spell4Id, uint creatureId, uint vehicleId, uint itemDisplayId);
+        void Initialise(IPlayer owner, uint spell4Id, ICreatureInfo creatureInfo, uint vehicleId, uint itemDisplayId);
     }
 }

@@ -1,15 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
+using NexusForever.Shared;
 using NexusForever.WorldServer.Command.Context;
+using NexusForever.WorldServer.Command.Convert;
 using NexusForever.WorldServer.Command.Shared;
 
 namespace NexusForever.WorldServer.Command.Handler
@@ -25,13 +29,45 @@ namespace NexusForever.WorldServer.Command.Handler
             public void HandleEntityModifyDisplayInfo(ICommandContext context,
                 uint displayInfo)
             {
-                if (displayInfo != 0 && GameTableManager.Instance.Creature2DisplayInfo.GetEntry(displayInfo) == null)
+                Creature2DisplayInfoEntry entry = GameTableManager.Instance.Creature2DisplayInfo.GetEntry(displayInfo);
+                if (displayInfo != 0 && entry == null)
                 {
                     context.SendMessage($"Invalid display info id {displayInfo}!");
                     return;
                 }
 
-                context.GetTargetOrInvoker<IWorldEntity>().DisplayInfo = displayInfo;
+                context.GetTargetOrInvoker<IWorldEntity>().CreatureDisplayEntry = entry;
+            }
+        }
+
+        [Command(Permission.EntitySummon, "Summon an entity.", "sum", "summon")]
+        public void HandleEntityCreate(
+            ICommandContext context,
+            [Parameter("CreatureId of the entity to summon.")]
+            uint creatureId,
+            [Parameter("Temporary entities will be removed when the summoner is removed from map. Defaults to true.")]
+            bool? temporary,
+            [Parameter("Entity type of the entity to summon. Defaults to game table value if not supplied.", converter: typeof(EnumParameterConverter<EntityType>))]
+            EntityType? entityType)
+        {
+            // TODO: replace with dependency injection once commands system is refactored
+            var creatureInfoManager = LegacyServiceProvider.Provider.GetService<ICreatureInfoManager>();
+            var entityFactory = LegacyServiceProvider.Provider.GetService<IEntityFactory>();
+
+            ICreatureInfo creatureInfo = creatureInfoManager.GetCreatureInfo(creatureId);
+            if (creatureInfo == null)
+            {
+                context.SendMessage($"Invalid creature id {creatureId}!");
+                return;
+            }
+
+            if (temporary ?? true)
+                context.Invoker.SummonFactory.Summon(creatureInfo, entityType ?? creatureInfo.Entry.CreationTypeEnum, context.Invoker.Position, context.Invoker.Rotation);
+            else
+            {
+                IWorldEntity entity = entityFactory.CreateWorldEntity(entityType ?? creatureInfo.Entry.CreationTypeEnum);
+                entity.Initialise(creatureInfo);
+                entity.AddToMap(context.Invoker.Map, context.Invoker.Position);
             }
         }
 

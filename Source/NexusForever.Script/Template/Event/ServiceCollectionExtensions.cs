@@ -12,7 +12,7 @@ namespace NexusForever.Script.Template.Event
             sc.AddTransient<IEntitySayEvent, EntitySayEvent>();
             sc.AddTransient<IEntityRandomMovementEvent, EntityRandomMovementEvent>();
             sc.AddTransient<IEntityCastEvent, EntityCastEvent>();
-            sc.AddTransient(typeof(IEntitySummonEvent<>), typeof(EntitySummonEvent<>));
+            sc.AddTransient<IEntitySummonEvent, EntitySummonEvent>();
         }
     }
 }

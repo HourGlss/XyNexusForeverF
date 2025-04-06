@@ -128,12 +128,8 @@ namespace NexusForever.Game.Entity
 
         private void InitialiseHitRadius()
         {
-            if (CreatureEntry == null)
-                return;
-
-            Creature2ModelInfoEntry modelInfoEntry = GameTableManager.Instance.Creature2ModelInfo.GetEntry(CreatureEntry.Creature2ModelInfoId);
-            if (modelInfoEntry != null)
-                HitRadius = modelInfoEntry.HitRadius * CreatureEntry.ModelScale;
+            if (CreatureInfo?.ModelEntry != null)
+                HitRadius = CreatureInfo.ModelEntry.HitRadius * CreatureInfo.Entry.ModelScale;
         }
 
         public override void Update(double lastTick)

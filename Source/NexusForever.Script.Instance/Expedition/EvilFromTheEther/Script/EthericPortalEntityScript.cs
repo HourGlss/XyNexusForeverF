@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Event;
@@ -12,6 +13,11 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther.Script
 {
     public abstract class EthericPortalEntityScript : INonPlayerScript, IOwnedScript<INonPlayerEntity>
     {
+        private enum Creature
+        {
+            TetheredCreature = 71133,
+        }
+
         private INonPlayerEntity entity;
 
         private uint portalCount;
@@ -20,18 +26,18 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther.Script
 
         private readonly IScriptEventFactory eventFactory;
         private readonly IScriptEventManager eventManager;
-        private readonly IEntityTemplateManager entityTemplateManager;
+        private readonly ICreatureInfoManager creatureInfoManager;
         private readonly IFactory<ISpellParameters> spellParameterFactory;
 
         public EthericPortalEntityScript(
             IScriptEventFactory eventFactory,
             IScriptEventManager eventManager,
-            IEntityTemplateManager entityTemplateManager,
+            ICreatureInfoManager creatureInfoManager,
             IFactory<ISpellParameters> spellParameterFactory)
         {
             this.eventFactory          = eventFactory;
             this.eventManager          = eventManager;
-            this.entityTemplateManager = entityTemplateManager;
+            this.creatureInfoManager   = creatureInfoManager;
             this.spellParameterFactory = spellParameterFactory;
         }
 
@@ -43,9 +49,6 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther.Script
         public void OnLoad(INonPlayerEntity owner)
         {
             entity = owner;
-
-            entity.SummonFactory.OnSummon += OnSummon;
-            entity.SummonFactory.OnUnsummon += OnUnsummon;
         }
 
         /// <summary>
@@ -58,23 +61,32 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther.Script
 
         protected void CreateTetheredOrganism(TimeSpan time, float angle)
         {
-            IEntityTemplate template = entityTemplateManager.GetEntityTemplate(71133);
+            ICreatureInfo creatureInfo = creatureInfoManager.GetCreatureInfo(Creature.TetheredCreature);
+            if (creatureInfo == null)
+                return;
 
             float entityAngle = -entity.Rotation.X;
             entityAngle -= MathF.PI / 2;
             Vector3 position = entity.Position.GetPoint2D(entityAngle + angle, 5f);
 
-            var @event = eventFactory.CreateEvent<IEntitySummonEvent<INonPlayerEntity>>();
-            @event.Initialise(entity.SummonFactory, template, position, entity.Rotation);
+            var @event = eventFactory.CreateEvent<IEntitySummonEvent>();
+            @event.Initialise(entity.SummonFactory, creatureInfo, position, entity.Rotation);
             eventManager.EnqueueEvent(time, @event);
         }
 
-        private void OnSummon(uint guid)
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/> summons another <see cref="IWorldEntity"/>.
+        /// </summary>
+        /// <param name="entity"></param>
+        public void OnSummon(IWorldEntity summoned)
         {
             portalCount++;
         }
 
-        private void OnUnsummon(uint guid)
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/> unsummons another <see cref="IWorldEntity"/>.
+        /// </summary>
+        public void OnUnsummon(IWorldEntity summoned)
         {
             portalCount--;
 

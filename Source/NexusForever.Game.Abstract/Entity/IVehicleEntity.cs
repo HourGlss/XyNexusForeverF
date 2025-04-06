@@ -1,4 +1,5 @@
-﻿using NexusForever.Game.Static.Entity;
+﻿using NexusForever.Game.Abstract.Entity.Creature;
+using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Abstract.Entity
@@ -8,7 +9,7 @@ namespace NexusForever.Game.Abstract.Entity
         UnitVehicleEntry VehicleEntry { get; }
         Spell4Entry SpellEntry { get; }
 
-        void Initialise(uint creatureId, uint vehicleId, uint spell4Id);
+        void Initialise(ICreatureInfo creatureInfo, uint vehicleId, uint spell4Id);
 
         /// <summary>
         /// Return <see cref="IVehiclePassenger"/> with supplied guid.

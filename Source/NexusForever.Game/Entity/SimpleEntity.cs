@@ -1,12 +1,9 @@
-using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Entity.Stat;
-using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Entity;
-using NexusForever.GameTable;
-using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
 
@@ -16,43 +13,20 @@ namespace NexusForever.Game.Entity
     {
         public override EntityType Type => EntityType.Simple;
 
-        public Action<ISimpleEntity> afterAddToMap;
-
         #region Dependency Injection
 
         public SimpleEntity(
             IMovementManager movementManager,
             IEntitySummonFactory entitySummonFactory,
             IStatUpdateManager<IUnitEntity> statUpdateManager,
-            ISpellFactory spellFactory)
+            ISpellFactory spellFactory,
+            ICreatureInfoManager creatureInfoManager)
             : base(movementManager, entitySummonFactory, statUpdateManager, spellFactory)
         {
             statUpdateManager.Initialise(this);
         }
 
         #endregion
-
-        public void Initialise(uint creatureId, Action<ISimpleEntity> actionAfterAddToMap = null)
-        {
-            Creature2Entry entry = GameTableManager.Instance.Creature2.GetEntry(creatureId);
-            if (entry == null)
-                throw new ArgumentNullException();
-
-            Initialise(creatureId); // TODO: Get display info from TBL or optional override params
-            afterAddToMap = actionAfterAddToMap;
-
-            SetBaseProperty(Property.BaseHealth, 101.0f);
-
-            SetStat(Static.Entity.Stat.Health, 101u);
-            SetStat(Static.Entity.Stat.Level, 1u);
-
-            Creature2DisplayGroupEntryEntry displayGroupEntry = GameTableManager.Instance.
-                Creature2DisplayGroupEntry.
-                Entries.
-                FirstOrDefault(d => d.Creature2DisplayGroupId == entry.Creature2DisplayGroupId);
-            if (displayGroupEntry != null)
-                DisplayInfo = displayGroupEntry.Creature2DisplayInfoId;
-        }
 
         protected override IEntityModel BuildEntityModel()
         {
@@ -65,8 +39,8 @@ namespace NexusForever.Game.Entity
 
         public override void OnActivate(IPlayer activator)
         {
-            if (CreatureEntry.DatacubeId != 0u)
-                activator.DatacubeManager.AddDatacube((ushort)CreatureEntry.DatacubeId, int.MaxValue);
+            if (CreatureInfo.Entry.DatacubeId != 0u)
+                activator.DatacubeManager.AddDatacube((ushort)CreatureInfo.Entry.DatacubeId, int.MaxValue);
         }
 
         public override void OnActivateSuccess(IPlayer activator)
@@ -75,12 +49,11 @@ namespace NexusForever.Game.Entity
 
             uint progress = (uint)(1 << QuestChecklistIdx);
 
-            Creature2Entry entry = GameTableManager.Instance.Creature2.GetEntry(CreatureId);
-            if (entry.DatacubeId != 0u)
+            if (CreatureInfo.Entry.DatacubeId != 0u)
             {
-                IDatacube datacube = activator.DatacubeManager.GetDatacube((ushort)entry.DatacubeId, DatacubeType.Datacube);
+                IDatacube datacube = activator.DatacubeManager.GetDatacube((ushort)CreatureInfo.Entry.DatacubeId, DatacubeType.Datacube);
                 if (datacube == null)
-                    activator.DatacubeManager.AddDatacube((ushort)entry.DatacubeId, progress);
+                    activator.DatacubeManager.AddDatacube((ushort)CreatureInfo.Entry.DatacubeId, progress);
                 else
                 {
                     datacube.Progress |= progress;
@@ -88,24 +61,17 @@ namespace NexusForever.Game.Entity
                 }
             }
 
-            if (entry.DatacubeVolumeId != 0u)
+            if (CreatureInfo.Entry.DatacubeVolumeId != 0u)
             {
-                IDatacube datacube = activator.DatacubeManager.GetDatacube((ushort)entry.DatacubeVolumeId, DatacubeType.Journal);
+                IDatacube datacube = activator.DatacubeManager.GetDatacube((ushort)CreatureInfo.Entry.DatacubeVolumeId, DatacubeType.Journal);
                 if (datacube == null)
-                    activator.DatacubeManager.AddDatacubeVolume((ushort)entry.DatacubeVolumeId, progress);
+                    activator.DatacubeManager.AddDatacubeVolume((ushort)CreatureInfo.Entry.DatacubeVolumeId, progress);
                 else
                 {
                     datacube.Progress |= progress;
                     activator.DatacubeManager.SendDatacubeVolume(datacube);
                 }
             }
-        }
-
-        public override void OnAddToMap(IBaseMap map, uint guid, Vector3 vector)
-        {
-            base.OnAddToMap(map, guid, vector);
-
-            afterAddToMap?.Invoke(this);
         }
     }
 }

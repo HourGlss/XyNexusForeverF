@@ -7,6 +7,7 @@ using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Achievement;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Entity.Stat;
 using NexusForever.Game.Abstract.Group;
@@ -255,6 +256,7 @@ namespace NexusForever.Game.Entity
         private readonly IEntityFactory entityFactory;
         private readonly IMatchingManager matchingManager;
         private readonly IMatchManager matchManager;
+        private readonly ICreatureInfoManager creatureInfoManager;
 
         private readonly IStatUpdateManager<IPlayer> statUpdateManager;
 
@@ -264,6 +266,7 @@ namespace NexusForever.Game.Entity
             IStatUpdateManager<IPlayer> statUpdateManager,
             ISpellFactory spellFactory,
             IEntityFactory entityFactory,
+            ICreatureInfoManager creatureInfoManager,
             IMatchingManager matchingManager,
             IMatchManager matchManager,
             ICurrencyManager currencyManager,
@@ -271,11 +274,12 @@ namespace NexusForever.Game.Entity
             : base(movementManager, entitySummonFactory, statUpdateManager, spellFactory)
         {
             // TODO: can this be replaced by IEntitySummonFactory?
-            this.entityFactory     = entityFactory;
-            this.matchingManager   = matchingManager;
-            this.matchManager      = matchManager;
+            this.entityFactory       = entityFactory;
+            this.creatureInfoManager = creatureInfoManager;
+            this.matchingManager     = matchingManager;
+            this.matchManager        = matchManager;
 
-            this.statUpdateManager = statUpdateManager;
+            this.statUpdateManager   = statUpdateManager;
 
             // managers
             CurrencyManager     = currencyManager;
@@ -601,9 +605,14 @@ namespace NexusForever.Game.Entity
             // resummon vanity pet if it existed before teleport
             if (pendingTeleport?.VanityPetId != null)
             {
-                var pet = entityFactory.CreateEntity<IPetEntity>();
-                pet.Initialise(this, pendingTeleport.VanityPetId.Value);
-                pet.AddToMap(map, Position);
+                ICreatureInfo creatureInfo = creatureInfoManager.GetCreatureInfo(pendingTeleport.VanityPetId.Value);
+                if (creatureInfo != null)
+                {
+                    // TODO: this should really be replaced with EntitySummonFactory
+                    var pet = entityFactory.CreateEntity<IPetEntity>();
+                    pet.Initialise(this, creatureInfo);
+                    pet.AddToMap(map, Position);
+                }
             }
 
             SendPacketsAfterAddToMap();
