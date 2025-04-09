@@ -519,16 +519,14 @@ namespace NexusForever.Game.Spell
                 or SpellTargetMechanicType.PrimaryTarget)
                 return;
 
-            InitialiseTelegraphs();
-            if (telegraphs.Count == 0)
-                return;
-
             var implicitTargets = new List<ISpellTargetImplicit>();
 
             // Targeting First Pass: Do Basic Checks to get targets for spell as needed, nearby.
             var targetSelector = LegacyServiceProvider.Provider.GetService<ISpellTargetImplicitSelector>();
             targetSelector.Initialise(Caster, Parameters);
             targetSelector.SelectTargets(implicitTargets);
+
+            InitialiseTelegraphs();
 
             foreach (ITelegraph telegraph in telegraphs)
             {
