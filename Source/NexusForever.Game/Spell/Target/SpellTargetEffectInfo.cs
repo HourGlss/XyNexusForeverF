@@ -37,8 +37,6 @@ namespace NexusForever.Game.Spell.Target
 
         private UpdateTimer duration;
 
-        private bool sentToClient;
-
         #region Dependency Injection
 
         private ILogger<SpellTargetEffectInfo> log;

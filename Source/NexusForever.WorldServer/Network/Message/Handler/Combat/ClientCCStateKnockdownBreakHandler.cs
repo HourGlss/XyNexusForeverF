@@ -1,4 +1,5 @@
-﻿using NexusForever.Game.Abstract.Spell;
+﻿using System;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Combat.CrowdControl;
 using NexusForever.Game.Static.Entity;
@@ -33,6 +34,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Combat
                 DashDirection.Right    => 28771,
                 DashDirection.Forward  => 28772,
                 DashDirection.Backward => 28773,
+                _                      => throw new NotImplementedException()
             };
 
             spellParameters.UserInitiatedSpellCast = false;
