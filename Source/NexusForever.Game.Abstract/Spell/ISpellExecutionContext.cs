@@ -8,11 +8,12 @@ namespace NexusForever.Game.Abstract.Spell
     {
         ISpell Spell { get; }
         ISpellTargetCollection TargetCollection { get; }
+        bool IsDelayed { get; }
 
         /// <summary>
         /// Initialise the spell execution context with the supplied <see cref="ISpell"/>.
         /// </summary>
-        void Initialise(ISpell spell);
+        void Initialise(ISpell spell, bool isDelayed = false);
 
         /// <summary>
         /// Add <see cref="Spell4EffectsEntry"/> to the spell execution.
