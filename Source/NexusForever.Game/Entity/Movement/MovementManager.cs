@@ -123,7 +123,7 @@ namespace NexusForever.Game.Entity.Movement
             timeCommandGroup.Initialise();
             platformCommandGroup.Initialise();
             positionCommandGroup.Initialise(this);
-            velocityCommandGroup.Initialise();
+            velocityCommandGroup.Initialise(this);
             moveCommandGroup.Initialise(this);
             rotationCommandGroup.Initialise(this, positionCommandGroup);
             scaleCommandGroup.Initialise(this);

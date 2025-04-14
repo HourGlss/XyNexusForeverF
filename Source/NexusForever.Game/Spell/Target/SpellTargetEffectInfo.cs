@@ -1,9 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Effect;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Spell;
+using NexusForever.Game.Static.Spell.Effect;
 using NexusForever.GameTable.Model;
+using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Shared.Game;
 
@@ -19,12 +22,22 @@ namespace NexusForever.Game.Spell.Target
         /// </remarks>
         public bool IsFinalised { get; private set; }
 
+        /// <summary>
+        /// Return whether the <see cref="ISpellTargetEffectInfo"/> is pending execution.
+        /// </summary>
+        /// <remarks>
+        /// A pending effect has been sent to the client but has not yet been executed.
+        /// </remarks>
+        public bool IsPending { get; private set; }
+
         public ISpellTargetInfo Target { get; private set; }
         public uint EffectId { get; private set; }
         public Spell4EffectsEntry Entry { get; private set; }
         public IDamageDescription Damage { get; private set; }
 
         private UpdateTimer duration;
+
+        private bool sentToClient;
 
         #region Dependency Injection
 
@@ -52,12 +65,13 @@ namespace NexusForever.Game.Spell.Target
             if (EffectId != 0)
                 throw new InvalidOperationException("SpellTargetEffectInfo has already been initialised!");
 
-            EffectId = globalSpellEffectManager.NextEffectId;
-            Target   = target;
-            Entry    = entry;
+            EffectId  = globalSpellEffectManager.NextEffectId;
+            Target    = target;
+            Entry     = entry;
+            IsPending = entry.DelayTime > 0;
 
             if (!entry.Flags.HasFlag(SpellEffectFlags.CancelOnly))
-                duration = new UpdateTimer(TimeSpan.FromMilliseconds(entry.DurationTime));
+                duration = new UpdateTimer(TimeSpan.FromMilliseconds(entry.DurationTime + entry.DelayTime));
 
             log.LogTrace($"Initalised effect {Entry.EffectType} for target {Target.Guid} for spell {Target.Collection.Spell.Spell4Id}");
         }
@@ -68,6 +82,9 @@ namespace NexusForever.Game.Spell.Target
         public void Update(double lastTick)
         {
             if (IsFinalised)
+                return;
+
+            if (IsPending)
                 return;
 
             duration?.Update(lastTick);
@@ -100,18 +117,40 @@ namespace NexusForever.Game.Spell.Target
         /// <remarks>
         /// This will also invoke the <see cref="ISpellEffectApplyHandler"/> for the effect type if it exists.
         /// </remarks>
-        public void Execute(ISpellExecutionContext executionContext)
+        public SpellEffectExecutionResult Execute(ISpellExecutionContext executionContext)
         {
+            if (IsPending && !executionContext.IsDelayed)
+                return SpellEffectExecutionResult.Pending;
+
             try
             {
-                spellEffectHandlerInvoker.InvokeApplyHandler(executionContext, Target.GetTarget(), this);
+                IUnitEntity target = Target.GetTarget();
+
+                SpellEffectExecutionResult result = spellEffectHandlerInvoker.InvokeApplyHandler(executionContext, target, this);
+                if (result == SpellEffectExecutionResult.Ok)
+                {
+                    if (executionContext.IsDelayed)
+                    {
+                        IsPending = false;
+
+                        target.EnqueueToVisible(new ServerSpellEffectExecute()
+                        {
+                            CastingId           = executionContext.Spell.CastingId,
+                            TargetGuid          = target.Guid,
+                            SpellEffectUniqueId = EffectId
+                        }, true);
+                    }
+                }
+
+                log.LogTrace($"Applied effect {Entry.EffectType} for target {Target.Guid} for spell {Target.Collection.Spell.Spell4Id}");
+
+                return result;
             }
             catch (Exception e)
             {
                 log.LogError(e, $"An exception occurred applying effect {Entry.EffectType} for target {Target.Guid} for spell {Target.Collection.Spell.Spell4Id}!");
+                return SpellEffectExecutionResult.NoHandler;
             }
-
-            log.LogTrace($"Applied effect {Entry.EffectType} for target {Target.Guid} for spell {Target.Collection.Spell.Spell4Id}");
         }
 
         /// <summary>
@@ -133,6 +172,10 @@ namespace NexusForever.Game.Spell.Target
 
         private void HandleSpellEffectRemove()
         {
+            // don't execute remove effect if apply effect was not executed
+            if (IsPending)
+                return;
+
             try
             {
                 spellEffectHandlerInvoker.InvokeRemoveHandler(Target.Collection.Spell, Target.GetTarget(), this);
@@ -151,6 +194,15 @@ namespace NexusForever.Game.Spell.Target
         public void AddDamage(IDamageDescription damage)
         {
             Damage = damage;
+            // TODO: what about delayed effects, is there a message we should send?
+        }
+
+        /// <summary>
+        /// Return the effect duration.
+        /// </summary>
+        public TimeSpan? GetDuration()
+        {
+            return duration != null ? TimeSpan.FromSeconds(duration.Duration) : null;
         }
 
         /// <summary>
@@ -159,9 +211,28 @@ namespace NexusForever.Game.Spell.Target
         /// <remarks>
         /// This will overwrite the default duration.
         /// </remarks>
-        public void SetDuration(TimeSpan timeSpan)
+        public void SetDuration(TimeSpan? timeSpan)
         {
-            duration = new UpdateTimer(timeSpan);
+            if (timeSpan != null)
+                duration = new UpdateTimer(timeSpan.Value);
+            else
+                duration = null;
+
+            // non delayed effects will send the updated duration in ServerSpellGo
+            if (IsPending)
+            {
+                IUnitEntity target = Target.GetTarget();
+                if (target == null)
+                    return;
+
+                target.EnqueueToVisible(new ServerSpellUpdateEffectDuration
+                {
+                    CastingId           = Target.Collection.Spell.CastingId,
+                    TargetId            = target.Guid,
+                    SpellEffectUniqueId = EffectId,
+                    Duration            = duration != null ? (int)TimeSpan.FromSeconds(duration.Duration).TotalMilliseconds : -1
+                }, true);
+            }
         }
     }
 }

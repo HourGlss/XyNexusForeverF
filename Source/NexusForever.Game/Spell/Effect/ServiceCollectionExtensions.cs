@@ -12,11 +12,14 @@ namespace NexusForever.Game.Spell.Effect
         {
             sc.AddSingleton<IGlobalSpellEffectManager, GlobalSpellEffectManager>();
 
+            sc.AddTransient<ISpellEffectCCStateBreakData, SpellEffectCCStateBreakData>();
+            sc.AddTransient<ISpellEffectCCStateSetData, SpellEffectCCStateSetData>();
             sc.AddTransient<ISpellEffectDamageData, SpellEffectDamageData>();
             sc.AddTransient<ISpellEffectDefaultData, SpellEffectDefaultData>();
             sc.AddTransient<ISpellEffectDisguiseData, SpellEffectDisguiseData>();
             sc.AddTransient<ISpellEffectFactionSetData, SpellEffectFactionSetData>();
             sc.AddTransient<ISpellEffectLearnDyeColourData, SpellEffectLearnDyeColourData>();
+            sc.AddTransient<ISpellEffectModifyInterruptArmourData, SpellEffectModifyInterruptArmourData>();
             sc.AddTransient<ISpellEffectProcData, SpellEffectProcData>();
             sc.AddTransient<ISpellEffectProxyData, SpellEffectProxyData>();
             sc.AddTransient<ISpellEffectSpellForceRemoveData, SpellEffectSpellForceRemoveData>();

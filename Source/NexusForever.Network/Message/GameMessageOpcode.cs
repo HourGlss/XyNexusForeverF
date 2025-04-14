@@ -26,6 +26,8 @@ namespace NexusForever.Network.Message
         ClientVendorPurchase            = 0x00BE,
         ClientLogoutRequest             = 0x00BF,
         ClientLogoutConfirm             = 0x00C0,
+        ClientCCStateStunUpdate         = 0x00C3,
+        ServerCCStateStunDirection      = 0x00C4,
         ClientHousingResidencePrivacyLevel = 0x00C9,
         ServerPublicEventEnd            = 0x00D6,
         ServerCostume                   = 0x00D8,
@@ -77,6 +79,7 @@ namespace NexusForever.Network.Message
         ClientRequestAmpReset           = 0x0151,
         ClientResurrectAccept           = 0x015A,
         ServerResurrectRequest          = 0x015B,
+        ClientCCStateKnockdownBreak     = 0x015C,
         ClientItemUseLootBag            = 0x015E,
         ServerCharacterSelectFail       = 0x0162,
         ClientSellItemToVendor          = 0x0166,
@@ -382,7 +385,7 @@ namespace NexusForever.Network.Message
         ClientPetCustomisation          = 0x07ED,
         ClientSelectRealm               = 0x07DF,
         ServerSpellGo                   = 0x07F4,
-        Server07F5                      = 0x07F5, // spell related
+        ServerSpellEffectExecute        = 0x07F5,
         Server07F6                      = 0x07F6, // spell related
         Server07F7                      = 0x07F7, // spell related
         Server07F8                      = 0x07F8, // spell related
@@ -399,6 +402,7 @@ namespace NexusForever.Network.Message
         ClientSpellInteractionResult    = 0x0805,
         ServerSpellBuffsApply           = 0x0810,
         ServerSpellBuffsRemoved         = 0x0811,
+        ServerSpellUpdateEffectDuration = 0x0812,
         ServerSpellBuffRemove           = 0x0813,
         ServerSpellThresholdClear       = 0x0814,
         ServerSpellThresholdStart       = 0x0816,
@@ -418,6 +422,8 @@ namespace NexusForever.Network.Message
         ServerVehiclePassengerAdd       = 0x086F,
         ServerEntityAggroSwitch         = 0x0876,
         ServerEntityCCStateSet          = 0x087F,
+        ServerEntityCCStateRemove       = 0x0880,
+        ServerEntityCCTetherUnit        = 0x0881,
         ServerEntityDeathState          = 0x088C,
         ServerUnitEnteredCombat         = 0x089A,
         Server089B                      = 0x089B, // mount related

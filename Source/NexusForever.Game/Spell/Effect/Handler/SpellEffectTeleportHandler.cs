@@ -7,6 +7,7 @@ using NexusForever.Game.Abstract.Spell.Effect;
 using NexusForever.Game.Abstract.Spell.Effect.Data;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Spell;
+using NexusForever.Game.Static.Spell.Effect;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Shared;
@@ -37,14 +38,14 @@ namespace NexusForever.Game.Spell.Effect.Handler
         /// <summary>
         /// Handle <see cref="ISpell"/> effect apply on <see cref="IUnitEntity"/> target.
         /// </summary>
-        public void Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectTeleportData data)
+        public SpellEffectExecutionResult Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectTeleportData data)
         {
             if (target is not IPlayer player)
-                return;
+                return SpellEffectExecutionResult.Ok;
 
             WorldLocation2Entry locationEntry = gameTableManager.WorldLocation2.GetEntry(data.WorldLocationId);
             if (locationEntry == null)
-                return;
+                return SpellEffectExecutionResult.Ok;
 
             // Handle Housing Teleport
             if (locationEntry.WorldId == 1229)
@@ -60,7 +61,7 @@ namespace NexusForever.Game.Spell.Effect.Handler
 
                     player.Rotation = entrance.Rotation.ToEuler();
                     player.TeleportTo(entrance.Entry, entrance.Position, mapLock);
-                    return;
+                    return SpellEffectExecutionResult.Ok;
                 }
             }
 
@@ -69,6 +70,8 @@ namespace NexusForever.Game.Spell.Effect.Handler
                 player.Rotation = new Quaternion(locationEntry.Facing0, locationEntry.Facing1, locationEntry.Facing2, locationEntry.Facing3).ToEuler();
                 player.TeleportTo((ushort)locationEntry.WorldId, locationEntry.Position0, locationEntry.Position1, locationEntry.Position2);
             }
+
+            return SpellEffectExecutionResult.Ok;
         }
     }
 }

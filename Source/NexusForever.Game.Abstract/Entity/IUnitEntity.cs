@@ -1,6 +1,7 @@
 using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Proc;
+using NexusForever.Game.Combat.CrowdControl;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
 
@@ -30,6 +31,7 @@ namespace NexusForever.Game.Abstract.Entity
 
         public IThreatManager ThreatManager { get; }
         public IProcManager ProcManager { get; }
+        public ICrowdControlManager CrowdControlManager { get; }
 
         /// <summary>
         /// Add a <see cref="Property"/> modifier given a Spell4Id and <see cref="ISpellPropertyModifier"/> instance.
@@ -40,11 +42,6 @@ namespace NexusForever.Game.Abstract.Entity
         /// Remove a <see cref="Property"/> modifier by a Spell that is currently affecting this <see cref="IUnitEntity"/>.
         /// </summary>
         void RemoveSpellProperty(Property property, uint spell4Id);
-
-        /// <summary>
-        /// Remove all <see cref="Property"/> modifiers by a Spell that is currently affecting this <see cref="IUnitEntity"/>
-        /// </summary>
-        void RemoveSpellProperties(uint spell4Id);
 
         /// Checks if this <see cref="IUnitEntity"/> is currently casting a spell.
         /// </summary>
@@ -94,6 +91,11 @@ namespace NexusForever.Game.Abstract.Entity
         /// <summary>
         /// Cast a <see cref="ISpell"/> with the supplied spell id and <see cref="ISpellParameters"/>.
         /// </summary>
+        void CastSpell<T>(T spell4Id, ISpellParameters parameters) where T : Enum;
+
+        /// <summary>
+        /// Cast a <see cref="ISpell"/> with the supplied spell id and <see cref="ISpellParameters"/>.
+        /// </summary>
         void CastSpell(uint spell4Id, ISpellParameters parameters);
 
         /// <summary>
@@ -123,9 +125,9 @@ namespace NexusForever.Game.Abstract.Entity
         bool CanAttack(IUnitEntity target);
 
         /// <summary>
-        /// Returns whether or not this <see cref="IUnitEntity"/> is an attackable target.
+        /// Returns whether or not this <see cref="IUnitEntity"/> is an attackable target for supplied <see cref="IUnitEntity"/>.
         /// </summary>
-        bool IsValidAttackTarget();
+        bool IsValidAttackTarget(IUnitEntity attacker);
 
         /// <summary>
         /// Deal damage to this <see cref="IUnitEntity"/> from the supplied <see cref="IUnitEntity"/>.

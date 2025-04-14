@@ -7,12 +7,14 @@ using NexusForever.Game.Abstract.Spell.Event;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Abstract.Spell.Target.Implicit;
 using NexusForever.Game.Abstract.Spell.Target.Implicit.Filter;
+using NexusForever.Game.Abstract.Spell.Validator;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Spell.Event;
 using NexusForever.Game.Spell.Target;
 using NexusForever.Game.Spell.Type;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
+using NexusForever.Game.Static.Spell.Effect;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Combat;
 using NexusForever.Network.World.Entity;
@@ -23,6 +25,7 @@ using NexusForever.Script;
 using NexusForever.Script.Template.Collection;
 using NexusForever.Shared;
 using NexusForever.Shared.Game;
+using static NexusForever.Network.World.Message.Model.ServerSpellList;
 
 namespace NexusForever.Game.Spell
 {
@@ -64,6 +67,8 @@ namespace NexusForever.Game.Spell
 
         private readonly UpdateTimer persistCheck = new(TimeSpan.FromMilliseconds(100));
 
+        private readonly Dictionary<Spell4EffectsEntry, UpdateTimer> delayedEffects = [];
+
         private IScriptCollection scriptCollection;
 
         #region Dependency Injection
@@ -71,15 +76,18 @@ namespace NexusForever.Game.Spell
         private readonly ILogger log;
         private readonly ISpellTargetInfoCollection spellTargetInfoCollection;
         private readonly IGlobalSpellManager globalSpellManager;
+        private readonly ICastResultValidatorManager castResultValidatorManager;
 
         public Spell(
             ILogger log,
             ISpellTargetInfoCollection spellTargetInfoCollection,
-            IGlobalSpellManager globalSpellManager)
+            IGlobalSpellManager globalSpellManager,
+            ICastResultValidatorManager castResultValidatorManager)
         {
-            this.log                       = log;
-            this.spellTargetInfoCollection = spellTargetInfoCollection;
-            this.globalSpellManager        = globalSpellManager;
+            this.log                        = log;
+            this.spellTargetInfoCollection  = spellTargetInfoCollection;
+            this.globalSpellManager         = globalSpellManager;
+            this.castResultValidatorManager = castResultValidatorManager;
         }
 
         #endregion
@@ -126,11 +134,30 @@ namespace NexusForever.Game.Spell
                 return;
 
             spellTargetInfoCollection.Update(lastTick);
+            HandleDelayedEffects(lastTick);
 
             scriptCollection.Invoke<IUpdate>(s => s.Update(lastTick));
 
             events.Update(lastTick);
             CheckPersistance(lastTick);
+        }
+
+        private void HandleDelayedEffects(double lastTick)
+        {
+            var executionContext = new SpellExecutionContext();
+            executionContext.Initialise(this, true);
+
+            foreach ((Spell4EffectsEntry effect, UpdateTimer updateTimer) in delayedEffects)
+            {
+                updateTimer.Update(lastTick);
+                if (updateTimer.HasElapsed)
+                {
+                    executionContext.AddSpellEffect(effect);
+                    delayedEffects.Remove(effect);
+                }
+            }
+
+            Execute(executionContext);
         }
 
         /// <summary>
@@ -218,13 +245,14 @@ namespace NexusForever.Game.Spell
         /// </summary>
         protected CastResult CheckCast()
         {
+            // TODO: replace the rest of this method with cast result validators...
+            CastResult castResult = castResultValidatorManager.GetCastResult(this);
+            if (castResult != CastResult.Ok)
+                return castResult;
+
             CastResult preReqCheck = CheckPrerequisites();
             if (preReqCheck != CastResult.Ok)
                 return preReqCheck;
-
-            CastResult ccResult = CheckCCConditions();
-            if (ccResult != CastResult.Ok)
-                return ccResult;
 
             if (Caster is IPlayer player)
             {
@@ -313,21 +341,6 @@ namespace NexusForever.Game.Spell
                     return true;
 
             return false;
-        }
-
-        protected CastResult CheckCCConditions()
-        {
-            // TODO: this just looks like a mask for CCState enum
-            if (Parameters.SpellInfo.CasterCCConditions != null)
-            {
-            }
-
-            // not sure if this should be for explicit and/or implicit targets
-            if (Parameters.SpellInfo.TargetCCConditions != null)
-            {
-            }
-
-            return CastResult.Ok;
         }
 
         protected CastResult CheckResourceConditions()
@@ -454,7 +467,9 @@ namespace NexusForever.Game.Spell
             SelectTargets(executionContext);  // First Select Targets
             ExecuteEffects(executionContext); // All Effects are evaluated and executed (after SelectTargets())
             HandleProxies(executionContext);  // Any Proxies that are added by Effects are evaluated and executed (after ExecuteEffects())
-            SendSpellGo();                    // Inform the Client once all evaluations are taken place (after Effects & Proxies are executed)
+            
+            if (!executionContext.IsDelayed)
+                SendSpellGo();                // Inform the Client once all evaluations are taken place (after Effects & Proxies are executed)
 
             foreach (ICombatLog combatLog in executionContext.GetCombatLogs())
             {
@@ -561,12 +576,23 @@ namespace NexusForever.Game.Spell
                     return false;
             }
 
+            if (delayedEffects.TryGetValue(spell4EffectsEntry, out UpdateTimer updateTimer)
+                && !updateTimer.HasElapsed)
+                return false;
+
             return true;
         }
+
 
         protected virtual void ExecuteEffect(Spell4EffectsEntry spell4EffectsEntry, ISpellExecutionContext executionContext)
         {
             log.LogTrace($"Executing SpellEffect ID {spell4EffectsEntry.Id} ({1 << currentPhase})");
+
+            if (!executionContext.IsDelayed && spell4EffectsEntry.DelayTime > 0)
+            {
+                delayedEffects.Add(spell4EffectsEntry, new UpdateTimer(TimeSpan.FromMilliseconds(spell4EffectsEntry.DelayTime)));
+                log.LogTrace($"Delaying effect {spell4EffectsEntry.Id} execution for {spell4EffectsEntry.DelayTime} ms.");
+            }
 
             foreach (ISpellTarget spellTarget in executionContext.TargetCollection.GetTargets(spell4EffectsEntry.TargetFlags))
             {
@@ -576,11 +602,14 @@ namespace NexusForever.Game.Spell
                 ISpellTargetInfo spellTargetInfo =
                     spellTargetInfoCollection.GetSpellTargetInfo(spellTarget) ??
                     spellTargetInfoCollection.CreateSpellTargetInfo(spellTarget);
-                spellTargetInfo.Execute(spell4EffectsEntry, executionContext);
 
-                // Track the number of times this effect has fired.
-                // Some spell effects have a limited trigger count per spell cast.
-                executionContext.IncrementEffectTriggerCount(spell4EffectsEntry.Id);
+                SpellEffectExecutionResult result = spellTargetInfo.Execute(spell4EffectsEntry, executionContext);
+                if (result == SpellEffectExecutionResult.Ok)
+                {
+                    // Track the number of times this effect has fired.
+                    // Some spell effects have a limited trigger count per spell cast.
+                    executionContext.IncrementEffectTriggerCount(spell4EffectsEntry.Id);
+                }
             }
         }
 
@@ -881,7 +910,8 @@ namespace NexusForever.Game.Spell
             return (status == SpellStatus.Executing
                     && spellTargetInfoCollection.IsFinalised
                     && !events.HasPendingEvent
-                    && !Parameters.ForceCancelOnly)
+                    && !Parameters.ForceCancelOnly
+                    && delayedEffects.Count == 0)
                 || status == SpellStatus.Finishing;
         }
     }

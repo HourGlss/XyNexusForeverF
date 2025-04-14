@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Entity.Movement.Command.Velocity;
 using NexusForever.Game.Static.Entity.Movement.Command;
 using NexusForever.Network.World.Entity;
@@ -20,6 +21,8 @@ namespace NexusForever.Game.Entity.Movement.Command.Velocity
 
         private IVelocityCommand command;
 
+        private IMovementManager movementManager;
+
         #region Dependency Injection
 
         private readonly IFactoryInterface<IVelocityCommand> factory;
@@ -35,8 +38,10 @@ namespace NexusForever.Game.Entity.Movement.Command.Velocity
         /// <summary>
         /// Initialise <see cref="IVelocityCommandGroup"/ with default command.
         /// </summary>
-        public void Initialise()
+        public void Initialise(IMovementManager movementManager)
         {
+            this.movementManager = movementManager;
+
             SetVelocityDefaults();
         }
 
@@ -77,10 +82,14 @@ namespace NexusForever.Game.Entity.Movement.Command.Velocity
             if (command == null)
                 return;
 
+            IVelocityCommand previousCommand = command;
+
             Vector3 velocity = GetVelocity();
             command = null;
 
             SetVelocity(velocity, false);
+
+            movementManager.Owner.OnEntityCommandFinalise(previousCommand);
         }
 
         /// <summary>

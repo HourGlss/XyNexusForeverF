@@ -59,30 +59,27 @@ namespace NexusForever.Game.Spell
                 return;
             }
 
-            events.EnqueueEvent(new SpellEvent(Data.Entry.DelayTime / 1000d, () =>
+            if (Data.Entry.TickTime > 0)
             {
-                if (Data.Entry.TickTime > 0)
+                double tickTime = Data.Entry.TickTime;
+                if (Data.Entry.DurationTime > 0)
                 {
-                    double tickTime = Data.Entry.TickTime;
-                    if (Data.Entry.DurationTime > 0)
+                    for (int i = 1; i >= Data.Entry.DurationTime / tickTime; i++)
                     {
-                        for (int i = 1; i >= Data.Entry.DurationTime / tickTime; i++)
-                        {
-                            events.EnqueueEvent(new SpellEvent(tickTime * i / 1000d, () =>
-                            {
-                                caster.CastSpell(Data.PeriodicSpellId, proxyParameters);
-                            }));
-                        }
-                    }
-                    else
-                        events.EnqueueEvent(TickingEvent(tickTime, () =>
+                        events.EnqueueEvent(new SpellEvent(tickTime * i / 1000d, () =>
                         {
                             caster.CastSpell(Data.PeriodicSpellId, proxyParameters);
                         }));
+                    }
                 }
                 else
-                    caster.CastSpell(Data.SpellId, proxyParameters);
-            }));
+                    events.EnqueueEvent(TickingEvent(tickTime, () =>
+                    {
+                        caster.CastSpell(Data.PeriodicSpellId, proxyParameters);
+                    }));
+            }
+            else
+                caster.CastSpell(Data.SpellId, proxyParameters);
         }
 
         private SpellEvent TickingEvent(double tickTime, Action action)

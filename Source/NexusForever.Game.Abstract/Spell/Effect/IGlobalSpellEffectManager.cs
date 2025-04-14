@@ -2,10 +2,11 @@
 using NexusForever.Game.Abstract.Spell.Effect.Data;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Spell;
+using NexusForever.Game.Static.Spell.Effect;
 
 namespace NexusForever.Game.Abstract.Spell.Effect
 {
-    public delegate void SpellEffectHandlerApplyDelegate(object handler, ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectData data);
+    public delegate SpellEffectExecutionResult SpellEffectHandlerApplyDelegate(object handler, ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectData data);
     public delegate void SpellEffectHandlerRemoveDelegate(object handler, ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectData data);
 
     public interface IGlobalSpellEffectManager

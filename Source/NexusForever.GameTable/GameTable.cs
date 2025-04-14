@@ -244,7 +244,7 @@ namespace NexusForever.GameTable
                     Entries[i] = entry;
 
                     // id will always be the first column
-                    var id = (uint)typeFields[0].GetValue(entry);
+                    var id = Convert.ToUInt32(typeFields[0].GetValue(entry));
                     lookup[id] = i;
                 }
             }

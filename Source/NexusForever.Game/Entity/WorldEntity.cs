@@ -3,10 +3,13 @@ using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Abstract.Entity.Movement.Command;
+using NexusForever.Game.Abstract.Entity.Movement.Command.Position;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.CSI;
+using NexusForever.Game.Entity.Movement;
 using NexusForever.Game.Map.Search;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Reputation;
@@ -209,10 +212,16 @@ namespace NexusForever.Game.Entity
         }
 
         [Vital(Vital.InterruptArmor)]
-        public float InterruptArmor
+        public float InterruptArmour
         {
             get => (float)(GetStatInteger(Static.Entity.Stat.InterruptArmor) ?? 0f);
             set => SetStat(Static.Entity.Stat.InterruptArmor, (uint)value);
+        }
+
+        public int MaxInterruptArmour
+        {
+            get => (int)GetPropertyValue(Property.InterruptArmorThreshold);
+            set => SetBaseProperty(Property.InterruptArmorThreshold, value);
         }
 
         public virtual uint Level
@@ -293,6 +302,7 @@ namespace NexusForever.Game.Entity
         private readonly HashSet<uint> platformPassengerGuids = new();
 
         protected readonly Dictionary<Static.Entity.Stat, IStatValue> stats = [];
+        private readonly HashSet<Static.Entity.Stat> dirtyStats = [];
 
         private readonly Dictionary<Property, IPropertyValue> properties = new ();
         private readonly HashSet<Property> dirtyProperties = new();
@@ -427,7 +437,7 @@ namespace NexusForever.Game.Entity
             if (SummonerGuid.HasValue)
             {
                 IWorldEntity summoner = Map.GetEntity<IWorldEntity>(SummonerGuid.Value);
-                summoner.OnUnsummon(this);
+                summoner?.OnUnsummon(this);
             }
 
             base.OnRemoveFromMap();
@@ -474,6 +484,12 @@ namespace NexusForever.Game.Entity
             {
                 EnqueueToVisible(BuildPropertyUpdates(), true);
                 dirtyProperties.Clear();
+            }
+
+            if (dirtyStats.Count != 0)
+            {
+                BroadcastStatUpdates();
+                dirtyStats.Clear();
             }
         }
 
@@ -775,7 +791,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Calculate the primary value for <see cref="Property"/>.
         /// </summary>
-        protected void CalculateProperty(Property property)
+        public void CalculateProperty(Property property)
         {
             IPropertyValue propertyValue = GetProperty(property);
             CalculateProperty(propertyValue);
@@ -845,6 +861,10 @@ namespace NexusForever.Game.Entity
                 case Property.ShieldCapacityMax:
                     if (propertyValue.Value < Shield)
                         Shield = MaxShieldCapacity;
+                    break;
+                case Property.InterruptArmorThreshold:
+                    if (propertyValue.Value < InterruptArmour)
+                        InterruptArmour = MaxInterruptArmour;
                     break;
             }
         }
@@ -935,18 +955,7 @@ namespace NexusForever.Game.Entity
             }
 
             if (attribute.SendUpdate)
-            {
-                EnqueueToVisible(new ServerEntityStatUpdateFloat
-                {
-                    UnitId = Guid,
-                    Stat   = new StatValueUpdate
-                    {
-                        Stat  = statValue.Stat,
-                        Type  = statValue.Type,
-                        Value = statValue.Value
-                    }
-                }, true);
-            }
+                SetStatEmit(stat);
 
             OnStatUpdate(statValue, previousValue);
         }
@@ -973,20 +982,57 @@ namespace NexusForever.Game.Entity
             }
 
             if (attribute.SendUpdate)
-            {
-                EnqueueToVisible(new ServerEntityStatUpdateInteger
-                {
-                    UnitId = Guid,
-                    Stat   = new StatValueUpdate
-                    {
-                        Stat  = statValue.Stat,
-                        Type  = statValue.Type,
-                        Value = statValue.Value
-                    }
-                }, true);
-            }
+                SetStatEmit(stat);
 
             OnStatUpdate(statValue, previousValue);
+        }
+
+        /// <summary>
+        /// Set <see cref="IWorldEntity"/> to broadcast <see cref="Static.Entity.Stat"/> on next world update.
+        /// </summary>
+        private void SetStatEmit(Static.Entity.Stat stat)
+        {
+            // don't broadcast stat changes if not in world, stats will be sent with creation packet.
+            if (!InWorld)
+                return;
+
+            dirtyStats.Add(stat);
+        }
+
+        private void BroadcastStatUpdates()
+        {
+            foreach (Static.Entity.Stat stat in dirtyStats)
+            {
+                if (!stats.TryGetValue(stat, out IStatValue statValue))
+                    return;
+
+                if (statValue.Type == StatType.Float)
+                {
+                    EnqueueToVisible(new ServerEntityStatUpdateFloat
+                    {
+                        UnitId = Guid,
+                        Stat   = new StatValueUpdate
+                        {
+                            Stat  = statValue.Stat,
+                            Type  = statValue.Type,
+                            Value = statValue.Value
+                        }
+                    }, true);
+                }
+                else
+                {
+                    EnqueueToVisible(new ServerEntityStatUpdateInteger
+                    {
+                        UnitId = Guid,
+                        Stat   = new StatValueUpdate
+                        {
+                            Stat  = statValue.Stat,
+                            Type  = statValue.Type,
+                            Value = statValue.Value
+                        }
+                    }, true);
+                }
+            }
         }
 
         /// <summary>
@@ -1260,6 +1306,14 @@ namespace NexusForever.Game.Entity
         {
             SummonFactory.UntrackSummon(entity);
             scriptCollection.Invoke<IWorldEntityScript>(s => s.OnUnsummon(entity));
+        }
+
+        /// <summary>
+        /// Invoked when an <see cref="IEntityCommand"/> has finialised for <see cref="IWorldEntity"/>.
+        /// </summary>
+        public virtual void OnEntityCommandFinalise(IEntityCommand command)
+        {
+            InvokeScriptCollection<IWorldEntityScript>(s => s.OnEntityCommandFinalise(command));
         }
     }
 }

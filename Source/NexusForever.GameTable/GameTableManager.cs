@@ -53,9 +53,16 @@ namespace NexusForever.GameTable
         public GameTable<BinkMovieSubtitleEntry> BinkMovieSubtitle { get; private set; }
         public GameTable<BugCategoryEntry> BugCategory { get; private set; }
         public GameTable<BugSubcategoryEntry> BugSubcategory { get; private set; }
+
+        [GameData]
         public GameTable<CCStateAdditionalDataEntry> CCStateAdditionalData { get; private set; }
+
+        [GameData]
         public GameTable<CCStateDiminishingReturnsEntry> CCStateDiminishingReturns { get; private set; }
+
+        [GameData]
         public GameTable<CCStatesEntry> CCStates { get; private set; }
+
         public GameTable<ChallengeEntry> Challenge { get; private set; }
         public GameTable<ChallengeTierEntry> ChallengeTier { get; private set; }
 

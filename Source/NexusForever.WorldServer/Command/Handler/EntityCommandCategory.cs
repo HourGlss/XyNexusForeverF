@@ -81,7 +81,7 @@ namespace NexusForever.WorldServer.Command.Handler
 
             builder.AppendLine($"XYZ: {entity.Position.X}, {entity.Position.Y}, {entity.Position.Z}");
             builder.AppendLine($"Rotation: {entity.Rotation.X}, {entity.Rotation.Y}, {entity.Rotation.Z}");
-            builder.AppendLine($"HP: {entity.Health}/(MAX) | Shield: {entity.Shield}/(MAX)");
+            builder.AppendLine($"HP: {entity.Health}/({entity.MaxHealth}) | Shield: {entity.Shield}/({entity.MaxShieldCapacity})");
 
             Disposition faction1Disposition = context.Invoker.GetDispositionTo(entity.Faction1);
             Disposition faction2Disposition = context.Invoker.GetDispositionTo(entity.Faction2);

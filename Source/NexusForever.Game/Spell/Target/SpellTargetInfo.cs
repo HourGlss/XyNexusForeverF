@@ -3,7 +3,9 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Spell;
+using NexusForever.Game.Static.Spell.Effect;
 using NexusForever.GameTable.Model;
+using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Shared;
 
@@ -62,9 +64,6 @@ namespace NexusForever.Game.Spell.Target
 
         private void RemoveFinalised(List<ISpellTargetEffectInfo> toRemove)
         {
-            if (toRemove.Count == 0)
-                return;
-
             foreach (ISpellTargetEffectInfo effect in toRemove)
             {
                 effects.Remove(effect.Entry.Id);
@@ -73,6 +72,8 @@ namespace NexusForever.Game.Spell.Target
 
             if (effects.Count == 0)
             {
+                SendBuffsRemoved([ Guid ]);
+
                 IsFinalised = true;
                 log.LogTrace($"Finalised SpellTargetInfo for target {Guid} for spell {Collection.Spell.Spell4Id}.");
             }
@@ -123,18 +124,27 @@ namespace NexusForever.Game.Spell.Target
         /// <summary>
         /// Create and execute the supplied <see cref="Spell4EffectsEntry"/>.
         /// </summary>
-        public void Execute(Spell4EffectsEntry entry, ISpellExecutionContext executionContext)
+        public SpellEffectExecutionResult Execute(Spell4EffectsEntry entry, ISpellExecutionContext executionContext)
         {
             if (!effects.TryGetValue(entry.Id, out ISpellTargetEffectInfo info))
             {
                 info = spellTargetEffectInfoFactory.Resolve();
                 info.Initialise(this, entry);
-                effects.Add(info.Entry.Id, info);
 
-                log.LogTrace($"Added new SpellTargetEffectInfo for target {Guid} for spell {Collection.Spell.Spell4Id}.");
+                effects.Add(info.Entry.Id, info);
+                log.LogTrace($"Added new SpellTargetEffectInfo for target {Guid} for spell {Collection.Spell.Spell4Id}, effect {entry.EffectType}.");
             }
 
-            info.Execute(executionContext);
+            SpellEffectExecutionResult result = info.Execute(executionContext);
+            if (result == SpellEffectExecutionResult.PreventEffect)
+            {
+                if (executionContext.IsDelayed)
+                    info.Finish();
+                else
+                    effects.Remove(info.Entry.Id);
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -160,6 +170,18 @@ namespace NexusForever.Game.Spell.Target
         public IUnitEntity GetTarget()
         {
             return Collection.Spell.Caster.GetVisible<IUnitEntity>(Guid);
+        }
+
+        private void SendBuffsRemoved(List<uint> unitIds)
+        {
+            if (unitIds.Count == 0)
+                return;
+
+            Collection.Spell.Caster.EnqueueToVisible(new ServerSpellBuffsRemoved
+            {
+                CastingId    = Collection.Spell.CastingId,
+                SpellTargets = unitIds
+            }, true);
         }
     }
 }

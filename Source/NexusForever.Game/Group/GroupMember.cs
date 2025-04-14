@@ -181,8 +181,8 @@ namespace NexusForever.Game.Group
                 HealthMax = (ushort)targetPlayer.Health,
                 Shield = (ushort)targetPlayer.Shield,
                 ShieldMax = (ushort)targetPlayer.Shield,
-                InterruptArmor = (ushort)targetPlayer.InterruptArmor,
-                InterruptArmorMax = (ushort)targetPlayer.InterruptArmor,
+                InterruptArmor = (ushort)targetPlayer.InterruptArmour,
+                InterruptArmorMax = (ushort)targetPlayer.InterruptArmour,
                 Path = targetPlayer.Path
             };
         }

@@ -24,7 +24,7 @@ namespace NexusForever.Game.Spell.Effect.Handler
 
         #endregion
 
-        public void Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectSpellForceRemoveData data)
+        public SpellEffectExecutionResult Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectSpellForceRemoveData data)
         {
             switch (data.Type)
             {
@@ -50,6 +50,8 @@ namespace NexusForever.Game.Spell.Effect.Handler
                     log.LogWarning($"Unhandled EffectForceSpellRemoveType Type {data.Type}");
                     break;
             }
+
+            return SpellEffectExecutionResult.Ok;
         }
     }
 }

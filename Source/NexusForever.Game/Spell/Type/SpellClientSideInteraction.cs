@@ -2,6 +2,7 @@
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Target;
+using NexusForever.Game.Abstract.Spell.Validator;
 using NexusForever.Game.Spell.Event;
 using NexusForever.Game.Static.Spell;
 using NexusForever.Network.World.Message.Model;
@@ -20,8 +21,9 @@ namespace NexusForever.Game.Spell.Type
         public SpellClientSideInteraction(
             ILogger<SpellClientSideInteraction> log,
             ISpellTargetInfoCollection spellTargetInfoCollection,
-            IGlobalSpellManager globalSpellManager)
-            : base(log, spellTargetInfoCollection, globalSpellManager)
+            IGlobalSpellManager globalSpellManager,
+            ICastResultValidatorManager castResultValidatorManager)
+            : base(log, spellTargetInfoCollection, globalSpellManager, castResultValidatorManager)
         {
             this.log = log;
         }

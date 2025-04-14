@@ -3,6 +3,7 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Game.Abstract.Spell.Target;
+using NexusForever.Game.Abstract.Spell.Validator;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
@@ -29,8 +30,9 @@ namespace NexusForever.Game.Spell.Type
             ILogger log,
             ISpellTargetInfoCollection spellTargetInfoCollection,
             IGlobalSpellManager globalSpellManager,
+            ICastResultValidatorManager castResultValidatorManager,
             ISpellFactory spellFactory)
-            : base(log, spellTargetInfoCollection, globalSpellManager)
+            : base(log, spellTargetInfoCollection, globalSpellManager, castResultValidatorManager)
         {
             this.log          = log;
             this.spellFactory = spellFactory;

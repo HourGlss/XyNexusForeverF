@@ -1,4 +1,4 @@
-using NexusForever.Game.Abstract.Entity;
+﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Effect;
@@ -6,6 +6,7 @@ using NexusForever.Game.Abstract.Spell.Effect.Data;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
+using NexusForever.Game.Static.Spell.Effect;
 
 namespace NexusForever.Game.Spell.Effect.Handler
 {
@@ -30,15 +31,18 @@ namespace NexusForever.Game.Spell.Effect.Handler
         /// <summary>
         /// Handle <see cref="ISpell"/> effect apply on <see cref="IUnitEntity"/> target.
         /// </summary>
-        public void Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectSummonMountData data)
+        public SpellEffectExecutionResult Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectSummonMountData data)
         {
             // TODO: handle NPC mounting?
             if (target is not IPlayer player)
-                return;
+                return SpellEffectExecutionResult.PreventEffect;
 
             if (!player.CanMount())
-                return;
+                return SpellEffectExecutionResult.PreventEffect;
+
             ICreatureInfo creatureInfo = creatureInfoManager.GetCreatureInfo(data.CreatureId);
+            if (creatureInfo == null)
+                return SpellEffectExecutionResult.PreventEffect;
 
             var mount = entityFactory.CreateEntity<IMountEntity>();
             mount.Initialise(player, executionContext.Spell.Parameters.SpellInfo.Entry.Id, creatureInfo, data.VehicleId, data.ItemDisplayId);
@@ -61,6 +65,8 @@ namespace NexusForever.Game.Spell.Effect.Handler
 
             player.CastSpell(52539, new SpellParameters());
             player.CastSpell(80530, new SpellParameters());
+
+            return SpellEffectExecutionResult.Ok;
         }
 
         public void Remove(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectSummonMountData data)

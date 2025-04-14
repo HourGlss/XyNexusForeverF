@@ -1,5 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Movement.Command;
 using NexusForever.Game.Abstract.Entity.Movement.Command.Position;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Entity;
@@ -9,12 +10,14 @@ using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Script.Template;
+using NexusForever.Script.Template.Filter.Dynamic;
 using NexusForever.Shared;
 using NexusForever.Shared.Game;
 
 namespace NexusForever.Script.Main.AI
 {
     //[ScriptFilterIgnore]
+    [ScriptFilterDynamic<IScriptFilterDynamicCombatAI>]
     public class CombatAI : IUnitScript, IOwnedScript<ICreatureEntity>
     {
         protected ICreatureEntity entity;
@@ -131,8 +134,11 @@ namespace NexusForever.Script.Main.AI
         /// <summary>
         /// Invoked when <see cref="IPositionCommand"/> is finalised.
         /// </summary>
-        public void OnPositionEntityCommandFinalise(IPositionCommand command)
+        public void OnEntityCommandFinalise(IEntityCommand command)
         {
+            if (command is not IPositionCommand)
+                return;
+
             if (!entity.TargetGuid.HasValue)
                 return;
 

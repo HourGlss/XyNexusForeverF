@@ -4,6 +4,7 @@ using NexusForever.Game.Abstract.Spell.Effect;
 using NexusForever.Game.Abstract.Spell.Effect.Data;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Spell;
+using NexusForever.Game.Static.Spell.Effect;
 
 namespace NexusForever.Game.Spell.Effect.Handler
 {
@@ -13,12 +14,12 @@ namespace NexusForever.Game.Spell.Effect.Handler
         /// <summary>
         /// Handle <see cref="ISpell"/> effect apply on <see cref="IUnitEntity"/> target.
         /// </summary>
-        public void Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectLearnDyeColourData data)
+        public SpellEffectExecutionResult Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectLearnDyeColourData data)
         {
-            if (target is not IPlayer player)
-                return;
+            if (target is IPlayer player)
+                player.Account.GenericUnlockManager.Unlock((ushort)data.GenericUnlockEntryId);
 
-            player.Account.GenericUnlockManager.Unlock((ushort)data.GenericUnlockEntryId);
+            return SpellEffectExecutionResult.Ok;
         }
     }
 }

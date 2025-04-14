@@ -1,8 +1,10 @@
+using NexusForever.Game.Static.Combat.CrowdControl;
+
 namespace NexusForever.GameTable.Model
 {
     public class CCStatesEntry
     {
-        public uint Id;
+        public CCState Id;
         public uint Flags;
         public float DefaultBreakProbability;
         public uint LocalizedTextIdName;

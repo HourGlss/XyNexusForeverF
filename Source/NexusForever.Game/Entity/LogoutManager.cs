@@ -83,7 +83,7 @@ namespace NexusForever.Game.Entity
         public void Finish(LogoutReason reason = LogoutReason.None)
         {
             // can't finish logout if not started or still in countdown
-            if (reason == LogoutReason.None && (timer == null || timer.IsTicking))
+            if (reason == LogoutReason.None && (timer == null || !timer.HasElapsed))
                 throw new InvalidOperationException();
 
             // force logout can be performed if a reason is supplied

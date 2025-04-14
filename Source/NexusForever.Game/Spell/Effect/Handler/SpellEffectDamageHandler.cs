@@ -1,4 +1,4 @@
-﻿using NexusForever.Game.Abstract;
+﻿using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Effect;
@@ -7,6 +7,7 @@ using NexusForever.Game.Abstract.Spell.Proc;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Event;
 using NexusForever.Game.Static.Spell;
+using NexusForever.Game.Static.Spell.Effect;
 using NexusForever.Game.Static.Spell.Proc;
 using NexusForever.Shared;
 
@@ -33,16 +34,16 @@ namespace NexusForever.Game.Spell.Effect.Handler
         /// <summary>
         /// Handle <see cref="ISpell"/> effect apply on <see cref="IUnitEntity"/> target.
         /// </summary>
-        public void Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectDamageData data)
+        public SpellEffectExecutionResult Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectDamageData data)
         {
             if (!target.CanAttack(executionContext.Spell.Caster))
-                return;
+                return SpellEffectExecutionResult.PreventEffect;
 
             IDamageCalculator damageCalculator = damageCalculatorFactory.Resolve();
             damageCalculator.CalculateDamage(executionContext, target, info);
 
             if (info.Damage == null)
-                return;
+                return SpellEffectExecutionResult.Ok;
 
             if (info.Damage.CombatResult == CombatResult.Critical)
             {
@@ -55,6 +56,8 @@ namespace NexusForever.Game.Spell.Effect.Handler
 
             if (executionContext.Spell.Caster is IPlayer player)
                 player.Map.PublicEventManager.UpdateStat(player, PublicEventStat.Damage, info.Damage.AdjustedDamage);
+
+            return SpellEffectExecutionResult.Ok;
         }
     }
 }

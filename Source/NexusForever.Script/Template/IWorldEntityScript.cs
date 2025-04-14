@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Movement.Command;
 using NexusForever.Game.Abstract.Entity.Movement.Command.Position;
 
 namespace NexusForever.Script.Template
@@ -20,9 +21,9 @@ namespace NexusForever.Script.Template
         }
 
         /// <summary>
-        /// Invoked when <see cref="IPositionCommand"/> is finalised.
+        /// Invoked when an <see cref="IEntityCommand"/> has finialised for <see cref="IWorldEntity"/>.
         /// </summary>
-        void OnPositionEntityCommandFinalise(IPositionCommand command)
+        void OnEntityCommandFinalise(IEntityCommand command)
         {
         }
 

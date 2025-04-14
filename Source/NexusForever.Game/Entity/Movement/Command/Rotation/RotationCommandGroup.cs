@@ -95,10 +95,14 @@ namespace NexusForever.Game.Entity.Movement.Command.Rotation
             if (command == null)
                 return;
 
+            IRotationCommand previousCommand = command;
+
             Vector3 rotation = GetRotation();
             command = null;
 
             SetRotation(rotation, false);
+
+            movementManager.Owner.OnEntityCommandFinalise(previousCommand);
         }
 
         /// <summary>

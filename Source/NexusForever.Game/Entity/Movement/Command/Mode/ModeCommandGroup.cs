@@ -88,10 +88,14 @@ namespace NexusForever.Game.Entity.Movement.Command.Mode
             if (command == null)
                 return;
 
+            IModeCommand previousCommand = command;
+
             ModeType mode = GetMode();
             command = null;
 
             SetMode(mode);
+
+            movementManager.Owner.OnEntityCommandFinalise(previousCommand);
         }
 
         /// <summary>

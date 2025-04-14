@@ -56,7 +56,7 @@ namespace NexusForever.Game.Static.Spell
         CraftItem                 = 0x0031,
         RewardPropertyModifier    = 0x0032,
         SpellForceRemoveChanneled = 0x0033,
-        ModifyInterruptArmor      = 0x0034,
+        ModifyInterruptArmour     = 0x0034,
         SpellDispel               = 0x0035,
         UNUSED054                 = 0x0036,
         ModifySpell               = 0x0037,

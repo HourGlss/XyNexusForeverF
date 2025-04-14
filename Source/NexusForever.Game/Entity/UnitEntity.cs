@@ -8,6 +8,7 @@ using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Game.Abstract.Spell.Proc;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Combat;
+using NexusForever.Game.Combat.CrowdControl;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Event;
@@ -87,6 +88,7 @@ namespace NexusForever.Game.Entity
 
         public IThreatManager ThreatManager { get; private set; }
         public IProcManager ProcManager { get; private set; }
+        public ICrowdControlManager CrowdControlManager { get; private set; }
 
         private IStatUpdateManager statUpdateManager;
 
@@ -112,6 +114,8 @@ namespace NexusForever.Game.Entity
             ThreatManager = new ThreatManager(this);
             ProcManager   = LegacyServiceProvider.Provider.GetService<IProcManager>();
             ProcManager.Initialise(this);
+            CrowdControlManager = LegacyServiceProvider.Provider.GetService<ICrowdControlManager>();
+            CrowdControlManager.Initialise(this);
 
             InitialiseHitRadius();
         }
@@ -229,17 +233,6 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Remove all <see cref="Property"/> modifiers by a Spell that is currently affecting this <see cref="IUnitEntity"/>
-        /// </summary>
-        public void RemoveSpellProperties(uint spell4Id)
-        {
-            List<Property> propertiesWithSpell = spellProperties.Where(i => i.Value.ContainsKey(spell4Id)).Select(p => p.Key).ToList();
-
-            foreach (Property property in propertiesWithSpell)
-                RemoveSpellProperty(property, spell4Id);
-        }
-
-        /// <summary>
         /// Return all <see cref="IPropertyModifier"/> for this <see cref="IUnitEntity"/>'s <see cref="Property"/>
         /// </summary>
         private IEnumerable<ISpellPropertyModifier> GetSpellPropertyModifiers(Property property)
@@ -271,6 +264,9 @@ namespace NexusForever.Game.Entity
                     }
                 }
             }
+
+            if (propertyValue.Property == Property.InterruptArmorThreshold)
+                propertyValue.Value += CrowdControlManager.GetTemporaryInterruptArmour();
         }
 
         /// Checks if this <see cref="IUnitEntity"/> is currently casting a spell.
@@ -327,6 +323,9 @@ namespace NexusForever.Game.Entity
             foreach (ISpell spell in spells.Values)
             {
                 ISpellTargetInfo target = spell.GetTarget(this);
+                if (target == null)
+                    continue;
+
                 if (target.GetEffectsByType(type).Any())
                     yield return spell;
             }
@@ -357,6 +356,14 @@ namespace NexusForever.Game.Entity
         {
             spell = spells.Values.FirstOrDefault(predicate);
             return spell != null;
+        }
+
+        /// <summary>
+        /// Cast a <see cref="ISpell"/> with the supplied spell id and <see cref="ISpellParameters"/>.
+        /// </summary>
+        public void CastSpell<T>(T spell4Id, ISpellParameters parameters) where T : Enum
+        {
+            CastSpell(spell4Id.As<T, uint>(), parameters);
         }
 
         /// <summary>
@@ -480,16 +487,16 @@ namespace NexusForever.Game.Entity
             if (!IsAlive)
                 return false;
 
-            if (!target.IsValidAttackTarget() || !IsValidAttackTarget())
+            if (!target.IsValidAttackTarget(this) || !IsValidAttackTarget(target))
                 return false;
 
             return GetDispositionTo(target.Faction1) < Disposition.Friendly;
         }
 
         /// <summary>
-        /// Returns whether or not this <see cref="IUnitEntity"/> is an attackable target.
+        /// Returns whether or not this <see cref="IUnitEntity"/> is an attackable target for supplied <see cref="IUnitEntity"/>.
         /// </summary>
-        public bool IsValidAttackTarget()
+        public virtual bool IsValidAttackTarget(IUnitEntity attacker)
         {
             // TODO: Expand on this. There's bound to be flags or states that should prevent an entity from being attacked.
             return (this is IPlayer or INonPlayerEntity);

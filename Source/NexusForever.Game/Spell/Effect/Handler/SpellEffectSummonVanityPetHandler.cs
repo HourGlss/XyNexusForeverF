@@ -1,10 +1,11 @@
-using NexusForever.Game.Abstract.Entity;
+﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Effect;
 using NexusForever.Game.Abstract.Spell.Effect.Data;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Spell;
+using NexusForever.Game.Static.Spell.Effect;
 
 namespace NexusForever.Game.Spell.Effect.Handler
 {
@@ -29,11 +30,14 @@ namespace NexusForever.Game.Spell.Effect.Handler
         /// <summary>
         /// Handle <see cref="ISpell"/> effect apply on <see cref="IUnitEntity"/> target.
         /// </summary>
-        public void Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectSummonVanityPetData data)
+        public SpellEffectExecutionResult Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectSummonVanityPetData data)
         {
             if (target is not IPlayer player)
-                return;
+                return SpellEffectExecutionResult.PreventEffect;
+
             ICreatureInfo creatureInfo = creatureInfoManager.GetCreatureInfo(data.CreatureId);
+            if (creatureInfo == null)
+                return SpellEffectExecutionResult.PreventEffect;
 
             // enqueue removal of existing vanity pet if summoned
             if (player.VanityPetGuid != null)
@@ -46,6 +50,8 @@ namespace NexusForever.Game.Spell.Effect.Handler
             var pet = entityFactory.CreateEntity<IPetEntity>();
             pet.Initialise(player, creatureInfo);
             pet.AddToMap(player.Map, player.Position);
+
+            return SpellEffectExecutionResult.Ok;
         }
     }
 }

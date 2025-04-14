@@ -1,4 +1,4 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Entity.Trigger;
@@ -55,6 +55,7 @@ namespace NexusForever.Game.Entity
             sc.AddTransient<IHousingHarvestPlugEntity, HousingHarvestPlugEntity>();
             sc.AddTransient<IHousingPlantEntity, HousingPlantEntity>();
             sc.AddTransient<ILockboxEntity, LockboxEntity>();
+            sc.AddTransient<ITetherEntity, TetherEntity>();
 
             sc.AddTransient<IGridTriggerEntity, GridTriggerEntity>();
             sc.AddTransient<ITurnstileGridTriggerEntity, TurnstileTriggerEntity>();

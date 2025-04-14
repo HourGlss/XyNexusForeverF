@@ -2,6 +2,8 @@ using System.Numerics;
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Abstract.Entity.Movement.Command;
+using NexusForever.Game.Abstract.Entity.Movement.Command.Position;
 using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
@@ -55,7 +57,8 @@ namespace NexusForever.Game.Abstract.Entity
         float Resource1 { get; set; }
         float Resource3 { get; set; }
         float Resource4 { get; set; }
-        float InterruptArmor { get; set; }
+        float InterruptArmour { get; set; }
+        int MaxInterruptArmour { get; set; }
 
         uint Level { get; set; }
         bool Sheathed { get; set; }
@@ -176,6 +179,11 @@ namespace NexusForever.Game.Abstract.Entity
         void SetBaseProperty(Property property, float value);
 
         /// <summary>
+        /// Calculate the primary value for <see cref="Property"/>.
+        /// </summary>
+        void CalculateProperty(Property property);
+
+        /// <summary>
         /// Set <see cref="IWorldEntity"/> to broadcast <see cref="Property"/> on next world update.
         /// </summary>
         void SetPropertyEmit(Property property);
@@ -277,5 +285,10 @@ namespace NexusForever.Game.Abstract.Entity
         /// Invoked when <see cref="IWorldEntity"/> unsummons another <see cref="IWorldEntity"/>.
         /// </summary>
         void OnUnsummon(IWorldEntity entity);
+
+        /// <summary>
+        /// Invoked when an <see cref="IEntityCommand"/> has finialised for <see cref="IWorldEntity"/>.
+        /// </summary>
+        void OnEntityCommandFinalise(IEntityCommand command);
     }
 }

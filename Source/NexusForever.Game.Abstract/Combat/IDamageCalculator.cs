@@ -2,7 +2,7 @@
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Target;
 
-namespace NexusForever.Game.Abstract
+namespace NexusForever.Game.Abstract.Combat
 {
     public interface IDamageCalculator
     {

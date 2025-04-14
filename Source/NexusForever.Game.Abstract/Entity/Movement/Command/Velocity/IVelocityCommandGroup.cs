@@ -7,7 +7,7 @@ namespace NexusForever.Game.Abstract.Entity.Movement.Command.Velocity
         /// <summary>
         /// Initialise <see cref="IVelocityCommandGroup"/ with default command.
         /// </summary>
-        void Initialise();
+        void Initialise(IMovementManager movementManager);
 
         /// <summary>
         /// Get the current <see cref="Vector3"/> velocity value.

@@ -10,6 +10,7 @@ namespace NexusForever.Game.Spell
     {
         public ISpell Spell { get; private set; }
         public ISpellTargetCollection TargetCollection { get; } = new SpellTargetCollection();
+        public bool IsDelayed { get; private set; }
 
         private readonly List<Spell4EffectsEntry> spellEffects = [];
         private readonly List<IProxy> proxies = [];
@@ -19,12 +20,13 @@ namespace NexusForever.Game.Spell
         /// <summary>
         /// Initialise the spell execution context with the supplied <see cref="ISpell"/>.
         /// </summary>
-        public void Initialise(ISpell spell)
+        public void Initialise(ISpell spell, bool isDelayed = false)
         {
             if (Spell != null)
                 throw new InvalidOperationException("SpellExecutionContext has already been initialised.");
 
-            Spell = spell;
+            Spell     = spell;
+            IsDelayed = isDelayed;
         }
 
         /// <summary>

@@ -6,6 +6,7 @@ using NexusForever.Game.Spell.Info;
 using NexusForever.Game.Spell.Proc;
 using NexusForever.Game.Spell.Target;
 using NexusForever.Game.Spell.Type;
+using NexusForever.Game.Spell.Validator;
 using NexusForever.Game.Static.Spell;
 using NexusForever.Shared;
 
@@ -18,6 +19,7 @@ namespace NexusForever.Game.Spell
             sc.AddGameSpellEffect();
             sc.AddGameSpellInfo();
             sc.AddGameSpellTarget();
+            sc.AddGameSpellValidator();
 
             sc.AddSingletonLegacy<IGlobalSpellManager, GlobalSpellManager>();
             sc.AddSingletonLegacy<ISpellLookupManager, SpellLookupManager>();

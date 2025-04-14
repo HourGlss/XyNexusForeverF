@@ -88,10 +88,14 @@ namespace NexusForever.Game.Entity.Movement.Command.State
             if (command == null)
                 return;
 
+            IStateCommand previousCommand = command;
+
             StateFlags state = GetState();
             command = null;
 
             SetState(state);
+
+            movementManager.Owner.OnEntityCommandFinalise(previousCommand);
         }
 
         /// <summary>

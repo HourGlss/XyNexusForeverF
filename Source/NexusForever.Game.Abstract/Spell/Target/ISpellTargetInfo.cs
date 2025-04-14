@@ -1,5 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Spell;
+using NexusForever.Game.Static.Spell.Effect;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
@@ -34,7 +35,7 @@ namespace NexusForever.Game.Abstract.Spell.Target
         /// <summary>
         /// Create and execute the supplied <see cref="Spell4EffectsEntry"/>.
         /// </summary>
-        void Execute(Spell4EffectsEntry entry, ISpellExecutionContext executionContext);
+        public SpellEffectExecutionResult Execute(Spell4EffectsEntry entry, ISpellExecutionContext executionContext);
 
         /// <summary>
         /// Finish all effects for the target.

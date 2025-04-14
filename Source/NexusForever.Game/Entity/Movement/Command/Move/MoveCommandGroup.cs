@@ -88,10 +88,14 @@ namespace NexusForever.Game.Entity.Movement.Command.Move
             if (command == null)
                 return;
 
+            IMoveCommand previousCommand = command;
+
             Vector3 move = GetMove();
             command = null;
 
             SetMove(move, false);
+
+            movementManager.Owner.OnEntityCommandFinalise(previousCommand);
         }
 
         /// <summary>

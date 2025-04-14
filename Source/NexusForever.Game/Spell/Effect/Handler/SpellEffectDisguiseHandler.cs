@@ -1,11 +1,11 @@
 ﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Effect;
 using NexusForever.Game.Abstract.Spell.Effect.Data;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Spell;
-using NexusForever.GameTable;
-using NexusForever.GameTable.Model;
+using NexusForever.Game.Static.Spell.Effect;
 
 namespace NexusForever.Game.Spell.Effect.Handler
 {
@@ -14,12 +14,12 @@ namespace NexusForever.Game.Spell.Effect.Handler
     {
         #region Dependency Injection
 
-        private readonly IGameTableManager gameTableManager;
+        private readonly ICreatureInfoManager creatureInfoManager;
 
         public SpellEffectDisguiseHandler(
-            IGameTableManager gameTableManager)
+            ICreatureInfoManager creatureInfoManager)
         {
-            this.gameTableManager = gameTableManager;
+            this.creatureInfoManager = creatureInfoManager;
         }
 
         #endregion
@@ -27,17 +27,14 @@ namespace NexusForever.Game.Spell.Effect.Handler
         /// <summary>
         /// Handle <see cref="ISpell"/> effect apply on <see cref="IUnitEntity"/> target.
         /// </summary>
-        public void Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectDisguiseData data)
+        public SpellEffectExecutionResult Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectDisguiseData data)
         {
-            Creature2Entry creature2 = gameTableManager.Creature2.GetEntry(data.CreatureId);
-            if (creature2 == null)
-                return;
+            ICreatureInfo creatureInfo = creatureInfoManager.GetCreatureInfo(data.CreatureId);
+            if (creatureInfo == null)
+                return SpellEffectExecutionResult.PreventEffect;
 
-            Creature2DisplayGroupEntryEntry displayGroupEntry = gameTableManager.Creature2DisplayGroupEntry.Entries.FirstOrDefault(d => d.Creature2DisplayGroupId == creature2.Creature2DisplayGroupId);
-            if (displayGroupEntry == null)
-                return;
-
-            target.DisplayInfo = displayGroupEntry.Creature2DisplayInfoId;
+            target.CreatureDisplayEntry = creatureInfo.GetDisplayInfoEntry();
+            return SpellEffectExecutionResult.Ok;
         }
 
         /// <summary>
@@ -45,7 +42,7 @@ namespace NexusForever.Game.Spell.Effect.Handler
         /// </summary>
         public void Remove(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectDisguiseData data)
         {
-            target.DisplayInfo = 0;
+            target.CreatureDisplayEntry = target.CreatureInfo?.GetDisplayInfoEntry() ?? null;
         }
     }
 }

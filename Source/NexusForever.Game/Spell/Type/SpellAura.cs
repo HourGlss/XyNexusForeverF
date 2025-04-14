@@ -1,17 +1,14 @@
 ﻿using System.Numerics;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Target;
-using NexusForever.Game.Entity.Creature;
+using NexusForever.Game.Abstract.Spell.Validator;
 using NexusForever.Game.Spell.Event;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Shared;
 using NexusForever.Shared.Game;
 
 namespace NexusForever.Game.Spell.Type
@@ -33,8 +30,9 @@ namespace NexusForever.Game.Spell.Type
             ILogger<SpellAura> log,
             ISpellTargetInfoCollection spellTargetInfoCollection,
             ICreatureInfoManager creatureInfoManager,
-            IGlobalSpellManager globalSpellManager)
-            : base(log, spellTargetInfoCollection, globalSpellManager)
+            IGlobalSpellManager globalSpellManager,
+            ICastResultValidatorManager castResultValidatorManager)
+            : base(log, spellTargetInfoCollection, globalSpellManager, castResultValidatorManager)
         {
             this.log                       = log;
             this.spellTargetInfoCollection = spellTargetInfoCollection;
@@ -72,12 +70,7 @@ namespace NexusForever.Game.Spell.Type
             {
                 ISpellTarget target = executionContext.TargetCollection.GetTarget(targetInfo.Guid, SpellEffectTargetFlags.ImplicitTarget);
                 if (target == null)
-                {
                     targetInfo.Finish();
-
-                    // this will remove the SpellTargetInfo at the client allowing for it to be created again through a future SpellGo
-                    SendBuffsRemoved([targetInfo.Guid]);
-                }
             }
 
             auraExecute.Reset();
@@ -183,18 +176,6 @@ namespace NexusForever.Game.Spell.Type
             }
 
             Caster.EnqueueToVisible(serverSpellBuffsApply, true);
-        }
-
-        private void SendBuffsRemoved(List<uint> unitIds)
-        {
-            if (unitIds.Count == 0)
-                return;
-
-            Caster.EnqueueToVisible( new ServerSpellBuffsRemoved
-            {
-                CastingId    = CastingId,
-                SpellTargets = unitIds
-            }, true);
         }
 
         // TODO: research more, when should this be sent?

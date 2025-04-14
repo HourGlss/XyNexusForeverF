@@ -5,6 +5,7 @@ using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Effect;
 using NexusForever.Game.Abstract.Spell.Effect.Data;
 using NexusForever.Game.Abstract.Spell.Target;
+using NexusForever.Game.Static.Spell.Effect;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Spell.Effect
@@ -34,31 +35,31 @@ namespace NexusForever.Game.Spell.Effect
         /// <summary>
         /// Invoke the apply handler for the given spell effect.
         /// </summary>
-        public void InvokeApplyHandler(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info)
+        public SpellEffectExecutionResult InvokeApplyHandler(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info)
         {
             System.Type handlerType = globalSpellEffectManager.GetSpellEffectApplyHandlerType(info.Entry.EffectType);
             if (handlerType == null)
             {
                 log.LogWarning($"Unhandled handler for spell effect {info.Entry.EffectType}!");
-                return;
+                return SpellEffectExecutionResult.NoHandler;
             }
 
             object handler = CreateHandler(info, handlerType);
             if (handler == null)
-                return;
+                return SpellEffectExecutionResult.NoHandler;
 
             SpellEffectHandlerApplyDelegate handlerDelegate = globalSpellEffectManager.GetSpellEffectApplyDelegate(info.Entry.EffectType);
             if (handlerDelegate == null)
             {
                 log.LogWarning($"Unhandled handler for spell effect {info.Entry.EffectType}, missing delegate!");
-                return;
+                return SpellEffectExecutionResult.NoHandler;
             }
 
             ISpellEffectData data = PopulateData(info);
             if (data == null)
-                return;
+                return SpellEffectExecutionResult.NoHandler;
 
-            handlerDelegate.Invoke(handler, executionContext, target, info, data);
+            return handlerDelegate.Invoke(handler, executionContext, target, info, data);
         }
 
         /// <summary>

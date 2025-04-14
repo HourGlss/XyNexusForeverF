@@ -87,10 +87,14 @@ namespace NexusForever.Game.Entity.Movement.Command.Scale
             if (command == null)
                 return;
 
+            IScaleCommand previousCommand = command;
+
             float scale = GetScale();
             command = null;
 
             SetScale(scale);
+
+            movementManager.Owner.OnEntityCommandFinalise(previousCommand);
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 ﻿namespace NexusForever.Game.Abstract.Entity
 {
-    public interface IPickupEntity : IWorldEntity
+    public interface IPickupEntity : IUnitEntity
     {
+        void Initialise(IItem item);
     }
 }

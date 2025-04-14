@@ -1,5 +1,6 @@
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
+using NexusForever.GameTable.Static;
 
 namespace NexusForever.GameTable.Model
 {
@@ -38,7 +39,7 @@ namespace NexusForever.GameTable.Model
         public uint QuestAnimStateId;
         public uint PrerequisiteIdAnimState;
         public uint QuestAnimObjectiveIndex;
-        public uint Flags;
+        public CreatureFlags Flags;
         public uint UiFlags;
         public uint ActivationFlags;
         public float AimYawConstraint;

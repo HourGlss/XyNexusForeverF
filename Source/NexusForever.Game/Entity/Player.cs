@@ -328,6 +328,8 @@ namespace NexusForever.Game.Entity
             CalculateDefaultProperties();
             SetBaseCharacterProperties();
 
+            MaxInterruptArmour = 0;
+
             scriptCollection = ScriptManager.Instance.InitialiseOwnedCollection<IPlayer>(this);
             ScriptManager.Instance.InitialiseEntityScripts<IPlayer>(scriptCollection, this, null);
 

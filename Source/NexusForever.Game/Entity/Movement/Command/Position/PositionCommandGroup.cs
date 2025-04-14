@@ -6,7 +6,6 @@ using NexusForever.Game.Static.Entity.Movement.Command;
 using NexusForever.Game.Static.Entity.Movement.Command.Mode;
 using NexusForever.Game.Static.Entity.Movement.Spline;
 using NexusForever.Network.World.Entity;
-using NexusForever.Script.Template;
 using NexusForever.Shared;
 using NexusForever.Shared.Game;
 
@@ -79,12 +78,7 @@ namespace NexusForever.Game.Entity.Movement.Command.Position
             }
 
             if (Command.IsFinalised)
-            {
-                var command = Command;
                 Finalise();
-
-                movementManager.Owner.InvokeScriptCollection<IWorldEntityScript>(s => s.OnPositionEntityCommandFinalise(command));
-            }
         }
 
         private void Relocate()
@@ -135,10 +129,14 @@ namespace NexusForever.Game.Entity.Movement.Command.Position
             if (Command == null)
                 return;
 
+            IPositionCommand previousCommand = Command;
+
             Vector3 position = GetPosition();
             Command = null;
 
             SetPosition(position, true);
+
+            movementManager.Owner.OnEntityCommandFinalise(previousCommand);
         }
 
         /// <summary>
