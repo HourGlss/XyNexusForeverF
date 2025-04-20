@@ -28,7 +28,7 @@ namespace NexusForever.Game.Abstract.Entity.Movement.Command.Position
         /// <summary>
         /// Set the position to the interpolated <see cref="Vector3"/> between the supplied times and positions.
         /// </summary>
-        void SetPositionKeys(List<uint> times, List<Vector3> positions);
+        void SetPositionKeys(List<uint> times, List<Vector3> positions, Action callback = null);
 
         /// <summary>
         /// Set the position based on the supplied nodes, <see cref="SplineType"/>, <see cref="SplineMode"/> and speed.

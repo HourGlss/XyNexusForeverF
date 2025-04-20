@@ -29,6 +29,8 @@ namespace NexusForever.Game.Entity.Movement.Command.Rotation
         private IMovementManager movementManager;
         private IPositionCommandGroup positionCommandGroup;
 
+        private Action callback;
+
         #region Dependency Injection
 
         private readonly IFactoryInterface<IRotationCommand> factory;
@@ -102,6 +104,13 @@ namespace NexusForever.Game.Entity.Movement.Command.Rotation
 
             SetRotation(rotation, false);
 
+            if (callback != null)
+            {
+                Action cb = callback;
+                callback = null;
+                cb.Invoke();
+            }
+
             movementManager.Owner.OnEntityCommandFinalise(previousCommand);
         }
 
@@ -130,13 +139,15 @@ namespace NexusForever.Game.Entity.Movement.Command.Rotation
         /// <summary>
         /// Set rotation to the interpolated value between the supplied times and rotations.
         /// </summary>
-        public void SetRotationKeys(List<uint> times, List<Vector3> rotations)
+        public void SetRotationKeys(List<uint> times, List<Vector3> rotations, Action callback = null)
         {
             Finalise();
 
             var command = factory.Resolve<RotationKeysCommand>();
             command.Initialise(movementManager, times, rotations);
             this.command = command;
+
+            this.callback = callback;
 
             IsDirty = true;
         }

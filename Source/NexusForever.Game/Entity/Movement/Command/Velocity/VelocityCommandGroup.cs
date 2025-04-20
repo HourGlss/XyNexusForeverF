@@ -117,9 +117,15 @@ namespace NexusForever.Game.Entity.Movement.Command.Velocity
         /// <summary>
         /// Set velocity to the interpolated <see cref="Vector3"/> velocity between the supplied times and velocities.
         /// </summary>
-        public void SetVelocityKeys(List<uint> times, List<Vector3> modes)
+        public void SetVelocityKeys(List<uint> times, List<Vector3> velocities)
         {
-            throw new NotImplementedException();
+            Finalise();
+
+            var command = factory.Resolve<VelocityKeysCommand>();
+            command.Initialise(movementManager, times, velocities);
+            this.command = command;
+
+            IsDirty = true;
         }
 
         /// <summary>

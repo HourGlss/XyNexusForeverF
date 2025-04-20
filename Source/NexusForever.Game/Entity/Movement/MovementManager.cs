@@ -384,10 +384,23 @@ namespace NexusForever.Game.Entity.Movement
         /// </summary>
         public void SetPositionKeys(List<uint> times, List<Vector3> positions)
         {
-            if (!ServerControl)
-                return;
+            positionCommandGroup.SetPositionKeys(times, positions, KeyReturnControlCallback());
+            KeyRemoveControl();
+        }
 
-            positionCommandGroup.SetPositionKeys(times, positions);
+        private Action KeyReturnControlCallback()
+        {
+            Action callback = null;
+            if (!ServerControl && Owner is IPlayer player)
+                callback = () => player.SetControl(player);
+
+            return callback;
+        }
+
+        private void KeyRemoveControl()
+        {
+            if (!ServerControl && Owner is IPlayer player)
+                player.SetControl(null);
         }
 
         /// <summary>
@@ -479,9 +492,12 @@ namespace NexusForever.Game.Entity.Movement
         /// <summary>
         /// Set velocity with the supplied <see cref="Vector3"/> key and time values.
         /// </summary>
-        public void SetVelocityKeys()
+        public void SetVelocityKeys(List<uint> times, List<Vector3> velocities)
         {
-            throw new NotImplementedException();
+            if (!ServerControl)
+                return;
+
+            velocityCommandGroup.SetVelocityKeys(times, velocities);
         }
 
         /// <summary>
@@ -557,10 +573,8 @@ namespace NexusForever.Game.Entity.Movement
         /// </summary>
         public void SetRotationKeys(List<uint> times, List<Vector3> rotations)
         {
-            if (!ServerControl)
-                return;
-
-            rotationCommandGroup.SetRotationKeys(times, rotations);
+            rotationCommandGroup.SetRotationKeys(times, rotations, KeyReturnControlCallback());
+            KeyRemoveControl();
         }
 
         /// <summary>

@@ -23,7 +23,7 @@ namespace NexusForever.Game.Abstract.Entity.Movement.Command.Rotation
         /// <summary>
         /// Set rotation to the interpolated value between the supplied times and rotations.
         /// </summary>
-        void SetRotationKeys(List<uint> times, List<Vector3> rotations);
+        void SetRotationKeys(List<uint> times, List<Vector3> rotations, Action callback = null);
 
         /// <summary>
         /// NYI

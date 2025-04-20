@@ -33,8 +33,9 @@ namespace NexusForever.Game.Entity.Movement.Command.Position
         /// </summary>
         public IPositionCommand Command { get; private set; }
 
-        private readonly UpdateTimer relocationTimer = new(TimeSpan.FromSeconds(1));
         private Vector3 lastPosition;
+
+        private Action callback;
 
         private IMovementManager movementManager;
 
@@ -70,12 +71,7 @@ namespace NexusForever.Game.Entity.Movement.Command.Position
 
             Command.Update(lastTick);
 
-            relocationTimer.Update(lastTick);
-            if (relocationTimer.HasElapsed)
-            {
-                Relocate();
-                relocationTimer.Reset();
-            }
+            Relocate();
 
             if (Command.IsFinalised)
                 Finalise();
@@ -136,6 +132,13 @@ namespace NexusForever.Game.Entity.Movement.Command.Position
 
             SetPosition(position, true);
 
+            if (callback != null)
+            {
+                var cb = callback;
+                callback = null;
+                cb.Invoke();
+            }
+
             movementManager.Owner.OnEntityCommandFinalise(previousCommand);
         }
 
@@ -170,13 +173,15 @@ namespace NexusForever.Game.Entity.Movement.Command.Position
         /// <summary>
         /// Set the position to the interpolated <see cref="Vector3"/> between the supplied times and positions.
         /// </summary> 
-        public void SetPositionKeys(List<uint> times, List<Vector3> positions)
+        public void SetPositionKeys(List<uint> times, List<Vector3> positions, Action callback = null)
         {
             Finalise();
 
             var command = factory.Resolve<PositionKeysCommand>();
             command.Initialise(movementManager, times, positions);
             Command = command;
+
+            this.callback = callback;
 
             IsDirty = true;
         }
