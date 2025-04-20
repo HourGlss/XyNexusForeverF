@@ -149,9 +149,9 @@ namespace NexusForever.Game.Spell.Effect.Handler
                 case SpellEffectForcedMoveType.Unknown9:
                 case SpellEffectForcedMoveType.Unknown10:
                 {
-                    float speed = distance / (float)data.FlightTime.TotalSeconds;
+                    //float speed = distance / (float)data.FlightTime.TotalSeconds;
                     float spin = (data.Spin * MathF.PI * 2) / v20;
-                    forcedMovementGenerator.ForceMove(mover, position, new Vector3(angle, 0f, 0f), data.FlightTime, speed, gravity, spin);
+                    forcedMovementGenerator.ForceMove(mover, position, new Vector3(angle, 0f, 0f), data.FlightTime, gravity, spin);
                     break;
                 }
                 // seems like high jumps?? Trampoline?
