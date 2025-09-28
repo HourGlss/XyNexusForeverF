@@ -6,7 +6,9 @@ using NexusForever.Game.Abstract.Matching.Match;
 using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Matching;
+using NexusForever.Game.Static.PVP;
 using NexusForever.GameTable;
+using NexusForever.Network.Internal;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Shared;
@@ -34,8 +36,9 @@ namespace NexusForever.Game.Matching.Match
             IMatchingDataManager matchingDataManager,
             IFactory<IMatchTeam> matchTeamFactory,
             IGameTableManager gameTableManager,
-            IPlayerManager playerManager)
-            : base(log, matchManager, matchingDataManager, matchTeamFactory, gameTableManager, playerManager)
+            IPlayerManager playerManager,
+            IInternalMessagePublisher messagePublisher)
+            : base(log, matchManager, matchingDataManager, matchTeamFactory, gameTableManager, playerManager, messagePublisher)
         {
             this.playerManager = playerManager;
         }
@@ -135,7 +138,7 @@ namespace NexusForever.Game.Matching.Match
             {
                 foreach (IMatchTeamMember matchTeamMember in matchTeam.GetMembers())
                 {
-                    IPlayer player = playerManager.GetPlayer(matchTeamMember.CharacterId);
+                    IPlayer player = playerManager.GetPlayer(matchTeamMember.Identity);
                     if (player == null)
                         continue;
 
@@ -153,7 +156,7 @@ namespace NexusForever.Game.Matching.Match
             {
                 foreach (IMatchTeamMember matchTeamMember in matchTeam.GetMembers())
                 {
-                    IPlayer player = playerManager.GetPlayer(matchTeamMember.CharacterId);
+                    IPlayer player = playerManager.GetPlayer(matchTeamMember.Identity);
                     if (player == null)
                         continue;
 
@@ -165,12 +168,12 @@ namespace NexusForever.Game.Matching.Match
         /// <summary>
         /// Update deathmatch pool for the team the character is on.
         /// </summary>
-        public void UpdatePool(ulong characterId)
+        public void UpdatePool(Abstract.Identity identity)
         {
             if (MatchingMap.GameTypeEntry.MatchingRulesEnum != MatchRules.DeathmatchPool)
                 return;
 
-            IMatchTeam team = GetTeam(characterId);
+            IMatchTeam team = GetTeam(identity);
             if (team == null)
                 throw new InvalidOperationException();
 
@@ -197,7 +200,7 @@ namespace NexusForever.Game.Matching.Match
         {
             base.MatchEnter(player);
 
-            IMatchTeam team = GetTeam(player.CharacterId);
+            IMatchTeam team = GetTeam(player.Identity);
             if (team == null)
                 throw new InvalidOperationException();
 
@@ -245,13 +248,13 @@ namespace NexusForever.Game.Matching.Match
         /// <summary>
         /// Remove character from match.
         /// </summary>
-        public override void MatchLeave(ulong characterId)
+        public override void MatchLeave(Abstract.Identity identity)
         {
-            IMatchTeam team = GetTeam(characterId);
+            IMatchTeam team = GetTeam(identity);
             if (team == null)
                 throw new InvalidOperationException();
 
-            base.MatchLeave(characterId);
+            base.MatchLeave(identity);
 
             // if all members of a team have left, the other team wins
             if (Status == MatchStatus.InProgress)
@@ -286,7 +289,7 @@ namespace NexusForever.Game.Matching.Match
         /// </summary>
         public void OnDeath(IPlayer player)
         {
-            IMatchTeam team = GetTeam(player.CharacterId);
+            IMatchTeam team = GetTeam(player.Identity);
             if (team == null)
                 throw new InvalidOperationException();
 
@@ -317,7 +320,7 @@ namespace NexusForever.Game.Matching.Match
                 if (!matchTeamMember.InMatch)
                     continue;
 
-                IPlayer player = playerManager.GetPlayer(matchTeamMember.CharacterId);
+                IPlayer player = playerManager.GetPlayer(matchTeamMember.Identity);
                 if (player == null)
                     continue;
 

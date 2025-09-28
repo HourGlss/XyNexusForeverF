@@ -409,7 +409,7 @@ namespace NexusForever.Game.Quest
             player.Session.EnqueueMessageEncrypted(new ServerQuestObjectiveUpdate
             {
                 QuestId   = Id,
-                Index     = objective.Index,
+                QuestObjectiveIndex     = objective.Index,
                 Completed = objective.Progress
             });
         }

@@ -3,12 +3,12 @@ using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Achievement;
 using NexusForever.Game.Character;
+using NexusForever.Game.Chat;
 using NexusForever.Game.Cinematic;
 using NexusForever.Game.Combat;
 using NexusForever.Game.Customisation;
 using NexusForever.Game.Entity;
-using NexusForever.Game.Event;
-using NexusForever.Game.Group;
+using NexusForever.Game.PublicEvent;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
@@ -18,10 +18,8 @@ using NexusForever.Game.Quest;
 using NexusForever.Game.RBAC;
 using NexusForever.Game.Reputation;
 using NexusForever.Game.Server;
-using NexusForever.Game.Social;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Storefront;
-using NexusForever.Game.Text;
 using NexusForever.Shared;
 
 namespace NexusForever.Game
@@ -48,7 +46,6 @@ namespace NexusForever.Game
             sc.AddGameCustomisation();
             sc.AddGameEntity();
             sc.AddGameEvent();
-            sc.AddGameGroup();
             sc.AddGameGuild();
             sc.AddGameHousing();
             sc.AddGameMap();
@@ -58,10 +55,9 @@ namespace NexusForever.Game
             sc.AddGameRbac();
             sc.AddGameReputation();
             sc.AddGameServer();
-            sc.AddGameSocial();
+            sc.AddGameChat();
             sc.AddGameSpell();
             sc.AddGameStore();
-            sc.AddGameText();
         }
     }
 }

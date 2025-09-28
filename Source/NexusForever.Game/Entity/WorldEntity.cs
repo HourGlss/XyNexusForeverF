@@ -1,22 +1,20 @@
 using System.Numerics;
 using NexusForever.Database.World.Model;
+using NexusForever.Game.Abstract.Chat;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Entity.Movement.Command;
-using NexusForever.Game.Abstract.Entity.Movement.Command.Position;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Reputation;
-using NexusForever.Game.Abstract.Social;
+using NexusForever.Game.Chat;
 using NexusForever.Game.CSI;
-using NexusForever.Game.Entity.Movement;
 using NexusForever.Game.Map.Search;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Reputation;
-using NexusForever.Game.Social;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Static.Entity;
-using NexusForever.Game.Static.Event;
+using NexusForever.Game.Static.PublicEvent;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.Game.Static.Social;
@@ -214,8 +212,8 @@ namespace NexusForever.Game.Entity
         [Vital(Vital.InterruptArmor)]
         public float InterruptArmour
         {
-            get => (float)(GetStatInteger(Static.Entity.Stat.InterruptArmor) ?? 0f);
-            set => SetStat(Static.Entity.Stat.InterruptArmor, (uint)value);
+            get => (float)(GetStatInteger(Static.Entity.Stat.InterruptArmour) ?? 0f);
+            set => SetStat(Static.Entity.Stat.InterruptArmour, (uint)value);
         }
 
         public int MaxInterruptArmour

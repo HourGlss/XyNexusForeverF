@@ -13,11 +13,14 @@ using NexusForever.Game;
 using NexusForever.Game.Configuration.Model;
 using NexusForever.GameTable;
 using NexusForever.Network.Configuration.Model;
+using NexusForever.Network.Internal;
+using NexusForever.Network.Internal.Configuration;
 using NexusForever.Script;
 using NexusForever.Script.Configuration.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NexusForever.WorldServer.Network;
+using NexusForever.WorldServer.Network.Internal.Handler;
 using NexusForever.WorldServer.Service;
 using NLog;
 using NLog.Extensions.Logging;
@@ -47,7 +50,8 @@ namespace NexusForever.WorldServer
                 })
                 .ConfigureAppConfiguration(cb =>
                 {
-                    cb.AddJsonFile("WorldServer.json", false);
+                    cb.AddJsonFile("WorldServer.json", false)
+                        .AddEnvironmentVariables();
                 })
                 .ConfigureServices((hb, sc) =>
                 {
@@ -55,6 +59,8 @@ namespace NexusForever.WorldServer
                     sc.AddHostedService<ConfigurationHostedService>();
                     sc.AddHostedService<GameTableHostedService>();
                     sc.AddHostedService<SpellHostedService>();
+                    sc.AddHostedService<NetworkInternalHandlerHostedService>();
+                    sc.AddHostedService<OnlineHostedService>();
                     sc.AddHostedService<HostedService>();
 
                     sc.AddOptions<NetworkConfig>()
@@ -64,10 +70,15 @@ namespace NexusForever.WorldServer
                     sc.AddOptions<ScriptConfig>()
                         .Bind(hb.Configuration.GetSection("Script"));
 
+                    sc.AddNetworkInternal();
+                    sc.AddNetworkInternalBroker(hb.Configuration.GetSection("Network:Internal").Get<BrokerConfig>());
+                    sc.AddNetworkInternalHandlers();
+
                     sc.AddSingletonLegacy<ISharedConfiguration, SharedConfiguration>();
                     sc.AddDatabase();
                     sc.AddGame();
-                    sc.AddGameTable();
+                    sc.AddGameTable(
+                        hb.Configuration.GetSection("GameTable"));
                     sc.AddWorldNetwork();
                     sc.AddScript();
                     sc.AddShared();

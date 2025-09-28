@@ -6,16 +6,16 @@ using Microsoft.Extensions.Logging;
 using NexusForever.Database;
 using NexusForever.Database.Configuration.Model;
 using NexusForever.Game;
+using NexusForever.Game.Abstract.Chat.Format;
 using NexusForever.Game.Abstract.Entity.Creature;
-using NexusForever.Game.Abstract.Event;
 using NexusForever.Game.Abstract.Matching.Match;
 using NexusForever.Game.Abstract.Matching.Queue;
+using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.Game.Achievement;
 using NexusForever.Game.Character;
 using NexusForever.Game.Cinematic;
 using NexusForever.Game.Customisation;
 using NexusForever.Game.Entity;
-using NexusForever.Game.Group;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
@@ -23,15 +23,14 @@ using NexusForever.Game.Quest;
 using NexusForever.Game.RBAC;
 using NexusForever.Game.Reputation;
 using NexusForever.Game.Server;
-using NexusForever.Game.Social;
 using NexusForever.Game.Storefront;
-using NexusForever.Game.Text.Filter;
-using NexusForever.Game.Text.Search;
+using NexusForever.GameTable;
+using NexusForever.GameTable.Text.Filter;
+using NexusForever.GameTable.Text.Search;
 using NexusForever.Network.Message;
 using NexusForever.Network.Session;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message;
-using NexusForever.Network.World.Social;
 using NexusForever.Script;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
@@ -54,6 +53,7 @@ namespace NexusForever.WorldServer.Service
         private readonly IMatchManager matchManager;
         private readonly IPublicEventTemplateManager publicEventManager;
         private readonly ICreatureInfoManager creatureInfoManager;
+        private readonly IChatFormatManager chatFormatManager;
         private readonly IWorldManager worldManager;
 
         // TODO: this really should be split into multiple HostedServices
@@ -68,6 +68,7 @@ namespace NexusForever.WorldServer.Service
             IMatchManager matchManager,
             IPublicEventTemplateManager publicEventManager,
             ICreatureInfoManager creatureInfoManager,
+            IChatFormatManager chatFormatManager,
             IWorldManager worldManager)
         {
             this.log = log;
@@ -82,6 +83,7 @@ namespace NexusForever.WorldServer.Service
             this.matchManager        = matchManager;
             this.publicEventManager  = publicEventManager;
             this.creatureInfoManager = creatureInfoManager;
+            this.chatFormatManager   = chatFormatManager;
             this.worldManager        = worldManager;
         }
 
@@ -90,14 +92,14 @@ namespace NexusForever.WorldServer.Service
         /// <summary>
         /// Start <see cref="WorldServer"/> and any related resources.
         /// </summary>
-        public Task StartAsync(CancellationToken cancellationToken)
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             log.LogInformation("Starting...");
 
-            RealmContext.Instance.Initialise();
-
             DatabaseManager.Instance.Initialise(SharedConfiguration.Instance.Get<DatabaseConfig>());
             DatabaseManager.Instance.Migrate();
+
+            RealmContext.Instance.Initialise();
 
             // RBACManager must be initialised before CommandManager
             RBACManager.Instance.Initialise();
@@ -106,6 +108,7 @@ namespace NexusForever.WorldServer.Service
 
             scriptManager.Initialise();
 
+            await GameTableManager.Instance.Initialise();
             publicEventManager.Initialise();
             MapIOManager.Instance.Initialise();
             SearchManager.Instance.Initialise();
@@ -116,13 +119,11 @@ namespace NexusForever.WorldServer.Service
             FactionManager.Instance.Initialise();
 
             GlobalCinematicManager.Instance.Initialise();
-            ChatFormatManager.Instance.Initialise();
-            GlobalChatManager.Instance.Initialise(); // must be initialised before guilds
+            chatFormatManager.Initialise();
             GlobalAchievementManager.Instance.Initialise(); // must be initialised before guilds
             GlobalGuildManager.Instance.Initialise(); // must be initialised before residences
             CharacterManager.Instance.Initialise(); // must be initialised before residences
             GlobalResidenceManager.Instance.Initialise();
-            GlobalGuildManager.Instance.ValidateCommunityResidences();
 
             AssetManager.Instance.Initialise();
             ItemManager.Instance.Initialise();
@@ -154,12 +155,10 @@ namespace NexusForever.WorldServer.Service
                 GlobalQuestManager.Instance.Update(lastTick);
                 GlobalGuildManager.Instance.Update(lastTick);
                 GlobalResidenceManager.Instance.Update(lastTick); // must be after guild update
-                GlobalChatManager.Instance.Update(lastTick);
 
                 loginQueueManager.Update(lastTick);
                 matchingManager.Update(lastTick);
                 matchManager.Update(lastTick);
-                GroupManager.Instance.Update(lastTick);
 
                 scriptManager.Update(lastTick);
 
@@ -176,7 +175,6 @@ namespace NexusForever.WorldServer.Service
             CommandManager.Instance.Initialise();
 
             log.LogInformation("Started!");
-            return Task.CompletedTask;
         }
 
         /// <summary>

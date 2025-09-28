@@ -1,6 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Trigger;
-using NexusForever.Game.Static.Event;
+using NexusForever.Game.Static.PublicEvent;
 using NexusForever.Script;
 
 namespace NexusForever.Game.Entity.Trigger

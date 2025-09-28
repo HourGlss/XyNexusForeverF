@@ -3,7 +3,7 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Spell;
-using NexusForever.Game.Static.Event;
+using NexusForever.Game.Static.PublicEvent;
 using NexusForever.Game.Static.Spell;
 using NexusForever.Script.Template;
 using NexusForever.Script.Template.Event;

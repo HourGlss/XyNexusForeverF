@@ -1,7 +1,10 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Synchronisation;
 using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Entity.Synchronisation;
 using NexusForever.Game.Map;
 using NexusForever.Game.Map.Search;
 using NexusForever.Script;
@@ -46,6 +49,8 @@ namespace NexusForever.Game.Entity
 
         protected readonly EventQueue eventQueue = new();
 
+        private readonly ConcurrentQueue<ISynchronisationTask> synchronisationTaskQueue = [];
+
         /// <summary>
         /// Initialise <see cref="IGridEntity"/>
         /// </summary>
@@ -71,7 +76,22 @@ namespace NexusForever.Game.Entity
         public virtual void Update(double lastTick)
         {
             eventQueue.Update(lastTick);
+            HandlePendingSynchronisations();
+
             scriptCollection?.Invoke<IUpdate>(s => s.Update(lastTick));
+        }
+
+        public Task<T> SynchroniseAsync<T>(Func<T> func)
+        {
+            var synchronisationTask = new SynchronisationTask<T>();
+            synchronisationTaskQueue.Enqueue(synchronisationTask);
+            return synchronisationTask.Initialise(func);
+        }
+
+        private void HandlePendingSynchronisations()
+        {
+            while (synchronisationTaskQueue.TryDequeue(out ISynchronisationTask synchronisationTask))
+                synchronisationTask.Execute();
         }
 
         /// <summary>
@@ -278,6 +298,23 @@ namespace NexusForever.Game.Entity
             foreach (IGridEntity entity in visibleEntities.Values)
                 if (entity is IWorldEntity worldEntity && worldEntity.CreatureId == creatureId)
                     yield return (T)entity;
+        }
+
+        /// <summary>
+        /// Return visible <see cref="IPlayer"/> by supplied identity.
+        /// </summary>
+        public IPlayer GetVisiblePlayer(Abstract.Identity identity)
+        {
+            foreach (var item in visibleEntities.Values)
+            {
+                if (item is not IPlayer player)
+                    continue;
+
+                if (player.Identity == identity)
+                    return player;
+            }
+
+            return null;
         }
 
         /// <summary>

@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Abstract.Event;
+using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Abstract.Matching.Match;
@@ -58,7 +58,7 @@ namespace NexusForever.Game.Map.Instance
         {
             if (Match != null)
             {
-                IMapPosition mapPosition = Match.GetReturnPosition(player.CharacterId);
+                IMapPosition mapPosition = Match.GetReturnPosition(player.Identity);
                 if (mapPosition != null)
                     return mapPosition;
             }

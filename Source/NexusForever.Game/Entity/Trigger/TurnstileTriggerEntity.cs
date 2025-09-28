@@ -1,5 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Trigger;
+using NexusForever.Game.Static.PublicEvent;
 using NexusForever.Script;
 
 namespace NexusForever.Game.Entity.Trigger
@@ -34,7 +35,7 @@ namespace NexusForever.Game.Entity.Trigger
             if (entity is not IPlayer)
                 return;
 
-            Map.PublicEventManager.UpdateObjective(Static.Event.PublicEventObjectiveType.Turnstile, objectId, 1);
+            Map.PublicEventManager.UpdateObjective(PublicEventObjectiveType.Turnstile, objectId, 1);
         }
     }
 }

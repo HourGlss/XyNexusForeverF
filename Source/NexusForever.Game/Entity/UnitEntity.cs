@@ -11,7 +11,7 @@ using NexusForever.Game.Combat;
 using NexusForever.Game.Combat.CrowdControl;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Entity;
-using NexusForever.Game.Static.Event;
+using NexusForever.Game.Static.PublicEvent;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.Game.Static.Spell;

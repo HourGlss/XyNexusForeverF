@@ -3,7 +3,7 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Static.Event;
+using NexusForever.Game.Static.PublicEvent;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
@@ -47,9 +47,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
             {
                 case 37: // Quest NPC
                 {
-                    session.EnqueueMessageEncrypted(new Server0357
+                    session.EnqueueMessageEncrypted(new ServerDialogStart
                     {
-                        UnitId = entityInteraction.Guid
+                        DialogUnitId = entityInteraction.Guid
                     });
                     break;
                 }

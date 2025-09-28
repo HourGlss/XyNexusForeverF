@@ -1,6 +1,6 @@
-﻿using NexusForever.Game.Abstract.Event;
-using NexusForever.Game.Static.Event;
+﻿using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.Game.Static.Matching;
+using NexusForever.Game.Static.PublicEvent;
 using NexusForever.Script.Template;
 using NexusForever.Shared;
 

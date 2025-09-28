@@ -1,6 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
-using NexusForever.Game.Static.Event;
+using NexusForever.Game.Static.PublicEvent;
 using NexusForever.GameTable;
 using NexusForever.Script.Main.AI;
 using NexusForever.Script.Template;

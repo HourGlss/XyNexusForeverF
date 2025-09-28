@@ -1,4 +1,4 @@
-﻿using NexusForever.Script.Template.Filter;
+using NexusForever.Script.Template.Filter;
 
 namespace NexusForever.Script.Instance.Arena.TheSlaughterdome
 {

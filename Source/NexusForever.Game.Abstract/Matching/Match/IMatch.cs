@@ -35,7 +35,7 @@ namespace NexusForever.Game.Abstract.Matching.Match
         /// <summary>
         /// Return <see cref="IMatchTeam"/> for supplied character.
         /// </summary>
-        IMatchTeam GetTeam(ulong characterId);
+        IMatchTeam GetTeam(Identity identity);
 
         /// <summary>
         /// Return a collection containing <see cref="IMatchTeam"/> in the match.
@@ -55,7 +55,7 @@ namespace NexusForever.Game.Abstract.Matching.Match
         /// <summary>
         /// Remove character from match.
         /// </summary>
-        void MatchLeave(ulong characterId);
+        void MatchLeave(Identity identity);
 
         /// <summary>
         /// Finish the match.
@@ -65,7 +65,7 @@ namespace NexusForever.Game.Abstract.Matching.Match
         /// <summary>
         /// Teleport supplied character to the match.
         /// </summary>
-        void MatchTeleport(ulong characterId);
+        void MatchTeleport(Identity identity);
 
         /// <summary>
         /// Get return <see cref="IMapPosition"/> for supplied character.
@@ -73,7 +73,7 @@ namespace NexusForever.Game.Abstract.Matching.Match
         /// <remarks>
         /// Return position is the position of the player before entering the match.
         /// </remarks>
-        IMapPosition GetReturnPosition(ulong characterId);
+        IMapPosition GetReturnPosition(Identity identity);
 
         /// <summary>
         /// Get <see cref="IMapEntrance"/> for supplied character.
@@ -81,6 +81,6 @@ namespace NexusForever.Game.Abstract.Matching.Match
         /// <remarks>
         /// Map entrance position is the position the players team will be teleported to when the match starts.
         /// </remarks>
-        IMapEntrance GetMapEntrance(ulong characterId);
+        IMapEntrance GetMapEntrance(Identity identity);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Static.PublicEvent;
 using NexusForever.Script.Template;
 using NexusForever.Script.Template.Filter;
 
@@ -27,7 +28,7 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther.Script
             if (entity is not IPlayer player)
                 return;
 
-            door.Map.PublicEventManager.UpdateObjective(player, Game.Static.Event.PublicEventObjectiveType.ParticipantsInTriggerVolume, 8283, 1);
+            door.Map.PublicEventManager.UpdateObjective(player, PublicEventObjectiveType.ParticipantsInTriggerVolume, 8283, 1);
         }
 
         /// <summary>
@@ -38,7 +39,7 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther.Script
             if (entity is not IPlayer player)
                 return;
 
-            door.Map.PublicEventManager.UpdateObjective(player, Game.Static.Event.PublicEventObjectiveType.ParticipantsInTriggerVolume, 8283, -1);
+            door.Map.PublicEventManager.UpdateObjective(player, PublicEventObjectiveType.ParticipantsInTriggerVolume, 8283, -1);
         }
     }
 }

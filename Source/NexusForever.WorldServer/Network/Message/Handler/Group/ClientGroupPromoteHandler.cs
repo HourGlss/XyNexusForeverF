@@ -1,6 +1,10 @@
-﻿using NexusForever.Game.Abstract.Group;
+﻿using NexusForever.Game;
+using NexusForever.Network.Internal;
+using NexusForever.Network.Internal.Message.Group;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Shared;
+using NexusForever.WorldServer.Network.Internal;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Group
 {
@@ -8,22 +12,25 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Group
     {
         #region Dependency Injection
 
-        private readonly IGroupManager groupManager;
+        private readonly IInternalMessagePublisher messagePublisher;
 
         public ClientGroupPromoteHandler(
-            IGroupManager groupManager)
+            IInternalMessagePublisher messagePublisher)
         {
-            this.groupManager = groupManager;
+            this.messagePublisher = messagePublisher;
         }
 
         #endregion
 
         public void HandleMessage(IWorldSession session, ClientGroupPromote groupPromote)
         {
-            GroupHelper.AssertGroupId(session, groupPromote.GroupId);
+            messagePublisher.PublishAsync(new GroupMemberPromoteMessage
+            {
+                GroupId  = groupPromote.GroupId,
+                Promoter = session.Player.Identity.ToInternalIdentity(),
+                Promotee = groupPromote.TargetedPlayer.ToInternalIdentity()
 
-            IGroup group = groupManager.GetGroupById(groupPromote.GroupId);
-            group.Promote(groupPromote.TargetedPlayer);
+            }).FireAndForgetAsync();
         }
     }
 }

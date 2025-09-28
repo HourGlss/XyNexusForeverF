@@ -1,5 +1,6 @@
 ﻿using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Guild;
+using NexusForever.Game.Static.PVP;
 
 namespace NexusForever.Network.World.Entity.Model
 {

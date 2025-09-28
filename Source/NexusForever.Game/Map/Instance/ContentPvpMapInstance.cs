@@ -1,5 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Abstract.Event;
+using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Abstract.Matching;
 using NexusForever.Game.Abstract.Matching.Match;
@@ -76,12 +76,12 @@ namespace NexusForever.Game.Map.Instance
 
         private void OnResurrectHolocrypt(IPvpMatch pvpMatch, IPlayer player)
         {
-            IMapEntrance entrance = pvpMatch.GetMapEntrance(player.CharacterId);
+            IMapEntrance entrance = pvpMatch.GetMapEntrance(player.Identity);
 
             player.Rotation = entrance.Rotation;
             player.TeleportToLocal(entrance.Position, false, (_) =>
             {
-                pvpMatch.UpdatePool(player.CharacterId);
+                pvpMatch.UpdatePool(player.Identity);
 
                 player.ModifyHealth(player.MaxHealth, null, null);
                 player.Shield = player.MaxShieldCapacity;

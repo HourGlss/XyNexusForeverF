@@ -1,11 +1,11 @@
 ﻿using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Matching;
 using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Game.Map.Search;
 using NexusForever.Game.Static.Matching;
-using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Shared;
 
@@ -18,10 +18,10 @@ namespace NexusForever.Game.Matching.Queue
 
         private readonly ConcurrentQueue<IMatchingQueueProposal> incomingMatchingQueueProposals = [];
 
-        private readonly Dictionary<ulong, IMatchingCharacter> characters = [];
+        private readonly Dictionary<Identity, IMatchingCharacter> characters = [];
 
         private readonly List<IMatchingRoleCheck> matchingRoleChecks = [];
-        private readonly Dictionary<ulong, IMatchingRoleCheck> characterMatchingRoleChecks = [];
+        private readonly Dictionary<Identity, IMatchingRoleCheck> characterMatchingRoleChecks = [];
 
         #region Dependency Injection
 
@@ -131,7 +131,7 @@ namespace NexusForever.Game.Matching.Queue
                 {
                     matchingRoleChecks.Remove(matchingRoleCheck);
                     foreach (IMatchingRoleCheckMember matchingRoleCheckMember in matchingRoleCheck.GetMembers())
-                        characterMatchingRoleChecks.Remove(matchingRoleCheckMember.CharacterId);
+                        characterMatchingRoleChecks.Remove(matchingRoleCheckMember.Identity);
 
                     log.LogTrace($"Role check {matchingRoleCheck.Guid} removed from store.");
                 }
@@ -142,10 +142,10 @@ namespace NexusForever.Game.Matching.Queue
         {
             foreach (IMatchingRoleCheckMember matchingRoleCheckMember in matchingRoleCheck.GetMembers())
             {
-                matchingRoleCheck.MatchingQueueProposal.AddMember(matchingRoleCheckMember.CharacterId, matchingRoleCheckMember.Roles.Value);
+                matchingRoleCheck.MatchingQueueProposal.AddMember(matchingRoleCheckMember.Identity, matchingRoleCheckMember.Roles.Value);
 
                 // remove member from all solo queues
-                foreach (IMatchingCharacterQueue matchingCharacterQueue in GetMatchingCharacter(matchingRoleCheckMember.CharacterId).GetMatchingCharacterQueues())
+                foreach (IMatchingCharacterQueue matchingCharacterQueue in GetMatchingCharacter(matchingRoleCheckMember.Identity).GetMatchingCharacterQueues())
                     if (!matchingCharacterQueue.MatchingQueueProposal.IsParty)
                         matchingCharacterQueue.MatchingQueueGroup.RemoveMatchingQueueProposal(matchingCharacterQueue.MatchingQueueProposal);
             }
@@ -160,13 +160,13 @@ namespace NexusForever.Game.Matching.Queue
         /// <remarks>
         /// Will return a new <see cref="IMatchingCharacter"/> if one does not exist.
         /// </remarks>
-        public IMatchingCharacter GetMatchingCharacter(ulong characterId)
+        public IMatchingCharacter GetMatchingCharacter(Identity identity)
         {
-            if (!characters.TryGetValue(characterId, out IMatchingCharacter characterInfo))
+            if (!characters.TryGetValue(identity, out IMatchingCharacter characterInfo))
             {
                 characterInfo = matchingCharacterFactory.Resolve();
-                characterInfo.Initialise(characterId);
-                characters.Add(characterId, characterInfo);
+                characterInfo.Initialise(identity);
+                characters.Add(identity, characterInfo);
             }
 
             return characterInfo;
@@ -175,9 +175,9 @@ namespace NexusForever.Game.Matching.Queue
         /// <summary>
         /// Return <see cref="IMatchingRoleCheck"/> for supplied character id.
         /// </summary>
-        public IMatchingRoleCheck GetMatchingRoleCheck(ulong characterId)
+        public IMatchingRoleCheck GetMatchingRoleCheck(Identity identity)
         {
-            return characterMatchingRoleChecks.TryGetValue(characterId, out IMatchingRoleCheck matchingRoleCheck) ? matchingRoleCheck : null;
+            return characterMatchingRoleChecks.TryGetValue(identity, out IMatchingRoleCheck matchingRoleCheck) ? matchingRoleCheck : null;
         }
 
         /// <summary>
@@ -185,7 +185,7 @@ namespace NexusForever.Game.Matching.Queue
         /// </summary>
         public void JoinQueue(IPlayer player, Role roles, Static.Matching.MatchType matchType, List<uint> maps, uint matchingGameTypeId, MatchingQueueFlags matchingQueueFlags)
         {
-            log.LogTrace($"Queue join request, Character: {player.CharacterId}, Roles: {roles}, MatchType: {matchType}, Maps: {string.Join(", ", maps)}, Type {matchingGameTypeId}, Flags: {matchingQueueFlags}.");
+            log.LogTrace($"Queue join request, Character: {player.Identity}, Roles: {roles}, MatchType: {matchType}, Maps: {string.Join(", ", maps)}, Type {matchingGameTypeId}, Flags: {matchingQueueFlags}.");
 
             List<IMatchingMap> matchingMaps = GetMatchingMaps(maps, matchingGameTypeId);
             JoinQueue(player, roles, matchType, matchingMaps, matchingQueueFlags);
@@ -196,7 +196,7 @@ namespace NexusForever.Game.Matching.Queue
         /// </summary>
         public void JoinPartyQueue(IPlayer player, Role roles, Static.Matching.MatchType matchType, List<uint> maps, uint matchingGameTypeId, MatchingQueueFlags matchingQueueFlags)
         {
-            log.LogTrace($"Party queue join request, Character: {player.CharacterId}, Roles: {roles}, MatchType: {matchType}, Maps: {string.Join(", ", maps)}, Type {matchingGameTypeId}, Flags: {matchingQueueFlags}.");
+            log.LogTrace($"Party queue join request, Character: {player.Identity}, Roles: {roles}, MatchType: {matchType}, Maps: {string.Join(", ", maps)}, Type {matchingGameTypeId}, Flags: {matchingQueueFlags}.");
 
             List<IMatchingMap> matchingMaps = GetMatchingMaps(maps, matchingGameTypeId);
             JoinPartyQueue(player, roles, matchType, matchingMaps, matchingQueueFlags);
@@ -219,7 +219,7 @@ namespace NexusForever.Game.Matching.Queue
         {
             IMatchingQueueProposal matchingQueueProposal = matchingQueueProposalFactory.Resolve();
             matchingQueueProposal.Initialise(player.Faction1, matchType, matchingMaps, matchingQueueFlags);
-            matchingQueueProposal.AddMember(player.CharacterId, roles);
+            matchingQueueProposal.AddMember(player.Identity, roles);
             incomingMatchingQueueProposals.Enqueue(matchingQueueProposal);
         }
 
@@ -233,17 +233,17 @@ namespace NexusForever.Game.Matching.Queue
             var check = new SearchCheckRange<IPlayer>();
             check.Initialise(player.Position, 10f);
 
-            List<ulong> characterIds = player.Map
+            List<Identity> identities = player.Map
                 .Search(player.Position, 10f, check)
-                .Select(p => p.CharacterId)
+                .Select(p => p.Identity)
                 .ToList();
 
             IMatchingRoleCheck matchingRoleCheck = matchingRoleCheckFactory.Resolve();
-            matchingRoleCheck.Initialise(matchingQueueProposal, characterIds);
+            matchingRoleCheck.Initialise(matchingQueueProposal, identities);
 
             matchingRoleChecks.Add(matchingRoleCheck);
-            foreach (ulong characterId in characterIds)
-                characterMatchingRoleChecks.Add(characterId, matchingRoleCheck);
+            foreach (Identity identity in identities)
+                characterMatchingRoleChecks.Add(identity, matchingRoleCheck);
 
             log.LogTrace($"Role check {matchingRoleCheck.Guid} added to store.");
         }
@@ -255,7 +255,7 @@ namespace NexusForever.Game.Matching.Queue
             MatchingQueueResult? matchingResult = matchingQueueManager.CanQueue(matchingQueueProposal);
             if (matchingResult != null)
             {
-                matchingQueueProposal.Broadcast(new ServerMatchingQueueResult
+                matchingQueueProposal.Broadcast(new ServerMatchingQueueResultAnnounce
                 {
                     Result = matchingResult.Value
                 });
@@ -280,7 +280,7 @@ namespace NexusForever.Game.Matching.Queue
         /// </summary>
         public void JoinRandomQueue(IPlayer player, Role roles, Static.Matching.MatchType matchType)
         {
-            log.LogTrace($"Random queue join request, Character: {player.CharacterId}, Roles: {roles}, MatchType:, {matchType}.");
+            log.LogTrace($"Random queue join request, Character: {player.Identity}, Roles: {roles}, MatchType:, {matchType}.");
 
             List<IMatchingMap> maps = matchingDataManager.GetMatchingMaps(matchType).ToList();
             JoinQueue(player, roles, matchType, maps, MatchingQueueFlags.None);
@@ -291,7 +291,7 @@ namespace NexusForever.Game.Matching.Queue
         /// </summary>
         public void JoinRandomPartyQueue(IPlayer player, Role roles, Static.Matching.MatchType matchType)
         {
-            log.LogTrace($"Random party queue join request, Character: {player.CharacterId}, Roles: {roles}, MatchType:, {matchType}.");
+            log.LogTrace($"Random party queue join request, Character: {player.Identity}, Roles: {roles}, MatchType:, {matchType}.");
 
             List<IMatchingMap> maps = matchingDataManager.GetMatchingMaps(matchType).ToList();
             JoinPartyQueue(player, roles, matchType, maps, MatchingQueueFlags.None);
@@ -302,9 +302,9 @@ namespace NexusForever.Game.Matching.Queue
         /// </summary>
         public void LeaveQueue(IPlayer player, Static.Matching.MatchType matchType)
         {
-            log.LogTrace($"Leave queue request, Character: {player.CharacterId}, MatchType: {matchType}.");
+            log.LogTrace($"Leave queue request, Character: {player.Identity}, MatchType: {matchType}.");
 
-            IMatchingCharacter character = GetMatchingCharacter(player.CharacterId);
+            IMatchingCharacter character = GetMatchingCharacter(player.Identity);
             IMatchingCharacterQueue matchingCharacterQueue = character.GetMatchingCharacterQueue(matchType);
             matchingCharacterQueue.MatchingQueueGroup.RemoveMatchingQueueProposal(matchingCharacterQueue.MatchingQueueProposal);
         }
@@ -314,9 +314,9 @@ namespace NexusForever.Game.Matching.Queue
         /// </summary>
         public void LeaveQueue(IPlayer player)
         {
-            log.LogTrace($"Leave queue request, Character: {player.CharacterId}.");
+            log.LogTrace($"Leave queue request, Character: {player.Identity}.");
 
-            IMatchingCharacter character = GetMatchingCharacter(player.CharacterId);
+            IMatchingCharacter character = GetMatchingCharacter(player.Identity);
             foreach (IMatchingCharacterQueue matchingCharacterQueue in character.GetMatchingCharacterQueues())
                 matchingCharacterQueue.MatchingQueueGroup.RemoveMatchingQueueProposal(matchingCharacterQueue.MatchingQueueProposal);
         }
@@ -326,7 +326,7 @@ namespace NexusForever.Game.Matching.Queue
         /// </summary>
         public void OnLogin(IPlayer player)
         {
-            IMatchingCharacter matchingCharacter = GetMatchingCharacter(player.CharacterId);
+            IMatchingCharacter matchingCharacter = GetMatchingCharacter(player.Identity);
             matchingCharacter.SendMatchingStatus();
         }
 
@@ -335,7 +335,7 @@ namespace NexusForever.Game.Matching.Queue
         /// </summary>
         public void OnLogout(IPlayer player)
         {
-            GetMatchingRoleCheck(player.CharacterId)?.Respond(player.CharacterId, Role.None);
+            GetMatchingRoleCheck(player.Identity)?.Respond(player.Identity, Role.None);
         }
     }
 }

@@ -1,10 +1,12 @@
 ﻿using System.Numerics;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Matching;
 using NexusForever.Game.Abstract.Matching.Match;
 using NexusForever.Game.Map;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Matching;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
 
@@ -12,7 +14,8 @@ namespace NexusForever.Game.Matching.Match
 {
     public class MatchTeamMember : IMatchTeamMember
     {
-        public ulong CharacterId { get; private set; }
+        public Identity Identity { get; private set; }
+        public Role Roles { get; private set; }
         public bool InMatch { get; private set; }
         public IMapPosition ReturnPosition { get; private set; }
         public Vector3 ReturnRotation { get; private set;  }
@@ -32,19 +35,20 @@ namespace NexusForever.Game.Matching.Match
         /// <summary>
         /// Initialise new <see cref="IMatchTeamMember"/> with supplied character id.
         /// </summary>
-        public void Initialise(ulong characterId)
+        public void Initialise(Identity identity, Role roles)
         {
-            if (CharacterId != 0)
+            if (Identity != null)
                 throw new InvalidOperationException();
 
-            CharacterId = characterId;
+            Identity = identity;
+            Roles    = roles;
 
             GetReturnPosition();
         }
 
         private void GetReturnPosition()
         {
-            IPlayer player = playerManager.GetPlayer(CharacterId);
+            IPlayer player = playerManager.GetPlayer(Identity);
             if (player == null)
                 throw new InvalidOperationException();
 
@@ -70,7 +74,7 @@ namespace NexusForever.Game.Matching.Match
             InMatch = true;
             Send(new ServerMatchingMatchEntered
             {
-                MatchingGameMap = matchingMap.Id
+                MatchingGameMapId = matchingMap.Id
             });
         }
 
@@ -94,7 +98,7 @@ namespace NexusForever.Game.Matching.Match
         /// </summary>
         public void TeleportToMatch(IMapEntrance mapEntrance)
         {
-            IPlayer player = playerManager.GetPlayer(CharacterId);
+            IPlayer player = playerManager.GetPlayer(Identity);
             if (player == null)
                 return;
 
@@ -110,7 +114,7 @@ namespace NexusForever.Game.Matching.Match
         /// </remarks>
         public void TeleportToReturn()
         {
-            IPlayer player = playerManager.GetPlayer(CharacterId);
+            IPlayer player = playerManager.GetPlayer(Identity);
             if (player == null)
                 return;
 
@@ -123,7 +127,7 @@ namespace NexusForever.Game.Matching.Match
         /// </summary>
         public void Send(IWritable message)
         {
-            IPlayer player = playerManager.GetPlayer(CharacterId);
+            IPlayer player = playerManager.GetPlayer(Identity);
             player?.Session.EnqueueMessageEncrypted(message);
         }
     }

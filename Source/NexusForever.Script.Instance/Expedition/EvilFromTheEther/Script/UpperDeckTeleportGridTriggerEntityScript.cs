@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Trigger;
-using NexusForever.Game.Static.Event;
+using NexusForever.Game.Static.PublicEvent;
 using NexusForever.Script.Template;
 using NexusForever.Script.Template.Filter;
 

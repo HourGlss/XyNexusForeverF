@@ -28,7 +28,7 @@ namespace NexusForever.Game.Prerequisite.Check
             if (actionSet == null)
                 return false;
 
-            IActionSetShortcut shortcut = actionSet.GetShortcut(ShortcutType.Spell, objectId);
+            IActionSetShortcut shortcut = actionSet.GetShortcut(ShortcutType.SpellbookItem, objectId);
 
             switch (comparison)
             {

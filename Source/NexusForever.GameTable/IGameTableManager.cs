@@ -389,6 +389,8 @@ namespace NexusForever.GameTable
 
         Task Initialise();
 
+        Task Initialise(GameTableLoader loader);
+
         /// <summary>
         /// Return the <see cref="TextTable"/> for the specified <see cref="Game.Static.Language"/>.
         /// </summary>

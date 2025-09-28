@@ -25,7 +25,6 @@ using NexusForever.Script;
 using NexusForever.Script.Template.Collection;
 using NexusForever.Shared;
 using NexusForever.Shared.Game;
-using static NexusForever.Network.World.Message.Model.ServerSpellList;
 
 namespace NexusForever.Game.Spell
 {
