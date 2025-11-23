@@ -29,6 +29,7 @@ using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
 using NexusForever.Game.Reputation;
 using NexusForever.Game.Static;
+using NexusForever.Game.Static.Chat;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Guild;
 using NexusForever.Game.Static.PublicEvent;
@@ -37,7 +38,6 @@ using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.Game.Static.Setting;
-using NexusForever.Game.Static.Social;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -47,7 +47,7 @@ using NexusForever.Network.Session;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Model.Abilities;
+using NexusForever.Network.World.Message.Model.Chat;
 using NexusForever.Network.World.Message.Model.Pregame;
 using NexusForever.Network.World.Message.Model.Pvp;
 using NexusForever.Network.World.Message.Model.Shared;
@@ -1115,7 +1115,7 @@ namespace NexusForever.Game.Entity
             pendingLocalTeleport = true;
 
             if (showLoadingScreen)
-                Session.EnqueueMessageEncrypted(new ServerTeleportLocal());
+                Session.EnqueueMessageEncrypted(new ServerLoadingScreen());
 
             if (callback != null)
             {
@@ -1294,7 +1294,12 @@ namespace NexusForever.Game.Entity
             {
                 Channel = new Channel
                 {
-                    Type = ChatChannelType.System
+                    ChatChannelId = ChatChannelType.System
+                },
+                From = new Network.World.Message.Model.Shared.Identity
+                {
+                    Id = 0,
+                    RealmId = 0,
                 },
                 Text = text
             });
