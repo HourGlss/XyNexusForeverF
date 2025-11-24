@@ -1,6 +1,7 @@
 using System.Numerics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Event;
@@ -12,6 +13,7 @@ using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Spell.Event;
 using NexusForever.Game.Spell.Target;
 using NexusForever.Game.Spell.Type;
+using NexusForever.Game.Static;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
 using NexusForever.Game.Static.Spell.Effect;
@@ -76,17 +78,20 @@ namespace NexusForever.Game.Spell
         private readonly ISpellTargetInfoCollection spellTargetInfoCollection;
         private readonly IGlobalSpellManager globalSpellManager;
         private readonly ICastResultValidatorManager castResultValidatorManager;
+        private readonly IDisableManager disableManager;
 
         public Spell(
             ILogger log,
             ISpellTargetInfoCollection spellTargetInfoCollection,
             IGlobalSpellManager globalSpellManager,
-            ICastResultValidatorManager castResultValidatorManager)
+            ICastResultValidatorManager castResultValidatorManager,
+            IDisableManager disableManager)
         {
             this.log                        = log;
             this.spellTargetInfoCollection  = spellTargetInfoCollection;
             this.globalSpellManager         = globalSpellManager;
             this.castResultValidatorManager = castResultValidatorManager;
+            this.disableManager             = disableManager;
         }
 
         #endregion
@@ -568,6 +573,9 @@ namespace NexusForever.Game.Spell
 
         protected virtual bool CanExecuteEffect(Spell4EffectsEntry spell4EffectsEntry)
         {
+            if (disableManager.IsDisabled(DisableType.SpellEffect, spell4EffectsEntry.Id))
+                return false;
+
             if (Caster is IPlayer player)
             {
                 // Ensure caster can apply this effect

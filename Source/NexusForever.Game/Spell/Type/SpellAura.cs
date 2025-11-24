@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using Microsoft.Extensions.Logging;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Spell;
@@ -31,8 +32,9 @@ namespace NexusForever.Game.Spell.Type
             ISpellTargetInfoCollection spellTargetInfoCollection,
             ICreatureInfoManager creatureInfoManager,
             IGlobalSpellManager globalSpellManager,
-            ICastResultValidatorManager castResultValidatorManager)
-            : base(log, spellTargetInfoCollection, globalSpellManager, castResultValidatorManager)
+            ICastResultValidatorManager castResultValidatorManager,
+            IDisableManager disableManager)
+            : base(log, spellTargetInfoCollection, globalSpellManager, castResultValidatorManager, disableManager)
         {
             this.log                       = log;
             this.spellTargetInfoCollection = spellTargetInfoCollection;

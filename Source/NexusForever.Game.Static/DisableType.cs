@@ -9,6 +9,7 @@ namespace NexusForever.Game.Static
         World,
         Currency,
         AccountCurrency,
-        Achievement
+        Achievement,
+        SpellEffect
     }
 }

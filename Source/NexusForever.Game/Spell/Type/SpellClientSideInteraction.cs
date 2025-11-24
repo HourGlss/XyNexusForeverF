@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Target;
@@ -22,8 +23,9 @@ namespace NexusForever.Game.Spell.Type
             ILogger<SpellClientSideInteraction> log,
             ISpellTargetInfoCollection spellTargetInfoCollection,
             IGlobalSpellManager globalSpellManager,
-            ICastResultValidatorManager castResultValidatorManager)
-            : base(log, spellTargetInfoCollection, globalSpellManager, castResultValidatorManager)
+            ICastResultValidatorManager castResultValidatorManager,
+            IDisableManager disableManager)
+            : base(log, spellTargetInfoCollection, globalSpellManager, castResultValidatorManager, disableManager)
         {
             this.log = log;
         }
