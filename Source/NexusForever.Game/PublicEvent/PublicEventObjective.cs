@@ -197,9 +197,9 @@ namespace NexusForever.Game.PublicEvent
         {
             return new Network.World.Message.Model.Shared.PublicEventObjectiveStatus
             {
-                Status     = Status,
-                Count      = IsChecklist ? Checklist : Count,
-                DynamicMax = DynamicMax
+                Status        = Status,
+                ObjectiveData = IsChecklist ? Checklist : Count,
+                DynamicMax    = DynamicMax
             };
         }
     }

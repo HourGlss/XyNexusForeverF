@@ -1,9 +1,11 @@
 ﻿namespace NexusForever.Game.Static.PublicEvent
 {
+    [Flags]
     public enum PublicEventObjectiveFlag
     {
-        None             = 0x00,
-        InitialObjective = 0x01,
-        DynamicObjective = 0x80
+        None                    = 0x000000,
+        InitialObjective        = 0x000001,
+        DynamicObjective        = 0x000080,
+        ShouldShowOnMinimapEdge = 0x010000
     }
 }
