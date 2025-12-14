@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NexusForever.Database.Configuration.Model;
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Entity.Movement.Command.Mode;
 using NexusForever.Game.Static.Entity.Movement.Spline;
 
 namespace NexusForever.Database.World
@@ -241,6 +242,11 @@ namespace NexusForever.Database.World
                     .HasColumnName("z")
                     .HasColumnType("float")
                     .HasDefaultValue(0);
+
+                entity.Property(e => e.Mode)
+                    .HasColumnName("mode")
+                    .HasColumnType("tinyint(3) unsigned")
+                    .HasConversion<EnumToNumberConverter<ModeType, byte>>();
             });
 
             modelBuilder.Entity<EntityPropertyModel>(entity =>

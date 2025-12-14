@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Entity.Movement.Command.Mode;
 
 namespace NexusForever.Database.World.Model
 {
@@ -23,6 +24,7 @@ namespace NexusForever.Database.World.Model
         public byte QuestChecklistIdx { get; set; }
         public ulong ActivePropId { get; set; }
         public ushort WorldSocketId { get; set; }
+        public ModeType? Mode { get; set; }
 
         public EntityEventModel EntityEvent { get; set; }
         public ICollection<EntityPropertyModel> EntityProperty { get; set; } = [];

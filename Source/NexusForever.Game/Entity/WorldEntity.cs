@@ -9,15 +9,16 @@ using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Chat;
 using NexusForever.Game.CSI;
+using NexusForever.Game.Entity.Movement;
 using NexusForever.Game.Map.Search;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Reputation;
 using NexusForever.Game.Spell;
+using NexusForever.Game.Static.Chat;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.PublicEvent;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.Reputation;
-using NexusForever.Game.Static.Chat;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.GameTable.Static;
@@ -368,6 +369,9 @@ namespace NexusForever.Game.Entity
             ActivePropId         = model.ActivePropId;
             WorldSocketId        = model.WorldSocketId;
             Spline               = model.EntitySpline;
+
+            if (model.Mode != null)
+                MovementManager.SetMode(model.Mode.Value);
 
             foreach (EntityStatModel statModel in model.EntityStat)
                 stats.Add((Static.Entity.Stat)statModel.Stat, new StatValue(statModel));
