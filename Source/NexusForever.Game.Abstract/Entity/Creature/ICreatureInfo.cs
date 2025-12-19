@@ -11,6 +11,7 @@ namespace NexusForever.Game.Abstract.Entity.Creature
         Creature2TierEntry TierEntry { get; }
         Creature2ModelInfoEntry ModelEntry { get; }
         UnitVehicleEntry UnitVehicleEntry { get; }
+        PrerequisiteEntry PrerequisiteVisibilityEntry { get; }
 
         /// <summary>
         /// Initialise <see cref="ICreatureInfo"/> with supplied <see cref="Creature2Entry"/>.

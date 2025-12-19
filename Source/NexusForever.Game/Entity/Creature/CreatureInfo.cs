@@ -16,9 +16,11 @@ namespace NexusForever.Game.Entity.Creature
         public Creature2TierEntry TierEntry { get; private set; }
         public Creature2ModelInfoEntry ModelEntry { get; private set; }
         public UnitVehicleEntry UnitVehicleEntry { get; private set; }
+        public PrerequisiteEntry PrerequisiteVisibilityEntry { get; private set; }
 
         private ImmutableList<Creature2DisplayGroupEntryEntry> displayGroup;
         private ImmutableList<Creature2OutfitGroupEntryEntry> outfitGroup;
+        private ImmutableList<PrerequisiteEntry> prerequisitePriorityEntries;
         private ImmutableDictionary<Property, ICreatureInfoProperty> overrideProperties;
         private ImmutableDictionary<Static.Entity.Stat, ICreatureInfoStat> overrideStats;
 
@@ -54,8 +56,14 @@ namespace NexusForever.Game.Entity.Creature
             TierEntry        = gameTableManager.Creature2Tier.GetEntry(entry.Creature2TierId);
             ModelEntry       = gameTableManager.Creature2ModelInfo.GetEntry(entry.Creature2ModelInfoId);
             UnitVehicleEntry = gameTableManager.UnitVehicle.GetEntry(entry.UnitVehicleId);
-            displayGroup     = gameTableManager.Creature2DisplayGroupEntry.Entries.Where(x => x.Creature2DisplayGroupId == entry.Creature2DisplayGroupId).ToImmutableList();
-            outfitGroup      = gameTableManager.Creature2OutfitGroupEntry.Entries.Where(x => x.Creature2OutfitGroupId == entry.Creature2OutfitGroupId).ToImmutableList();
+            PrerequisiteVisibilityEntry = gameTableManager.Prerequisite.GetEntry(entry.PrerequisiteIdVisibility);
+
+            displayGroup = gameTableManager.Creature2DisplayGroupEntry.Entries
+                .Where(x => x.Creature2DisplayGroupId == entry.Creature2DisplayGroupId)
+                .ToImmutableList();
+            outfitGroup  = gameTableManager.Creature2OutfitGroupEntry.Entries
+                .Where(x => x.Creature2OutfitGroupId == entry.Creature2OutfitGroupId)
+                .ToImmutableList();
         }
 
         /// <summary>

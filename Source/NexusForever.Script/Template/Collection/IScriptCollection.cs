@@ -33,5 +33,13 @@ namespace NexusForever.Script.Template.Collection
         /// Invoke action on any scripts in <see cref="IScriptCollection"/> that are assignable to suppled <see cref="IScript"/> type.
         /// </summary>
         void Invoke<T>(Action<T> s);
+
+        /// <summary>
+        /// Invoke function on any scripts in <see cref="IScriptCollection"/> that are assignable to supplied <see cref="IScript"/> type.
+        /// </summary>
+        /// <remarks>
+        /// If multiple scripts are found that are assignable to the supplied <see cref="IScript"/> type, the return value of the first script processed will be returned.
+        /// </remarks>
+        TOut? Invoke<TOut, TIn>(Func<TIn, TOut> func) where TOut : struct;
     }
 }

@@ -42,8 +42,9 @@ namespace NexusForever.Game.Entity
 
         private readonly Dictionary<uint, IGridEntity> inRangeEntities = [];
 
-        protected readonly Dictionary<uint, IGridEntity> visibleEntities = new();
-        private readonly HashSet<(uint GridX, uint GridZ)> visibleGrids = new();
+        protected readonly Dictionary<uint, IGridEntity> visibleEntities = [];
+        protected readonly Dictionary<uint, IGridEntity> invisibleEntities = [];
+        private readonly HashSet<(uint GridX, uint GridZ)> visibleGrids = [];
 
         protected IScriptCollection scriptCollection;
 
@@ -100,6 +101,14 @@ namespace NexusForever.Game.Entity
         public void InvokeScriptCollection<T>(Action<T> action)
         {
             scriptCollection?.Invoke(action);
+        }
+
+        /// <summary>
+        /// Invoke <see cref="Func{TIn, TOut}"/> against <see cref="IGridEntity"/> script collection.
+        /// </summary>
+        public TOut? InvokeScriptCollection<TOut, TIn>(Func<TIn, TOut> func) where TOut : struct
+        {
+            return scriptCollection?.Invoke(func);
         }
 
         /// <summary>
@@ -165,6 +174,15 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// Enqueue <see cref="IGridEntity"/> for visibility update on the <see cref="IBaseMap"/>.
+        /// </summary>
+        public void VisibilityUpdate()
+        {
+            Debug.Assert(Map != null);
+            Map.EnqueueVisibilityUpdate(this, OnVisibilityUpdate);
+        }
+
+        /// <summary>
         /// Invoked when <see cref="IGridEntity"/> is enqueued to be added to <see cref="IBaseMap"/>.
         /// </summary>
         public virtual void OnEnqueueAddToMap()
@@ -203,10 +221,12 @@ namespace NexusForever.Game.Entity
         {
             scriptCollection?.Invoke<IGridEntityScript>(s => s.OnRemoveFromMap(Map));
 
-            foreach (IGridEntity entity in visibleEntities.Values.ToList())
-                entity.RemoveVisible(this);
-
-            visibleEntities.Clear();
+            foreach ((uint _, IGridEntity entity) in visibleEntities.Concat(invisibleEntities))
+            {
+                RemoveVisionEntity(this);
+                if (entity != this)
+                    entity.RemoveVisionEntity(this);
+            }
 
             foreach ((uint gridX, uint gridZ) in visibleGrids.ToList())
                 RemoveVisible(gridX, gridZ);
@@ -248,19 +268,27 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Returns if <see cref="IGridEntity"/> can see supplied <see cref="IGridEntity"/>.
         /// </summary>
-        public virtual bool CanSeeEntity(IGridEntity entity)
+        protected virtual bool CanSeeEntity(IGridEntity entity)
         {
             return true;
         }
 
         /// <summary>
+        /// Adds the specified <see cref="IGridEntity"/> to the appropriate vision collection based on its visibility.
+        /// </summary>
+        public void AddVisionEntity(IGridEntity entity)
+        {
+            if (CanSeeEntity(entity))
+                AddVisible(entity);
+            else
+                AddInvisible(entity);
+        }
+
+        /// <summary>
         /// Add tracked <see cref="IGridEntity"/> that is in vision range.
         /// </summary>
-        public virtual void AddVisible(IGridEntity entity)
+        protected virtual void AddVisible(IGridEntity entity)
         {
-            if (!CanSeeEntity(entity))
-                return;
-
             visibleEntities.Add(entity.Guid, entity);
 
             scriptCollection?.Invoke<IGridEntityScript>(s => s.OnAddVisibleEntity(entity));
@@ -268,16 +296,58 @@ namespace NexusForever.Game.Entity
             CheckEntityInRange(entity);
         }
 
+        private void AddInvisible(IGridEntity entity)
+        {
+            invisibleEntities.Add(entity.Guid, entity);
+        }
+
+        /// <summary>
+        /// Removes the specified vision entity from the grid, regardless of its current visibility state.
+        /// </summary>
+        public void RemoveVisionEntity(IGridEntity entity)
+        {
+            if (visibleEntities.ContainsKey(entity.Guid))
+                RemoveVisible(entity);
+            else
+                RemoveInvisible(entity);
+        }
+
         /// <summary>
         /// Remove tracked <see cref="IGridEntity"/> that is no longer in vision range.
         /// </summary>
-        public virtual void RemoveVisible(IGridEntity entity)
+        protected virtual void RemoveVisible(IGridEntity entity)
         {
             visibleEntities.Remove(entity.Guid);
 
             scriptCollection?.Invoke<IGridEntityScript>(s => s.OnRemoveVisibleEntity(entity));
 
             CheckEntityInRange(entity);
+        }
+
+        private void RemoveInvisible(IGridEntity entity)
+        {
+            invisibleEntities.Remove(entity.Guid);
+        }
+
+        private void OnVisibilityUpdate()
+        {
+            foreach ((uint _, IGridEntity entity) in invisibleEntities)
+            {
+                if (CanSeeEntity(entity))
+                {
+                    RemoveInvisible(entity);
+                    AddVisible(entity);
+                }
+            }
+
+            foreach ((uint _, IGridEntity entity) in visibleEntities)
+            {
+                if (!CanSeeEntity(entity))
+                {
+                    RemoveVisible(entity);
+                    AddInvisible(entity);
+                }
+            }
         }
 
         /// <summary>
@@ -325,21 +395,31 @@ namespace NexusForever.Game.Entity
             var check = new SearchCheckRange<IGridEntity>();
             check.Initialise(Position, Map.VisionRange);
 
-            List<IGridEntity> entities = Map.Search(Position, Map.VisionRange, check).ToList();
+            Dictionary<uint, IGridEntity> entities = Map.Search(Position, Map.VisionRange, check)
+                .ToDictionary(e => e.Guid, e => e);
 
             // new entities now in vision range
-            foreach (IGridEntity entity in entities.Except(visibleEntities.Values))
+            foreach ((uint guid, IGridEntity entity) in entities)
             {
-                AddVisible(entity);
+                if (visibleEntities.ContainsKey(guid)
+                    || invisibleEntities.ContainsKey(guid))
+                    continue;
+                
+                AddVisionEntity(entity);
                 if (entity != this)
-                    entity.AddVisible(this);
+                    entity.AddVisionEntity(this);
             }
 
             // old entities now out of vision range
-            foreach (IGridEntity entity in visibleEntities.Values.Except(entities).ToList())
+            foreach ((uint guid, IGridEntity entity) in visibleEntities
+                .Concat(invisibleEntities))
             {
-                RemoveVisible(entity);
-                entity.RemoveVisible(this);
+                if (entities.ContainsKey(guid))
+                    continue;
+
+                RemoveVisionEntity(entity);
+                if (entity != this)
+                    entity.RemoveVisionEntity(this);
             }
         }
 
@@ -374,7 +454,7 @@ namespace NexusForever.Game.Entity
 
         protected void UpdateRangeChecks()
         {
-            foreach (IGridEntity entity in visibleEntities.Values)
+            foreach ((uint _, IGridEntity entity) in visibleEntities)
                 entity.CheckEntityInRange(this);
         }
 

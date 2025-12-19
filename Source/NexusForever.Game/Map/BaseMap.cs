@@ -135,6 +135,9 @@ namespace NexusForever.Game.Map
                             actionRemove.Callback?.Invoke();
                             break;
                         }
+                        case IGridActionVisibilityUpdate actionVisionUpdate:
+                            actionVisionUpdate.Callback?.Invoke();
+                            break;
                     }
                 }
                 catch (Exception ex)
@@ -284,6 +287,18 @@ namespace NexusForever.Game.Map
             {
                 Entity   = entity,
                 Vector   = position,
+                Callback = callback
+            });
+        }
+
+        /// <summary>
+        /// Enqueue <see cref="IGridEntity"/> for visibility update.
+        /// </summary>
+        public void EnqueueVisibilityUpdate(IGridEntity entity, OnVisibilityUpdateDelegate callback = null)
+        {
+            pendingActions.Enqueue(new GridActionVisibilityUpdate
+            {
+                Entity   = entity,
                 Callback = callback
             });
         }

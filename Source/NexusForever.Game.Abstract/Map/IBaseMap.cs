@@ -44,6 +44,11 @@ namespace NexusForever.Game.Abstract.Map
         void EnqueueRelocate(IGridEntity entity, Vector3 position, OnRelocateDelegate callback = null);
 
         /// <summary>
+        /// Enqueue <see cref="IGridEntity"/> for visibility update.
+        /// </summary>
+        void EnqueueVisibilityUpdate(IGridEntity entity, OnVisibilityUpdateDelegate callback = null);
+
+        /// <summary>
         /// Return all <see cref="IGridEntity"/>'s from <see cref="Vector3"/> in range that satisfy <see cref="ISearchCheck{T}"/>.
         /// </summary>
         IEnumerable<T> Search<T>(Vector3 vector, float? radius, ISearchCheck<T> check) where T : IGridEntity;

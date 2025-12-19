@@ -11,5 +11,7 @@ namespace NexusForever.Game.Abstract.Map
 
     public delegate void OnRemoveDelegate();
 
+    public delegate void OnVisibilityUpdateDelegate();
+
     public delegate void OnExceptionDelegate(Exception ex);
 }

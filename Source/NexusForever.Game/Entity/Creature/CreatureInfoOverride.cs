@@ -12,6 +12,7 @@ namespace NexusForever.Game.Entity.Creature
         public Creature2TierEntry TierEntry => baseCreatureInfo.TierEntry;
         public Creature2ModelInfoEntry ModelEntry => baseCreatureInfo.ModelEntry;
         public UnitVehicleEntry UnitVehicleEntry => baseCreatureInfo.UnitVehicleEntry;
+        public PrerequisiteEntry PrerequisiteVisibilityEntry => baseCreatureInfo.PrerequisiteVisibilityEntry;
 
         private ICreatureInfo baseCreatureInfo;
         private uint? level;
@@ -117,6 +118,6 @@ namespace NexusForever.Game.Entity.Creature
                 return outfitInfoEntry;
 
             return baseCreatureInfo.GetOutfitInfoEntry();
-        }        
+        }
     }
 }

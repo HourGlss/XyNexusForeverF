@@ -823,7 +823,30 @@ namespace NexusForever.Game.Entity
             base.OnRemoveFromMap();
         }
 
-        public override void AddVisible(IGridEntity entity)
+        /// <summary>
+        /// Returns if <see cref="IGridEntity"/> can see supplied <see cref="IGridEntity"/>.
+        /// </summary>
+        protected override bool CanSeeEntity(IGridEntity entity)
+        {
+            bool? canSeeMe = entity.InvokeScriptCollection<bool, ICanSeeMeScript>(c => c.CanSeeMe(this));
+            if (canSeeMe != null && !canSeeMe.Value)
+                return false;
+
+            // TODO: implement me...
+            /*if (entity is IWorldEntity worldEntity && worldEntity.CreatureInfo != null)
+            {
+                if (worldEntity.CreatureInfo.PrerequisiteVisibilityEntry != null
+                    && !PrerequisiteManager.Instance.Meets(this, worldEntity.CreatureInfo.PrerequisiteVisibilityEntry.Id))
+                        return false;
+            }*/
+
+            return base.CanSeeEntity(entity);
+        }
+
+        /// <summary>
+        /// Add tracked <see cref="IGridEntity"/> that is in vision range.
+        /// </summary>
+        protected override void AddVisible(IGridEntity entity)
         {
             base.AddVisible(entity);
 
@@ -856,7 +879,10 @@ namespace NexusForever.Game.Entity
             }
         }
 
-        public override void RemoveVisible(IGridEntity entity)
+        /// <summary>
+        /// Remove tracked <see cref="IGridEntity"/> that is no longer in vision range.
+        /// </summary>
+        protected override void RemoveVisible(IGridEntity entity)
         {
             base.RemoveVisible(entity);
 

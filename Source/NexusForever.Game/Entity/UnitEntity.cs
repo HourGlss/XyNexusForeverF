@@ -188,7 +188,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Remove tracked <see cref="IGridEntity"/> that is no longer in vision range.
         /// </summary>
-        public override void RemoveVisible(IGridEntity entity)
+        protected override void RemoveVisible(IGridEntity entity)
         {
             if (entity.Guid == TargetGuid)
                 SetTarget((IWorldEntity)null);
