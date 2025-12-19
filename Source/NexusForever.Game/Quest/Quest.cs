@@ -1,12 +1,17 @@
 ﻿using System.Collections;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.Logging;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Quest;
+using NexusForever.Game.Static.Achievement;
+using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Quest;
+using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Static;
 using NexusForever.Script;
 using NexusForever.Script.Template;
 using NexusForever.Script.Template.Collection;
@@ -30,7 +35,7 @@ namespace NexusForever.Game.Quest
         }
 
         public ushort Id => (ushort)Info.Entry.Id;
-        public IQuestInfo Info { get; }
+        public IQuestInfo Info { get; private set; }
 
         public QuestState State
         {
@@ -96,21 +101,37 @@ namespace NexusForever.Game.Quest
 
         private QuestSaveMask saveMask;
 
-        private readonly IPlayer player;
-        private readonly List<IQuestObjective> objectives = new();
+        private IPlayer player;
+        private readonly List<IQuestObjective> objectives = [];
 
         private UpdateTimer questTimer;
 
         private IScriptCollection scriptCollection;
 
+
+        #region Dependency Injection
+
+        private readonly ILogger<Quest> log;
+        private readonly IScriptManager scriptManager;
+
+        public Quest(
+            ILogger<Quest> log,
+            IScriptManager scriptManager)
+        {
+            this.log           = log;
+            this.scriptManager = scriptManager;
+        }
+
+        #endregion
+
         /// <summary>
         /// Create a new <see cref="IQuest"/> from an existing database model.
         /// </summary>
-        public Quest(IPlayer owner, IQuestInfo info, CharacterQuestModel model)
+        public void Initialise(IPlayer owner, IQuestInfo info, CharacterQuestModel model)
         {
             player = owner;
             Info   = info;
-            state  = (QuestState)model.State;
+            State  = (QuestState)model.State;
             flags  = (QuestStateFlags)model.Flags;
             timer  = model.Timer;
             reset  = model.Reset;
@@ -121,40 +142,50 @@ namespace NexusForever.Game.Quest
             foreach (CharacterQuestObjectiveModel objectiveModel in model.QuestObjective)
                 objectives.Add(new QuestObjective(player, info, info.Objectives[objectiveModel.Index], objectiveModel));
 
-            scriptCollection = ScriptManager.Instance.InitialiseOwnedCollection<IQuest>(this);
-            ScriptManager.Instance.InitialiseOwnedScripts<IQuest>(scriptCollection, info.Entry.Id);
+            scriptCollection = scriptManager.InitialiseOwnedCollection<IQuest>(this);
+            scriptManager.InitialiseOwnedScripts<IQuest>(scriptCollection, info.Entry.Id);
         }
 
         /// <summary>
         /// Create a new <see cref="IQuest"/> from supplied <see cref="IQuestInfo"/>.
         /// </summary>
-        public Quest(IPlayer owner, IQuestInfo info)
+        public void Initialise(IPlayer owner, IQuestInfo info)
         {
             player = owner;
             Info   = info;
-            state  = QuestState.Accepted;
+            flags |= QuestStateFlags.Tracked;
+            State  = QuestState.Accepted;
 
             for (byte i = 0; i < info.Objectives.Count; i++)
                 objectives.Add(new QuestObjective(player, info, info.Objectives[i], i));
 
             if (objectives.Count == 0)
-                state = QuestState.Achieved;
+                State = QuestState.Achieved;
+
+            InitialiseItems();
+            InitialiseTimers();
+
+            player.VisibilityUpdate();
 
             saveMask = QuestSaveMask.Create;
 
-            scriptCollection = ScriptManager.Instance.InitialiseOwnedCollection<IQuest>(this);
-            ScriptManager.Instance.InitialiseOwnedScripts<IQuest>(scriptCollection, info.Entry.Id);
+            scriptCollection = scriptManager.InitialiseOwnedCollection<IQuest>(this);
+            scriptManager.InitialiseOwnedScripts<IQuest>(scriptCollection, info.Entry.Id);
         }
 
-        public void Dispose()
+        private void InitialiseItems()
         {
-            if (scriptCollection != null)
-                ScriptManager.Instance.Unload(scriptCollection);
+            for (int i = 0; i < Info.Entry.PushedItemIds.Length; i++)
+            {
+                uint itemId = Info.Entry.PushedItemIds[i];
+                if (itemId != 0u)
+                    player.Inventory.ItemCreate(InventoryLocation.Inventory, itemId, Info.Entry.PushedItemCounts[i]);
+            }
 
-            scriptCollection = null;
+            // TODO: virtual items
         }
 
-        public void InitialiseTimer()
+        private void InitialiseTimers()
         {
             if (Info.Entry.MaxTimeAllowedMS != 0u)
             {
@@ -163,6 +194,14 @@ namespace NexusForever.Game.Quest
             }
 
             // TODO: objective timers
+        }
+
+        public void Dispose()
+        {
+            if (scriptCollection != null)
+                scriptManager.Unload(scriptCollection);
+
+            scriptCollection = null;
         }
 
         public void Save(CharacterContext context)
@@ -295,6 +334,118 @@ namespace NexusForever.Game.Quest
         }
 
         /// <summary>
+        /// Returns the owner <see cref="IPlayer"/> of the <see cref="IQuest"/>.
+        /// </summary>
+        public IPlayer GetOwner()
+        {
+            return player;
+        }
+
+        /// <summary>
+        /// Return the <see cref="IQuestObjective"/> with the supplied id.
+        /// </summary>
+        public IQuestObjective GetQuestObjective(uint id)
+        {
+            return objectives.SingleOrDefault(o => o.ObjectiveInfo.Id == id);
+        }
+
+        /// <summary>
+        /// Return the <see cref="IQuestObjective"/> with the supplied index.
+        /// </summary>
+        public IQuestObjective GetQuestObjectiveByIndex(byte index)
+        {
+            return objectives.SingleOrDefault(o => o.Index == index);
+        }
+
+        /// <summary>
+        /// Complete the <see cref="IQuest"/> without rewards.
+        /// </summary>
+        public void CompleteQuest()
+        {
+            if (State != QuestState.Achieved)
+                return;
+
+            // reclaim any quest specific items
+            for (int i = 0; i < Info.Entry.PushedItemIds.Length; i++)
+            {
+                uint itemId = Info.Entry.PushedItemIds[i];
+                if (itemId != 0u)
+                    player.Inventory.ItemDelete(itemId, Info.Entry.PushedItemCounts[i]);
+            }
+
+            State = QuestState.Completed;
+
+            // mark repeatable quests for reset
+            switch ((QuestRepeatPeriod)Info.Entry.QuestRepeatPeriodEnum)
+            {
+                case QuestRepeatPeriod.Daily:
+                    Reset = GlobalQuestManager.Instance.NextDailyReset;
+                    break;
+                case QuestRepeatPeriod.Weekly:
+                    Reset = GlobalQuestManager.Instance.NextWeeklyReset;
+                    break;
+            }
+
+            player.AchievementManager.CheckAchievements(player, AchievementType.QuestComplete, Info.Entry.Id);
+        }
+
+        /// <summary>
+        /// Complete the <see cref="IQuest"/> with the specified reward.
+        /// </summary>
+        public void RewardQuest(ushort reward)
+        {
+            if (State != QuestState.Achieved)
+                return;
+
+            // Handle all Rewards that are not chosen
+            foreach (Quest2RewardEntry rewardEntry in Info.Rewards.Values.Where(x => x.Flags == 0))
+                RewardQuest(rewardEntry);
+
+            // Handle any chosen rewards
+            if (reward != 0)
+            {
+                if (!Info.Rewards.TryGetValue(reward, out Quest2RewardEntry entry))
+                    throw new QuestException($"Player {player.CharacterId} tried to complete quest {Info.Entry.Id} with invalid reward!");
+
+                // TODO: make sure reward is valid for player, some rewards are conditional
+
+                RewardQuest(entry);
+            }
+
+            // TODO: fixed rewards
+
+            uint experience = Info.GetRewardExperience();
+            if (experience != 0u)
+                player.XpManager.GrantXp(experience, ExpReason.Quest);
+
+            uint money = Info.GetRewardMoney();
+            if (money != 0u)
+                player.CurrencyManager.CurrencyAddAmount(CurrencyType.Credits, money);
+
+            CompleteQuest();
+        }
+
+        private void RewardQuest(Quest2RewardEntry entry)
+        {
+            switch ((QuestRewardType)entry.Quest2RewardTypeId)
+            {
+                case QuestRewardType.Item:
+                    player.Inventory.ItemCreate(InventoryLocation.Inventory, entry.ObjectId, entry.ObjectAmount);
+                    break;
+                case QuestRewardType.Money:
+                    player.CurrencyManager.CurrencyAddAmount((CurrencyType)entry.ObjectId, entry.ObjectAmount);
+                    break;
+                default:
+                {
+                    log.LogWarning($"Unhandled quest reward type {entry.Quest2RewardTypeId}!");
+                    break;
+                }
+            }
+
+            log.LogTrace($"Recieved quest reward, type: {(QuestRewardType)entry.Quest2RewardTypeId}, objectId: {entry.ObjectId}, amount: {entry.ObjectAmount}.");
+        }
+
+        /// <summary>
         /// Update any <see cref="IQuestObjective"/>'s with supplied <see cref="QuestObjectiveType"/> and data with progress.
         /// </summary>
         public void ObjectiveUpdate(QuestObjectiveType type, uint data, uint progress)
@@ -325,6 +476,8 @@ namespace NexusForever.Game.Quest
                 scriptCollection?.Invoke<IQuestScript>(s => s.OnObjectiveUpdate(objective));
             }
 
+            player.VisibilityUpdate();
+
             // TODO: Should you be able to complete optional objectives after required are completed?
             if (RequiredObjectivesComplete())
                 CompleteOptionalObjectives();
@@ -344,7 +497,7 @@ namespace NexusForever.Game.Quest
             if (State == QuestState.Achieved)
                 return;
 
-            IQuestObjective objective = objectives.SingleOrDefault(o => o.ObjectiveInfo.Id == id);
+            IQuestObjective objective = GetQuestObjective(id);
             if (objective == null)
                 return;
 
@@ -361,6 +514,8 @@ namespace NexusForever.Game.Quest
                 SendQuestObjectiveUpdate(objective);
 
             scriptCollection?.Invoke<IQuestScript>(s => s.OnObjectiveUpdate(objective));
+
+            player.VisibilityUpdate();
 
             // TODO: Should you be able to complete optional objectives after required are completed?
             if (RequiredObjectivesComplete())

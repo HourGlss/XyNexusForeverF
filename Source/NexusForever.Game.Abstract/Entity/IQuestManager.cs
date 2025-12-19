@@ -1,4 +1,5 @@
 ﻿using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Quest;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Shared;
@@ -8,6 +9,26 @@ namespace NexusForever.Game.Abstract.Entity
     public interface IQuestManager : IDisposable, IDatabaseCharacter, IUpdate
     {
         void SendInitialPackets();
+
+        /// <summary>
+        /// Initialise a new <see cref="IQuestManager"/> from existing <see cref="CharacterModel"/> database model.
+        /// </summary>
+        void Initialise(IPlayer owner, CharacterModel model);
+
+        /// <summary>
+        /// Get an active <see cref="IQuest"/> from supplied quest id.
+        /// </summary>
+        IQuest GetActiveQuest<T>(T questId) where T : Enum;
+
+        /// <summary>
+        /// Get an active <see cref="IQuest"/> from supplied quest id.
+        /// </summary>
+        IQuest GetActiveQuest(ushort questId);
+
+        /// <summary>
+        /// Returns a collection of all active quests.
+        /// </summary>
+        IEnumerable<IQuest> GetActiveQuests();
 
         /// <summary>
         /// Return <see cref="QuestState"/> for supplied quest.
@@ -33,6 +54,16 @@ namespace NexusForever.Game.Abstract.Entity
         /// Add a quest from supplied id, optionally supplying <see cref="IItem"/> which was used to start the quest.
         /// </summary>
         void QuestAdd(ushort questId, IItem item);
+
+        /// <summary>
+        /// Add a quest from supplied quest id.
+        /// </summary>
+        void QuestAdd<T>(T questId) where T : Enum;
+
+        /// <summary>
+        /// Add a quest from supplied quest id.
+        /// </summary>
+        void QuestAdd(ushort questId);
 
         /// <summary>
         /// Add a quest from supplied <see cref="IQuestInfo"/>, skipping any prerequisites checks.
@@ -65,6 +96,16 @@ namespace NexusForever.Game.Abstract.Entity
         void QuestComplete(ushort questId, ushort reward, bool communicator);
 
         /// <summary>
+        /// Complete an achieved <see cref="IQuest"/> from supplied quest id.
+        /// </summary>
+        void QuestComplete<T>(T questId) where T : Enum;
+
+        /// <summary>
+        /// Complete an achieved <see cref="IQuest"/> from supplied quest id.
+        /// </summary>
+        void QuestComplete(ushort questId);
+
+        /// <summary>
         /// Ignore or acknowledge an inactive quest.
         /// </summary>
         void QuestIgnore(ushort questId, bool ignored);
@@ -93,10 +134,5 @@ namespace NexusForever.Game.Abstract.Entity
         /// Update any active quest <see cref="IQuestObjective"/>'s with supplied ID with progress.
         /// </summary>
         void ObjectiveUpdate(uint id, uint progress);
-
-        /// <summary>
-        /// Returns a collection of all active quests.
-        /// </summary>
-        IEnumerable<IQuest> GetActiveQuests();
     }
 }

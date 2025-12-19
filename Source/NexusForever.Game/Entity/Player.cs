@@ -27,6 +27,7 @@ using NexusForever.Game.Configuration.Model;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
+using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Reputation;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Chat;
@@ -284,7 +285,8 @@ namespace NexusForever.Game.Entity
             IMatchingManager matchingManager,
             IMatchManager matchManager,
             ICurrencyManager currencyManager,
-            IResurrectionManager resurrectionManager)
+            IResurrectionManager resurrectionManager,
+            IQuestManager questManager)
             : base(movementManager, entitySummonFactory, statUpdateManager, spellFactory)
         {
             this.messagePublisher    = messagePublisher;
@@ -300,6 +302,7 @@ namespace NexusForever.Game.Entity
             // managers
             CurrencyManager     = currencyManager;
             ResurrectionManager = resurrectionManager;
+            QuestManager        = questManager;
         }
 
         #endregion
@@ -365,7 +368,7 @@ namespace NexusForever.Game.Entity
             DatacubeManager         = new DatacubeManager(this, model);
             MailManager             = new MailManager(this, model);
             ZoneMapManager          = new ZoneMapManager(this, model);
-            QuestManager            = new QuestManager(this, model);
+            QuestManager.Initialise(this, model);
             AchievementManager      = new CharacterAchievementManager(this, model);
             SupplySatchelManager    = new SupplySatchelManager(this, model);
             XpManager               = new XpManager(this, model);
