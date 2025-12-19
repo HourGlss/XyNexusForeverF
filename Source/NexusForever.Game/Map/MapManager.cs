@@ -219,7 +219,7 @@ namespace NexusForever.Game.Map
             if (maps.TryGetValue(entry.Id, out IMap map))
                 return map;
 
-            map = mapFactory.CreateMap(entry.Type);
+            map = mapFactory.CreateMap(entry);
             map.Initialise(entry);
             maps.Add(entry.Id, map);
 

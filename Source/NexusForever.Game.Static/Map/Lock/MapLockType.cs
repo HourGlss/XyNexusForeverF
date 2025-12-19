@@ -6,6 +6,7 @@
         Group,
         Match,
         Raid,
-        Residence
+        Residence,
+        Tutorial
     }
 }

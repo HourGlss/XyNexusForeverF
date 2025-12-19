@@ -15,7 +15,7 @@ namespace NexusForever.Game.Map.Lock
 
         #region Dependency Injection
 
-        private readonly ILogger<MapLock> log;
+        protected readonly ILogger<MapLock> log;
 
         public MapLock(
             ILogger<MapLock> log)

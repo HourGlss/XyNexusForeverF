@@ -8,13 +8,10 @@ namespace NexusForever.Game.Map.Lock
 
         #region Dependency Injection
 
-        private readonly ILogger<MapLock> log;
-
         public ResidenceMapLock(
             ILogger<MapLock> log)
             : base(log)
         {
-            this.log = log;
         }
 
         #endregion
