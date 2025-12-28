@@ -12,5 +12,21 @@
                 "Provider": "MySql"
             }
         ]
+    },
+    "Telemetry": {
+        "Logging": {
+            "Enable": false
+        },
+        "Metrics": {
+            "Enable": false
+        },
+        "Tracing": {
+            "Enable": false
+        },
+        "Endpoint": {
+            "Url": "",
+            "Protocol": "Grpc",
+            "Headers": ""
+        }
     }
 }

@@ -17,7 +17,7 @@ namespace NexusForever.Database.Chat.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.7")
+                .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -172,6 +172,10 @@ namespace NexusForever.Database.Chat.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("createdAt");
+
+                    b.Property<string>("Metadata")
+                        .HasColumnType("longtext")
+                        .HasColumnName("metadata");
 
                     b.Property<string>("Payload")
                         .IsRequired()

@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\NexusForever.Cryptography\NexusForever.Cryptography.csproj" />
     <ProjectReference Include="..\NexusForever.Shared\NexusForever.Shared.csproj" />
+    <ProjectReference Include="..\NexusForever.Telemetry\NexusForever.Telemetry.csproj" />
   </ItemGroup>
 
 </Project>

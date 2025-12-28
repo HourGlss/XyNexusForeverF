@@ -16,5 +16,21 @@
         "Character": {
             "Host": "http://localhost:4000"
         }
+    },
+    "Telemetry": {
+        "Logging": {
+            "Enable": false
+        },
+        "Metrics": {
+            "Enable": false
+        },
+        "Tracing": {
+            "Enable": false
+        },
+        "Endpoint": {
+            "Url": "",
+            "Protocol": "Grpc",
+            "Headers": ""
+        }
     }
 }

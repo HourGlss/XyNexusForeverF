@@ -8,10 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="nlog.config" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <None Include="Logging.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="nlog.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

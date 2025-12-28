@@ -8,22 +8,29 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.Systemd;
 using Microsoft.Extensions.Hosting.WindowsServices;
+using Microsoft.Extensions.Logging;
 using NexusForever.Database;
+using NexusForever.Database.Telemetry;
 using NexusForever.Game;
 using NexusForever.Game.Configuration.Model;
 using NexusForever.GameTable;
 using NexusForever.Network.Configuration.Model;
 using NexusForever.Network.Internal;
 using NexusForever.Network.Internal.Configuration;
+using NexusForever.Network.Internal.Telemetry.Trace;
+using NexusForever.Network.Telemetry;
 using NexusForever.Script;
 using NexusForever.Script.Configuration.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
+using NexusForever.Telemetry;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Internal.Handler;
 using NexusForever.WorldServer.Service;
+using NexusForever.WorldServer.Telemetry.Metric;
 using NLog;
 using NLog.Extensions.Logging;
+using OpenTelemetry;
 
 namespace NexusForever.WorldServer
 {
@@ -41,20 +48,35 @@ namespace NexusForever.WorldServer
 
         private static async Task Main()
         {
-            Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
+            string basePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            Directory.SetCurrentDirectory(basePath);
 
             IHostBuilder builder = new HostBuilder()
-                .ConfigureLogging(lb =>
+                .ConfigureLogging((hb, c) =>
                 {
-                    lb.AddNLog();
+                    c.ClearProviders()
+                        .AddConfiguration(hb.Configuration.GetSection("Logging"))
+                        .AddNLog(new NLogProviderOptions
+                        {
+                            RemoveLoggerFactoryFilter = false
+                        });
                 })
                 .ConfigureAppConfiguration(cb =>
                 {
-                    cb.AddJsonFile("WorldServer.json", false)
+                    cb.SetBasePath(basePath)
+                        .AddJsonFile("WorldServer.json", false)
+                        .AddJsonFile("Logging.json", true)
                         .AddEnvironmentVariables();
                 })
                 .ConfigureServices((hb, sc) =>
                 {
+                    OpenTelemetryBuilder otb = sc.AddNexusForeverTelemetry(
+                        hb.Configuration.GetSection("Telemetry"))?
+                            .AddNetworkInternalTracing()
+                            .AddNetworkTracing()
+                            .AddEntityFrameworkTracing()
+                            .AddWorldServerMetrics();
+
                     // register world server service first since it needs to execute before the web host
                     sc.AddHostedService<ConfigurationHostedService>();
                     sc.AddHostedService<GameTableHostedService>();
@@ -81,8 +103,9 @@ namespace NexusForever.WorldServer
                         hb.Configuration.GetSection("GameTable"));
                     sc.AddWorldNetwork();
                     sc.AddScript();
-                    sc.AddShared();
                     sc.AddWorld();
+
+                    sc.AddSingleton<IWorldManager, WorldManager>();
                 })
                 .ConfigureWebHostDefaults(wb =>
                 {

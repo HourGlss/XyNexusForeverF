@@ -1,9 +1,11 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Net.Sockets;
 using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Cryptography;
 using NexusForever.Network.Message;
 using NexusForever.Network.Packet;
+using NexusForever.Network.Telemetry;
 using NexusForever.Shared;
 
 namespace NexusForever.Network.Session
@@ -69,6 +71,10 @@ namespace NexusForever.Network.Session
                 log.Warn("Failed to send message with no attribute!");
                 return;
             }
+
+            using Activity activity = StaticTest.Messaging.StartActivity($"Send Network Message {opcode}", ActivityKind.Producer);
+            activity?.AddTag("Opcode", opcode);
+            activity?.AddTag("Opcode Value", (int)opcode);
 
             using (var stream = new MemoryStream())
             using (var writer = new GamePacketWriter(stream))
@@ -178,6 +184,7 @@ namespace NexusForever.Network.Session
 
         public void HandlePacket(ClientGamePacket packet)
         {
+            Activity activity = null;
             try
             {
                 //using IServiceScope serviceScope = CreateHandlePacketScope();
@@ -221,7 +228,14 @@ namespace NexusForever.Network.Session
                     && opcode != GameMessageOpcode.ClientPacked
                     && opcode != GameMessageOpcode.ClientPackedWorld
                     && opcode != GameMessageOpcode.ClientEntityCommand)
+                {
+                    activity = StaticTest.Messaging.StartActivity($"Receive Network Message {opcode}", ActivityKind.Consumer);
+                    activity?.AddTag("Opcode", opcode);
+                    activity?.AddTag("Opcode Value", (int)opcode);
+
                     log.Trace($"Received packet {opcode}(0x{opcode:X}).");
+                }
+                    
 
                 // FIXME workaround for now. possible performance impact. 
                 // ClientPing does not currently work and the session times out after 300s -> this keeps the session alive if -any- client packet is received
@@ -241,6 +255,10 @@ namespace NexusForever.Network.Session
             catch (Exception exception)
             {
                 log.Error(exception);
+            }
+            finally
+            {
+                activity?.Dispose();
             }
         }
 

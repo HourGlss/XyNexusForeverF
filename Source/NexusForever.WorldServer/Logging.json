@@ -1,0 +1,10 @@
+﻿{
+    "Logging": {
+        "LogLevel": {
+            "Default": "Trace",
+            "Rebus": "Information",
+            "Microsoft": "Information",
+            "Microsoft.EntityFrameworkCore.Database": "Warning"
+        }
+    }
+}

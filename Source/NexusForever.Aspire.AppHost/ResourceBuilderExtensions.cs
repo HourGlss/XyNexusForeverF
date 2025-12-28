@@ -80,5 +80,20 @@ namespace NexusForever.Aspire.AppHost
             });
             return builder;
         }
+
+        public static IResourceBuilder<T>WithNexusForeverTelemetry<T>(this IResourceBuilder<T> builder) where T : IResourceWithEnvironment
+        {
+            builder.WithEnvironment(c =>
+            {
+                c.EnvironmentVariables["Telemetry:Logging:Enable"] = true;
+                c.EnvironmentVariables["Telemetry:Metrics:Enable"] = true;
+                c.EnvironmentVariables["Telemetry:Tracing:Enable"] = true;
+                c.EnvironmentVariables["Telemetry:Endpoint:Url"] = c.EnvironmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"];
+                c.EnvironmentVariables["Telemetry:Endpoint:Protocol"] = c.EnvironmentVariables["OTEL_EXPORTER_OTLP_PROTOCOL"];
+                c.EnvironmentVariables["Telemetry:Endpoint:Headers"] = c.EnvironmentVariables["OTEL_EXPORTER_OTLP_HEADERS"];
+            });
+
+            return builder;
+        }
     }
 }

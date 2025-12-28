@@ -6,14 +6,18 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.Systemd;
 using Microsoft.Extensions.Hosting.WindowsServices;
+using Microsoft.Extensions.Logging;
 using NexusForever.AuthServer.Network;
 using NexusForever.Database;
+using NexusForever.Database.Telemetry;
 using NexusForever.Game;
 using NexusForever.Network.Configuration.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
+using NexusForever.Telemetry;
 using NLog;
 using NLog.Extensions.Logging;
+using OpenTelemetry;
 
 namespace NexusForever.AuthServer
 {
@@ -29,20 +33,32 @@ namespace NexusForever.AuthServer
 
         private static void Main()
         {
-            Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
+            string basePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            Directory.SetCurrentDirectory(basePath);
 
             IHostBuilder builder = new HostBuilder()
-                .ConfigureLogging(lb =>
+                .ConfigureLogging((hb, c) =>
                 {
-                    lb.AddNLog();
+                    c.ClearProviders()
+                        .AddConfiguration(hb.Configuration.GetSection("Logging"))
+                        .AddNLog(new NLogProviderOptions
+                        {
+                            RemoveLoggerFactoryFilter = false
+                        });
                 })
                 .ConfigureAppConfiguration(cb =>
                 {
-                    cb.AddJsonFile("AuthServer.json", false)
+                    cb.SetBasePath(basePath)
+                        .AddJsonFile("AuthServer.json", false)
+                        .AddJsonFile("Logging.json", true)
                         .AddEnvironmentVariables();
                 })
                 .ConfigureServices((hb, sc) =>
                 {
+                    OpenTelemetryBuilder otb = sc.AddNexusForeverTelemetry(
+                        hb.Configuration.GetSection("Telemetry"))?
+                            .AddEntityFrameworkTracing();
+
                     sc.AddHostedService<HostedService>();
 
                     sc.AddOptions<NetworkConfig>()

@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NexusForever.Game.Static\NexusForever.Game.Static.csproj" />
+    <ProjectReference Include="..\NexusForever.Telemetry\NexusForever.Telemetry.csproj" />
   </ItemGroup>
 
 </Project>

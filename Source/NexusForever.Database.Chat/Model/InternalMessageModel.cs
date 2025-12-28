@@ -7,5 +7,6 @@
         public DateTime? ProcessedAt { get; set; }
         public string Type { get; set; }
         public string Payload { get; set; }
+        public string Metadata { get; set; }
     }
 }

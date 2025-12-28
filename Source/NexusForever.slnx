@@ -30,6 +30,7 @@
     <Project Path="NexusForever.Server.GroupServer/NexusForever.Server.GroupServer.csproj" />
     <Project Path="NexusForever.Shared/NexusForever.Shared.csproj" />
     <Project Path="NexusForever.StsServer/NexusForever.StsServer.csproj" />
+    <Project Path="NexusForever.Telemetry/NexusForever.Telemetry.csproj" />
     <Project Path="NexusForever.WorldServer/NexusForever.WorldServer.csproj">
       <BuildDependency Project="NexusForever.Script.Alizar/NexusForever.Script.Alizar.csproj" />
       <BuildDependency Project="NexusForever.Script.Arcterra/NexusForever.Script.Arcterra.csproj" />

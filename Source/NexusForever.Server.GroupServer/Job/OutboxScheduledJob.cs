@@ -1,8 +1,11 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics;
+using System.Text.Json;
 using NexusForever.Database.Group;
 using NexusForever.Database.Group.Model;
 using NexusForever.Database.Group.Repository;
 using NexusForever.Network.Internal;
+using NexusForever.Network.Internal.Telemetry.Trace;
+using OpenTelemetry.Context.Propagation;
 using Quartz;
 
 namespace NexusForever.Server.GroupServer.Job
@@ -39,6 +42,15 @@ namespace NexusForever.Server.GroupServer.Job
                 var type = Type.GetType(message.Type);
                 if (type == null)
                     continue;
+
+                var metadata = JsonSerializer.Deserialize<Dictionary<string, string>>(message.Metadata);
+                PropagationContext parent = Propagators.DefaultTextMapPropagator.Extract(default, metadata,
+                    (headers, key) => headers.TryGetValue(key, out string value) ? new[] { value } : []);
+
+                using Activity activity = TraceStatic.Messaging.StartActivity($"Receive Outbox Message {type}", ActivityKind.Consumer, parent.ActivityContext);
+                activity?.SetTag("MessageId", message.Id);
+                activity?.SetTag("Type", type);
+                activity?.SetTag("CreatedAt", message.CreatedAt);
 
                 object payload = JsonSerializer.Deserialize(message.Payload, type);
                 await _messagePublisher.PublishAsync(payload);

@@ -409,6 +409,10 @@ namespace NexusForever.Database.Group
                 entity.Property(entity => entity.Payload)
                     .HasColumnName("data")
                     .IsRequired();
+
+                entity.Property(entity => entity.Metadata)
+                    .HasColumnName("metadata")
+                    .HasDefaultValue(null);
             });
         }
     }

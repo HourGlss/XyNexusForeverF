@@ -177,6 +177,10 @@ namespace NexusForever.Database.Chat
                 entity.Property(entity => entity.Payload)
                     .HasColumnName("data")
                     .IsRequired();
+
+                entity.Property(entity => entity.Metadata)
+                    .HasColumnName("metadata")
+                    .HasDefaultValue(null);
             });
         }
     }

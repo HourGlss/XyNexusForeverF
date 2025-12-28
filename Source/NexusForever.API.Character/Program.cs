@@ -3,11 +3,15 @@ using NexusForever.API.Character.Character;
 using NexusForever.API.Character.Configuration.Model;
 using NexusForever.API.Character.Database;
 using NexusForever.API.Character.Server;
+using NexusForever.API.Telemetry;
 using NexusForever.Database;
 using NexusForever.Database.Auth;
 using NexusForever.Database.Character;
 using NexusForever.Database.Configuration.Model;
+using NexusForever.Database.Telemetry;
+using NexusForever.Telemetry;
 using NLog.Extensions.Logging;
+using OpenTelemetry;
 
 namespace NexusForever.API.Character
 {
@@ -19,13 +23,23 @@ namespace NexusForever.API.Character
 
             builder.Logging
                 .ClearProviders()
-                .AddNLog();
+                .AddConfiguration(builder.Configuration.GetSection("Logging"))
+                .AddNLog(new NLogProviderOptions
+                {
+                    RemoveLoggerFactoryFilter = false
+                });
 
             string basePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             builder.Configuration
                 .SetBasePath(basePath)
                 .AddJsonFile("CharacterAPI.json", false)
+                .AddJsonFile("Logging.json", true)
                 .AddEnvironmentVariables();
+
+            OpenTelemetryBuilder otb = builder.Services.AddNexusForeverTelemetry(
+                builder.Configuration.GetSection("Telemetry"))?
+                    .AddAspTracing()
+                    .AddEntityFrameworkTracing();
 
             builder.Services
                 .AddAuthDatabase(

@@ -1,18 +1,32 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading;
-using NLog;
+using Microsoft.Extensions.Logging;
 
 namespace NexusForever.Shared
 {
-    public sealed class WorldManager : IWorldManager
+    // TODO: Rawaho: this really needs to go away for anything except the WorldServer
+    public class WorldManager : IWorldManager
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+        protected static readonly double TargetTps            = 30.0d;
+        protected static readonly TimeSpan TargetTickInterval = TimeSpan.FromSeconds(1d / TargetTps);
 
         private Thread worldThread;
-        private readonly ManualResetEventSlim waitHandle = new();
+        protected readonly ManualResetEventSlim waitHandle = new();
 
-        private volatile CancellationTokenSource cancellationToken;
+        protected volatile CancellationTokenSource cancellationToken;
+
+        #region Dependency Injection
+
+        protected readonly ILogger<WorldManager> log;
+
+        public WorldManager(
+            ILogger<WorldManager> log)
+        {
+            this.log = log;
+        }
+
+        #endregion
 
         /// <summary>
         /// Initialise <see cref="IWorldManager"/> and any related resources.
@@ -22,7 +36,7 @@ namespace NexusForever.Shared
             if (cancellationToken != null)
                 throw new InvalidOperationException();
 
-            log.Info("Initialising world manager...");
+            log.LogInformation("Initialising world manager...");
 
             cancellationToken = new CancellationTokenSource();
 
@@ -33,32 +47,36 @@ namespace NexusForever.Shared
             waitHandle.Wait();
         }
 
-        private void WorldThread(Action<double> updateAction)
+        protected virtual void WorldThread(Action<double> updateAction)
         {
-            log.Info("Started world thread.");
+            log.LogInformation("Started world thread.");
             waitHandle.Set();
 
-            var stopwatch = new Stopwatch();
-            double lastTick = 0d;
+            TimeSpan delta = TimeSpan.FromMilliseconds(0);
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                stopwatch.Restart();
+                long tickStart = Stopwatch.GetTimestamp();
 
                 try
                 {
-                    updateAction(lastTick);
+                    updateAction(delta.TotalSeconds);
                 }
                 catch (Exception ex)
                 {
-                    log.Error(ex, "Error during world update.");
+                    log.LogError(ex, "Error during world update.");
                 }
 
-                Thread.Sleep(1);
-                lastTick = (double)stopwatch.ElapsedTicks / Stopwatch.Frequency;
+                long tickEnd = Stopwatch.GetTimestamp();
+                TimeSpan elapsed = Stopwatch.GetElapsedTime(tickStart, tickEnd);
+
+                if (elapsed < TargetTickInterval)
+                    Thread.Sleep(TargetTickInterval - elapsed);
+
+                delta = Stopwatch.GetElapsedTime(tickStart, Stopwatch.GetTimestamp());
             }
 
-            log.Info("Stopped world thread.");
+            log.LogInformation("Stopped world thread.");
         }
 
         /// <summary>
@@ -69,7 +87,7 @@ namespace NexusForever.Shared
             if (cancellationToken == null)
                 throw new InvalidOperationException();
 
-            log.Info("Shutting down world manager...");
+            log.LogInformation("Shutting down world manager...");
 
             cancellationToken.Cancel();
 

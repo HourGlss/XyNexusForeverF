@@ -6,13 +6,17 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.Systemd;
 using Microsoft.Extensions.Hosting.WindowsServices;
+using Microsoft.Extensions.Logging;
 using NexusForever.Database;
+using NexusForever.Database.Telemetry;
 using NexusForever.Network.Configuration.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NexusForever.StsServer.Network;
+using NexusForever.Telemetry;
 using NLog;
 using NLog.Extensions.Logging;
+using OpenTelemetry;
 
 namespace NexusForever.StsServer
 {
@@ -28,20 +32,32 @@ namespace NexusForever.StsServer
 
         private static void Main()
         {
-            Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
+            string basePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            Directory.SetCurrentDirectory(basePath);
 
             IHostBuilder builder = new HostBuilder()
-                .ConfigureLogging(lb =>
+                .ConfigureLogging((hb, c) =>
                 {
-                    lb.AddNLog();
+                    c.ClearProviders()
+                        .AddConfiguration(hb.Configuration.GetSection("Logging"))
+                        .AddNLog(new NLogProviderOptions
+                        {
+                            RemoveLoggerFactoryFilter = false
+                        });
                 })
                 .ConfigureAppConfiguration(cb =>
                 {
-                    cb.AddJsonFile("StsServer.json", false)
+                    cb.SetBasePath(basePath)
+                        .AddJsonFile("StsServer.json", false)
+                        .AddJsonFile("Logging.json", true)
                         .AddEnvironmentVariables();
                 })
                 .ConfigureServices((hb, sc) =>
                 {
+                    OpenTelemetryBuilder otb = sc.AddNexusForeverTelemetry(
+                        hb.Configuration.GetSection("Telemetry"))?
+                            .AddEntityFrameworkTracing();
+
                     sc.AddHostedService<HostedService>();
 
                     sc.AddOptions<NetworkConfig>()

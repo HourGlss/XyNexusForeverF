@@ -7,11 +7,13 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\NexusForever.Shared\NexusForever.Shared.csproj" />
+    <ProjectReference Include="..\NexusForever.Telemetry\NexusForever.Telemetry.csproj" />
   </ItemGroup>
 
 </Project>

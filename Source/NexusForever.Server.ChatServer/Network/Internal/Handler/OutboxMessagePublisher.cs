@@ -1,7 +1,10 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics;
+using System.Text.Json;
 using NexusForever.Database.Chat.Model;
 using NexusForever.Database.Chat.Repository;
 using NexusForever.Network.Internal;
+using OpenTelemetry;
+using OpenTelemetry.Context.Propagation;
 
 namespace NexusForever.Server.ChatServer.Network.Internal.Handler
 {
@@ -30,7 +33,11 @@ namespace NexusForever.Server.ChatServer.Network.Internal.Handler
         /// <param name="message">Message to publish.</param>
         public async Task PublishAsync(object message)
         {
-            InternalMessageModel internalMessage = await CreateMessage(message);
+            using Activity activity = NexusForever.Network.Internal.Telemetry.Trace.TraceStatic.Messaging.StartActivity($"Send Outbox Message {message.GetType()}", ActivityKind.Producer);
+            activity?.SetTag("Type", message.GetType());
+
+            Dictionary<string, string> values = CreateHeaders();
+            InternalMessageModel internalMessage = await CreateMessage(message, values);
             _repository.AddMessage(internalMessage);
         }
 
@@ -44,9 +51,24 @@ namespace NexusForever.Server.ChatServer.Network.Internal.Handler
         /// <param name="message">Message to publish.</param>
         public async Task PublishUrgentAsync(object message)
         {
-            InternalMessageModel internalMessage = await CreateMessage(message);
+            using Activity activity = NexusForever.Network.Internal.Telemetry.Trace.TraceStatic.Messaging.StartActivity($"Send Outbox Message {message.GetType()}", ActivityKind.Producer);
+            activity?.SetTag("Type", message.GetType());
+            activity?.SetTag("Urgent", true);
+
+            Dictionary<string, string> values = CreateHeaders();
+            InternalMessageModel internalMessage = await CreateMessage(message, values);
             _repository.AddMessage(internalMessage);
             _urgentMessages.Add(internalMessage.Id);
+        }
+
+        private Dictionary<string, string> CreateHeaders()
+        {
+            var values = new Dictionary<string, string>();
+            var parent = new PropagationContext(Activity.Current?.Context ?? default, Baggage.Current);
+            Propagators.DefaultTextMapPropagator.Inject(parent, values,
+                (headers, key, value) => headers[key] = value);
+
+            return values;
         }
 
         /// <summary>
@@ -60,24 +82,38 @@ namespace NexusForever.Server.ChatServer.Network.Internal.Handler
             _urgentMessages.Clear();
         }
 
-        private async Task<InternalMessageModel> CreateMessage(object message)
+        private async Task<InternalMessageModel> CreateMessage(object message, Dictionary<string, string> headers)
         {
-            using var stream = new MemoryStream();
-            await JsonSerializer.SerializeAsync(stream, message, message.GetType());
-
-            stream.Position = 0;
-            using var reader = new StreamReader(stream);
-            string payload = await reader.ReadToEndAsync();
-
             var model = new InternalMessageModel
             {
                 Id        = Guid.NewGuid(),
                 CreatedAt = DateTime.UtcNow,
                 Type      = message.GetType().AssemblyQualifiedName,
-                Payload   = payload,
+                Payload   = await SerialisePayload(message),
+                Metadata  = await SerialiseMetadata(headers)
             };
 
             return model;
+        }
+
+        private async Task<string> SerialiseMetadata(Dictionary<string, string> values)
+        {
+            using var stream = new MemoryStream();
+            using var reader = new StreamReader(stream);
+            await JsonSerializer.SerializeAsync(stream, values);
+
+            stream.Position = 0;
+            return await reader.ReadToEndAsync();
+        }
+
+        private async Task<string> SerialisePayload(object message)
+        {
+            using var stream = new MemoryStream();
+            using var reader = new StreamReader(stream);
+            await JsonSerializer.SerializeAsync(stream, message, message.GetType());
+
+            stream.Position = 0;
+            return await reader.ReadToEndAsync();
         }
     }
 }
