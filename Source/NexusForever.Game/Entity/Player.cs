@@ -357,8 +357,9 @@ namespace NexusForever.Game.Entity
 
             MaxInterruptArmour = 0;
 
-            scriptCollection = ScriptManager.Instance.InitialiseOwnedCollection<IPlayer>(this);
-            ScriptManager.Instance.InitialiseEntityScripts<IPlayer>(scriptCollection, this, null);
+            scriptManagerForUnload = ScriptManager.Instance;
+            scriptCollection = scriptManagerForUnload.InitialiseOwnedCollection<IPlayer>(this);
+            scriptManagerForUnload.InitialiseEntityScripts<IPlayer>(scriptCollection, this, null);
 
             // managers
             EntitlementManager      = new CharacterEntitlementManager(this, model);

@@ -47,6 +47,7 @@ namespace NexusForever.Game.Entity
         private readonly HashSet<(uint GridX, uint GridZ)> visibleGrids = [];
 
         protected IScriptCollection scriptCollection;
+        protected IScriptManager scriptManagerForUnload;
 
         protected readonly EventQueue eventQueue = new();
 
@@ -68,7 +69,10 @@ namespace NexusForever.Game.Entity
         public virtual void Dispose()
         {
             if (scriptCollection != null)
-                ScriptManager.Instance.Unload(scriptCollection);
+            {
+                scriptManagerForUnload?.Unload(scriptCollection);
+                scriptCollection = null;
+            }
         }
 
         /// <summary>

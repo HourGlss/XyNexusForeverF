@@ -57,8 +57,9 @@ namespace NexusForever.Game.Entity
         /// </summary>
         protected override void InitialiseScriptCollection(List<string> names)
         {
-            scriptCollection = ScriptManager.Instance.InitialiseOwnedCollection<INonPlayerEntity>(this);
-            ScriptManager.Instance.InitialiseEntityScripts<INonPlayerEntity>(scriptCollection, this, names);
+            scriptManagerForUnload = ScriptManager.Instance;
+            scriptCollection = scriptManagerForUnload.InitialiseOwnedCollection<INonPlayerEntity>(this);
+            scriptManagerForUnload.InitialiseEntityScripts<INonPlayerEntity>(scriptCollection, this, names);
         }
 
         /// <summary>

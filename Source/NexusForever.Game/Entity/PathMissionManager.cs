@@ -73,7 +73,7 @@ namespace NexusForever.Game.Entity
         public IEnumerable<PathMission> GetEpisodeMissions(uint pathEpisodeId)
         {
             if (pathEpisodeId <= 0)
-                return null;
+                return Enumerable.Empty<PathMission>();
 
             return episodes.TryGetValue(pathEpisodeId, out PathEpisode value) ? value : Enumerable.Empty<PathMission>();
         }
@@ -109,13 +109,20 @@ namespace NexusForever.Game.Entity
         public void SetCurrentZoneEpisode()
         {
             PathEpisodeEntry currentMapEpisode = GetEpisodeForMap();
-            if (currentMapEpisode != null && currentMapEpisode.Id != currentEpisode)
+            if (currentMapEpisode == null)
+            {
+                currentEpisode = 0;
+                GlobalPathContentManager.Instance.OnEnterZone(player);
+                return;
+            }
+
+            if (currentMapEpisode.Id != currentEpisode)
             {
                 currentEpisode = currentMapEpisode.Id;
 
-                if (!episodes.TryGetValue(currentMapEpisode.Id, out PathEpisode pathEpisode))
+                if (!episodes.TryGetValue(currentMapEpisode.Id, out _))
                 {
-                    PathEpisode episode = PathEpisodeCreate(currentMapEpisode.Id);
+                    PathEpisode episode = PathEpisodeCreate(currentMapEpisode);
                     SendServerPathEpisodeProgress(episode.Id, episode);
                 }
 
@@ -131,17 +138,31 @@ namespace NexusForever.Game.Entity
         /// <returns></returns>
         private PathEpisodeEntry GetEpisodeForMap()
         {
-            // TODO: Use Zone ID & World ID when we can track zone
+            if (player.Map?.Entry == null || player.Zone == null)
+                return null;
+
+            if (GameTableManager.Instance.PathEpisode?.Entries == null)
+            {
+                log.Warn("PathEpisode game table is not loaded, skipping path episode lookup.");
+                return null;
+            }
+
             uint worldId = player.Map.Entry.Id;
-            uint parentZone = GetMostParentZone(player.Zone.Id).Id;
-            return GameTableManager.Instance.PathEpisode.Entries.FirstOrDefault(x => x.WorldId == worldId && x.PathTypeEnum == (uint)player.Path && x.WorldZoneId == parentZone);
+            WorldZoneEntry parentZone = GetMostParentZone(player.Zone.Id);
+            if (parentZone == null)
+            {
+                log.Warn($"Failed to resolve parent zone for world zone {player.Zone.Id}, skipping path episode lookup.");
+                return null;
+            }
+
+            return GameTableManager.Instance.PathEpisode.Entries.FirstOrDefault(x => x.WorldId == worldId && x.PathTypeEnum == (uint)player.Path && x.WorldZoneId == parentZone.Id);
         }
 
         private WorldZoneEntry GetMostParentZone(uint zoneId)
         {
-            WorldZoneEntry currentZone = GameTableManager.Instance.WorldZone.GetEntry(zoneId);
+            WorldZoneEntry currentZone = GameTableManager.Instance.WorldZone?.GetEntry(zoneId);
             if (currentZone == null)
-                throw new ArgumentNullException(nameof(zoneId));
+                return null;
 
             if (currentZone.ParentZoneId == 0)
                 return currentZone;
@@ -237,7 +258,7 @@ namespace NexusForever.Game.Entity
         {
             List<ServerPathEpisodeProgress.Mission> missionProgress = new List<ServerPathEpisodeProgress.Mission>();
 
-            foreach(PathMission pathMission in pathMissions)
+            foreach(PathMission pathMission in pathMissions ?? Enumerable.Empty<PathMission>())
             {
                 if (!pathMission.IsUnlocked())
                     continue;
@@ -271,8 +292,11 @@ namespace NexusForever.Game.Entity
         {
             List<ServerPathMissionActivate.Mission> missionList = new List<ServerPathMissionActivate.Mission>();
 
-            foreach (PathMission pathMission in pathMissions)
+            foreach (PathMission pathMission in pathMissions ?? Enumerable.Empty<PathMission>())
             {
+                if (pathMission == null)
+                    continue;
+
                 //log.Debug($"Activating {pathMission.Id}, {pathMission.Completed}, {pathMission.Progress}, {pathMission.State}");
                 missionList.Add(new ServerPathMissionActivate.Mission
                 {

@@ -43,8 +43,9 @@ namespace NexusForever.Game.Entity.Trigger
         /// </summary>
         protected override void InitialiseScriptCollection(List<string> names)
         {
-            scriptCollection = scriptManager.InitialiseOwnedCollection<IGridTriggerEntity>(this);
-            scriptManager.InitialiseOwnedScripts<IGridTriggerEntity>(scriptCollection, id);
+            scriptManagerForUnload = scriptManager;
+            scriptCollection = scriptManagerForUnload.InitialiseOwnedCollection<IGridTriggerEntity>(this);
+            scriptManagerForUnload.InitialiseOwnedScripts<IGridTriggerEntity>(scriptCollection, id);
         }
 
         /// <summary>

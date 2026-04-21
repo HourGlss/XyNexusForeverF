@@ -46,8 +46,9 @@ namespace NexusForever.Game.Entity
         /// </summary>
         protected override void InitialiseScriptCollection(List<string> names)
         {
-            scriptCollection = scriptManager.InitialiseOwnedCollection<IDoorEntity>(this);
-            scriptManager.InitialiseEntityScripts<IDoorEntity>(scriptCollection, this, names);
+            scriptManagerForUnload = scriptManager;
+            scriptCollection = scriptManagerForUnload.InitialiseOwnedCollection<IDoorEntity>(this);
+            scriptManagerForUnload.InitialiseEntityScripts<IDoorEntity>(scriptCollection, this, names);
         }
 
         protected override IEntityModel BuildEntityModel()
