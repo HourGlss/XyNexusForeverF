@@ -66,16 +66,22 @@ namespace NexusForever.Game.Spell.Info
 
         private void InitialiseSpellInfo(ISpellInfoCache spellInfoCache)
         {
-            List<Spell4Entry> spellEntries = spellInfoCache.GetSpell4Entries(Entry.Id).ToList();
+            List<Spell4Entry> spellEntries = spellInfoCache.GetSpell4Entries(Entry.Id)
+                .Where(s => s.TierIndex > 0)
+                .OrderBy(s => s.TierIndex)
+                .ToList();
             if (spellEntries.Count < 1)
                 return;
 
-            // spell don't always have sequential tiers, create from highest tier not total
-            spellInfoStore = new SpellInfo[spellEntries[0].TierIndex];
+            // Spells do not always have sequential tiers, so size by the highest tier.
+            spellInfoStore = new ISpellInfo[spellEntries.Max(s => s.TierIndex)];
 
             foreach (Spell4Entry spell4Entry in spellEntries)
             {
                 ISpellInfo spellInfo = spellInfoManager.GetSpellInfo(spell4Entry.Id);
+                if (spellInfo == null)
+                    continue;
+
                 spellInfo.BaseInfo = this;
                 spellInfoStore[spell4Entry.TierIndex - 1] = spellInfo;
             }
@@ -86,15 +92,24 @@ namespace NexusForever.Game.Spell.Info
         /// </summary>
         public ISpellInfo GetSpellInfo(byte tier)
         {
+            if (spellInfoStore == null || spellInfoStore.Length == 0)
+                return null;
+
             if (tier < 1)
                 tier = 1;
-            return spellInfoStore[tier - 1];
+
+            int index = Math.Min(tier, spellInfoStore.Length) - 1;
+            for (int i = index; i >= 0; i--)
+                if (spellInfoStore[i] != null)
+                    return spellInfoStore[i];
+
+            return spellInfoStore.FirstOrDefault(s => s != null);
         }
 
         public IEnumerator<ISpellInfo> GetEnumerator()
         {
-            return spellInfoStore
-                .Select(s => s)
+            return (spellInfoStore ?? Enumerable.Empty<ISpellInfo>())
+                .Where(s => s != null)
                 .GetEnumerator();
         }
 

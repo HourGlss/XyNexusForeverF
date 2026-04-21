@@ -113,7 +113,7 @@ Completed items are prefixed with `[x]`; open items remain unboxed.
    Problem: shield-related combat math and vitals exist, but these effect types have no handlers.
    First fix: implement direct shield delta with clamps and combat logs. These should be easier than full damage because they can avoid target health/death flow initially.
 
-5. `P1` Improve `VitalModifier`.
+5. [x] `P1` Improve `VitalModifier`.
    File: `Source/NexusForever.Game/Spell/Effect/Handler/SpellEffectVitalModifierHandler.cs:14`
    Problem: directly calls `ModifyVital` with no combat log, no sign/data validation, and no clamping policy beyond the underlying vital setter.
    First fix: add `CombatLogVitalModifier`, validate signed/float interpretation of `DataBits01`, and confirm whether some effects use negative values encoded in uint bits.
@@ -130,7 +130,7 @@ Completed items are prefixed with `[x]`; open items remain unboxed.
 
 ## Targeting, Prerequisites, and Lifecycle
 
-1. `P0` Decide how threshold data maps to spell classes.
+1. [x] `P0` Decide how threshold data maps to spell classes.
    File: `Source/NexusForever.Game/Spell/Spell.cs:115`
    Problem: any non-`SpellThreshold` spell with threshold rows throws `NotImplementedException` during initialise.
    First fix: log/report affected spell ids from game tables, then either support those cast methods or prevent them cleanly without crashing.
@@ -165,12 +165,12 @@ Completed items are prefixed with `[x]`; open items remain unboxed.
    Problem: NPC telegraphs are initialized as if non-player casters stand still. Comments note moving/rotating unit telegraphs are wrong.
    First fix: add a telegraph attachment/update path for unit-attached telegraphs.
 
-8. `P2` Fix `SpellBaseInfo` tier storage assumptions.
+8. [x] `P2` Fix `SpellBaseInfo` tier storage assumptions.
    File: `Source/NexusForever.Game/Spell/Info/SpellBaseInfo.cs`
    Problem: the comment says spell tiers are not always sequential, but the array size uses `spellEntries[0].TierIndex` and lookup is `tier - 1`.
    First fix: sort entries and size by max tier, or use a dictionary keyed by tier.
 
-9. `P2` Fix threshold cache ordering.
+9. [x] `P2` Fix threshold cache ordering.
    File: `Source/NexusForever.Game/Spell/Info/SpellInfo.cs`
    Problem: `thresholdCache.Last()` depends on dictionary enumeration order, and `Thresholds[index]` assumes order index equals list index.
    First fix: order by `OrderIndex` and store both `SpellInfo` and `Spell4ThresholdsEntry` together.
@@ -386,4 +386,5 @@ All non-`UNUSED` enum values without a handler as of this audit:
 - `UnlockMount` and `UnlockVanityPet` now guard missing `Spell4Entry`, missing base spell id, and duplicate spell ownership before calling `SpellManager.AddSpell()`. Do not re-add duplicate handling unless changing `SpellManager.AddSpell()` itself.
 - `SpellEffectTeleportHandler` now returns `PreventEffect` for unsupported non-player targets, missing locations, missing housing entrances, or failed `CanTeleport()`. Housing teleport still creates a residence inline; split that into a helper later if touching housing teleport rules.
 - 2026-04-21 batch 3 added `Heal`, `HealShields`, and `DamageShields` handlers. They reuse the `DamageCalculator` damage-style formula fields through `CalculateBaseEffectAmount`, clamp actual health/shield changes before applying, and emit combat logs. `DamageShields` uses `Caster.CanAttack(target)`; healing still relies on target selection because there is no `CanAssist` helper yet.
+- 2026-04-21 batch 4 made unsupported non-threshold spells with threshold rows fail with `SpellBad` instead of throwing during initialise, fixed sparse tier and threshold lookup ordering, and made `VitalModifier` apply signed deltas with `CombatLogVitalModifier` for the actual clamped change.
 - Missing handler list and inventory counts are still from the original audit. If handlers are added, regenerate that section rather than manually guessing counts.

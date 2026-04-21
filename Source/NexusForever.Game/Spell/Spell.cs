@@ -67,6 +67,7 @@ namespace NexusForever.Game.Spell
         protected readonly List<ITelegraph> telegraphs = [];
 
         private readonly UpdateTimer persistCheck = new(TimeSpan.FromMilliseconds(100));
+        private bool unsupportedThresholdData;
 
         private readonly Dictionary<Spell4EffectsEntry, UpdateTimer> delayedEffects = [];
 
@@ -113,7 +114,13 @@ namespace NexusForever.Game.Spell
             parameters.RootSpellInfo ??= parameters.SpellInfo;
 
             if (this is not SpellThreshold && parameters.SpellInfo.Thresholds.Count > 0)
-                throw new NotImplementedException();
+            {
+                unsupportedThresholdData = true;
+                log.LogWarning("Spell {Spell4Id} has threshold data but cast method {CastMethod} is handled by {SpellType}. The cast will fail cleanly until this threshold shape is supported.",
+                    parameters.SpellInfo.Entry.Id,
+                    parameters.SpellInfo.BaseInfo.Entry.CastMethod,
+                    GetType().Name);
+            }
 
             spellTargetInfoCollection.Initialise(this);
 
@@ -203,7 +210,7 @@ namespace NexusForever.Game.Spell
 
             log.LogTrace($"Spell {Parameters.SpellInfo.Entry.Id} has started initating.");
 
-            CastResult result = CheckCast();
+            CastResult result = unsupportedThresholdData ? CastResult.SpellBad : CheckCast();
             if (result != CastResult.Ok)
             {
                 // Swallow Proxy CastResults

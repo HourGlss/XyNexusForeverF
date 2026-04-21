@@ -45,7 +45,7 @@ namespace NexusForever.Game.Spell.Info
 
         public HashSet<uint> SpellGroups { get; private set; } = [];
 
-        private readonly Dictionary<int /* orderIndex */, ISpellInfo /* spell4Id */> thresholdCache = [];
+        private readonly Dictionary<int /* orderIndex */, (ISpellInfo SpellInfo, Spell4ThresholdsEntry Entry)> thresholdCache = [];
         private (ISpellInfo, Spell4ThresholdsEntry) maxThresholdSpell;
 
         #region Dependency Injection
@@ -130,17 +130,20 @@ namespace NexusForever.Game.Spell.Info
 
         private void InitialiseThresholdCache()
         {
-            foreach (Spell4ThresholdsEntry thresholdsEntry in Thresholds)
+            foreach (Spell4ThresholdsEntry thresholdsEntry in Thresholds.OrderBy(t => t.OrderIndex))
             {
                 ISpellInfo spellInfo = spellInfoManager.GetSpellInfo(thresholdsEntry.Spell4IdToCast);
                 if (spellInfo == null)
                     continue;
                 
-                thresholdCache.TryAdd((int)thresholdsEntry.OrderIndex, spellInfo);
+                thresholdCache.TryAdd((int)thresholdsEntry.OrderIndex, (spellInfo, thresholdsEntry));
             }
 
-            if (thresholdCache.Keys.Count > 0)
-                maxThresholdSpell = (thresholdCache.Last().Value, Thresholds.MaxBy(x => x.OrderIndex));
+            if (thresholdCache.Count > 0)
+                maxThresholdSpell = thresholdCache
+                    .OrderBy(t => t.Key)
+                    .Last()
+                    .Value;
         }
 
         /// <summary>
@@ -148,7 +151,7 @@ namespace NexusForever.Game.Spell.Info
         /// </summary>
         public (ISpellInfo, Spell4ThresholdsEntry) GetThresholdSpellInfo(int index)
         {
-            return thresholdCache.TryGetValue(index, out ISpellInfo value) ? (value, Thresholds[index]) : maxThresholdSpell;
+            return thresholdCache.TryGetValue(index, out (ISpellInfo SpellInfo, Spell4ThresholdsEntry Entry) value) ? value : maxThresholdSpell;
         }
     }
 }
