@@ -47,16 +47,18 @@ CI evidence rather than checked-in churn.
 The C# reporter has three routine lanes:
 
 - `Complexity`: Roslyn-based function inventory with cyclomatic complexity,
-  advisory cognitive complexity, maintainability context, worst-function tables,
-  and a headline score based on function-grade health.
-- `Clean Code`: file-size scoring, production/test separation checks, oversized
-  file surfacing, and build-warning scoring when a build log is available.
+  advisory cognitive complexity, maintainability context, file hotspot tables,
+  and a headline score based on measured file complexity health.
+- `Clean Code`: file-size scoring, measured-source/test/tooling separation,
+  oversized file surfacing, and build-warning scoring when a build log is
+  available.
 - `Coverage`: Cobertura summary from `dotnet test --collect:"XPlat Code
   Coverage"` when test projects and coverage artifacts exist.
 
-Generated files, EF migrations, designers, and build outputs are excluded from
-headline complexity and clean-code scoring. They remain outside the main score
-because generated code should not dilute production-code signals.
+Only test and tooling files are excluded from complexity and clean-code
+measurements. Every other `.cs` file under `Source/` is measured, including EF
+migrations, designers, generated-looking files, and entry points. Build outputs
+under `bin/` and `obj/` are still ignored because they are not source files.
 
 ## Current Coverage Reality
 
@@ -72,8 +74,8 @@ This follows the referenced templates in a few practical ways:
 
 - Reports are non-blocking by default and include machine-readable JSON plus
   human-readable HTML.
-- Production source is scored separately from tests, tooling, and generated
-  code.
+- Measured source is scored separately from tests and tooling; generated-looking
+  source is still measured on this branch.
 - Coverage is treated as evidence, not proof. Missing coverage is surfaced as a
   gap, and future critical-file gates should be explicit instead of relying only
   on one global percentage.

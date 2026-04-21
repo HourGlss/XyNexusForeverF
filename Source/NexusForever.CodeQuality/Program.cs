@@ -31,7 +31,7 @@ internal static class Program
             Directory.CreateDirectory(outputRoot);
             Directory.CreateDirectory(rawRoot);
 
-            List<SourceFileMetric> files = AnalyseSource(sourceRoot, options.IncludeGenerated);
+            List<SourceFileMetric> files = AnalyseSource(sourceRoot);
             BuildSummary? buildSummary = BuildSummary.TryLoad(options.BuildLog);
             CoverageSummary coverageSummary = CoverageSummary.Load(options.CoverageRoot);
 
@@ -60,7 +60,7 @@ internal static class Program
         }
     }
 
-    private static List<SourceFileMetric> AnalyseSource(string sourceRoot, bool includeGenerated)
+    private static List<SourceFileMetric> AnalyseSource(string sourceRoot)
     {
         List<SourceFileMetric> files = [];
 
@@ -72,15 +72,19 @@ internal static class Program
             string text = File.ReadAllText(path);
             SourceClassification classification = Classify(relativePath, text);
 
-            if (!includeGenerated && classification == SourceClassification.Generated)
-                continue;
-
             SyntaxTree tree = CSharpSyntaxTree.ParseText(text, path: path);
             SyntaxNode root = tree.GetRoot();
 
             List<FunctionMetric> functions = CollectFunctions(relativePath, root, text);
             int lineCount = CountLines(text);
             int meaningfulLineCount = CountMeaningfulLines(text);
+            int worstCyclomatic = functions.Count == 0 ? 0 : functions.Max(f => f.Cyclomatic);
+            double averageCyclomatic = functions.Count == 0 ? 0 : Math.Round(functions.Average(f => f.Cyclomatic), 2);
+            int worstCognitive = functions.Count == 0 ? 0 : functions.Max(f => f.Cognitive);
+            string sizeBand = GetSizeBand(classification, lineCount);
+            double cleanCodeScore = CalculateCleanCodeFileScore(classification, lineCount, HasInlineTests(text));
+            double complexityScore = CalculateFileComplexityScore(functions);
+            double hotspotScore = CalculateFileHotspotScore(functions, meaningfulLineCount, cleanCodeScore, complexityScore);
 
             files.Add(new SourceFileMetric
             {
@@ -91,11 +95,14 @@ internal static class Program
                 HasInlineTests = HasInlineTests(text),
                 Functions = functions,
                 FunctionCount = functions.Count,
-                WorstCyclomatic = functions.Count == 0 ? 0 : functions.Max(f => f.Cyclomatic),
-                AverageCyclomatic = functions.Count == 0 ? 0 : Math.Round(functions.Average(f => f.Cyclomatic), 2),
-                WorstCognitive = functions.Count == 0 ? 0 : functions.Max(f => f.Cognitive),
-                SizeBand = GetSizeBand(classification, lineCount),
-                CleanCodeScore = CalculateCleanCodeFileScore(classification, lineCount, HasInlineTests(text))
+                WorstCyclomatic = worstCyclomatic,
+                AverageCyclomatic = averageCyclomatic,
+                WorstCognitive = worstCognitive,
+                SizeBand = sizeBand,
+                CleanCodeScore = cleanCodeScore,
+                ComplexityScore = complexityScore,
+                HotspotScore = hotspotScore,
+                HotspotReason = DescribeFileHotspot(functions, meaningfulLineCount, cleanCodeScore, complexityScore)
             });
         }
 
@@ -135,6 +142,8 @@ internal static class Program
 
         ComplexityWalker walker = new();
         walker.Visit(node);
+        double maintainabilityIndex = CalculateMaintainabilityIndex(walker.Cyclomatic, walker.Cognitive, sloc);
+        double hotspotScore = CalculateFunctionHotspotScore(walker.Cyclomatic, walker.Cognitive, maintainabilityIndex, sloc);
 
         return new FunctionMetric
         {
@@ -144,16 +153,21 @@ internal static class Program
             EndLine = endLine,
             Cyclomatic = walker.Cyclomatic,
             Cognitive = walker.Cognitive,
-            MaintainabilityIndex = CalculateMaintainabilityIndex(walker.Cyclomatic, walker.Cognitive, sloc),
+            MaintainabilityIndex = maintainabilityIndex,
             Sloc = sloc,
-            Grade = GradeCyclomatic(walker.Cyclomatic)
+            Grade = GradeCyclomatic(walker.Cyclomatic),
+            HotspotScore = hotspotScore,
+            HotspotReason = DescribeFunctionHotspot(walker.Cyclomatic, walker.Cognitive, maintainabilityIndex, sloc)
         };
     }
 
     private static LaneReport BuildComplexityReport(IReadOnlyCollection<SourceFileMetric> files)
     {
-        List<SourceFileMetric> scoredFiles = files
-            .Where(f => IsRuntimeScored(f.Classification) && f.Functions.Count > 0)
+        List<SourceFileMetric> measuredFiles = files
+            .Where(f => IsMeasuredSource(f.Classification))
+            .ToList();
+        List<SourceFileMetric> scoredFiles = measuredFiles
+            .Where(f => f.Functions.Count > 0)
             .ToList();
 
         List<FunctionMetric> functions = scoredFiles.SelectMany(f => f.Functions).ToList();
@@ -164,24 +178,32 @@ internal static class Program
             {
                 Name = "Complexity",
                 Status = "degraded",
-                Summary = "No runtime functions were available for complexity scoring.",
-                Formula = "50% worst-function grade + 30% average-function grade + 20% files without E/F hotspots",
+                Summary = "No measured source functions were available for complexity scoring.",
+                Formula = "Average file complexity score; each file is 50% worst-function grade, 30% average-function grade, and 20% average maintainability.",
                 Findings = [],
-                Notes = ["Generated, migration, test, and tool files are excluded from the headline score."]
+                Notes = ["Only test and tooling files are excluded from complexity scoring."]
             };
         }
 
-        double averageWorstFunctionScore = scoredFiles.Average(f => GradeScore(GradeCyclomatic(f.WorstCyclomatic)));
-        double averageFileFunctionScore = scoredFiles.Average(f => GradeScore(GradeCyclomatic(f.AverageCyclomatic)));
+        double averageFileComplexityScore = scoredFiles.Average(f => f.ComplexityScore);
+        double averageWorstFunctionHotspotScore = scoredFiles.Average(f => GetWorstFunction(f)?.HotspotScore ?? 0.0);
         double filesWithoutEfHotspots = 100.0 * scoredFiles.Count(f => !IsEfGrade(GradeCyclomatic(f.WorstCyclomatic))) / scoredFiles.Count;
-        double score = RoundScore(0.50 * averageWorstFunctionScore + 0.30 * averageFileFunctionScore + 0.20 * filesWithoutEfHotspots);
+        double score = RoundScore(averageFileComplexityScore);
 
-        List<string> findings = functions
-            .OrderByDescending(f => f.Cyclomatic)
-            .ThenByDescending(f => f.Cognitive)
-            .ThenBy(f => f.FilePath, StringComparer.Ordinal)
+        List<string> findings = measuredFiles
+            .OrderByDescending(f => f.HotspotScore)
+            .ThenByDescending(f => f.WorstCyclomatic)
+            .ThenByDescending(f => f.WorstCognitive)
+            .ThenBy(f => f.Path, StringComparer.Ordinal)
             .Take(12)
-            .Select(f => $"{f.FilePath}:{f.StartLine} {f.Name} cyclomatic={f.Cyclomatic}, cognitive={f.Cognitive}, grade={f.Grade}")
+            .Select(f =>
+            {
+                FunctionMetric? worst = GetWorstFunction(f);
+                string worstFunction = worst == null
+                    ? "no functions"
+                    : $"{worst.Name}:{worst.StartLine} hotspot={FormatScore(worst.HotspotScore)}, cyclomatic={worst.Cyclomatic}, cognitive={worst.Cognitive}";
+                return $"{f.Path}: file_hotspot={FormatScore(f.HotspotScore)}, complexity_score={FormatScore(f.ComplexityScore)}, clean_score={FormatScore(f.CleanCodeScore)}, {worstFunction}";
+            })
             .ToList();
 
         return new LaneReport
@@ -190,41 +212,43 @@ internal static class Program
             Status = score >= 70.0 ? "ok" : "degraded",
             Score = score,
             Grade = GradeScore(score),
-            Summary = $"{scoredFiles.Count} runtime files and {functions.Count} functions scored.",
-            Formula = "50% worst-function grade + 30% average-function grade + 20% files without E/F hotspots",
+            Summary = $"{measuredFiles.Count} measured source files and {functions.Count} functions scored; {files.Count - measuredFiles.Count} test/tooling files excluded.",
+            Formula = "Average file complexity score; each file is 50% worst-function grade, 30% average-function grade, and 20% average maintainability.",
             Findings = findings,
             Notes =
             [
                 "Cyclomatic complexity uses Roslyn syntax counting for branches, loops, switch arms, catch blocks, conditionals, and short-circuit boolean operators.",
-                "Cognitive complexity is advisory and used for hotspot ranking, not headline scoring.",
-                "Generated, migration, test, and tool files are excluded from the headline score but retained in raw inventory when included."
+                "Function hotspot score explains local risk: 40% cyclomatic risk, 25% cognitive risk, 20% maintainability risk, and 15% function size risk.",
+                "File hotspot score explains file-level risk: 45% complexity risk, 25% clean-code risk, 20% file-size risk, and 10% function-count risk.",
+                "Only test and tooling files are excluded. Generated, migration, designer, and other .cs files are measured."
             ],
             Metrics = new Dictionary<string, object?>
             {
-                ["runtime_file_count"] = scoredFiles.Count,
-                ["runtime_function_count"] = functions.Count,
-                ["average_runtime_worst_function_grade_score"] = RoundScore(averageWorstFunctionScore),
-                ["average_runtime_per_file_function_grade_score"] = RoundScore(averageFileFunctionScore),
-                ["runtime_files_without_ef_hotspots_percent"] = RoundScore(filesWithoutEfHotspots)
+                ["measured_source_file_count"] = measuredFiles.Count,
+                ["function_scored_file_count"] = scoredFiles.Count,
+                ["excluded_test_tooling_file_count"] = files.Count - measuredFiles.Count,
+                ["measured_function_count"] = functions.Count,
+                ["average_file_complexity_score"] = RoundScore(averageFileComplexityScore),
+                ["average_worst_function_hotspot_score"] = RoundScore(averageWorstFunctionHotspotScore),
+                ["measured_files_without_ef_hotspots_percent"] = RoundScore(filesWithoutEfHotspots)
             }
         };
     }
 
     private static LaneReport BuildCleanCodeReport(IReadOnlyCollection<SourceFileMetric> files, BuildSummary? buildSummary)
     {
-        List<SourceFileMetric> runtimeFiles = files
-            .Where(f => f.Classification is "runtime" or "entrypoint")
+        List<SourceFileMetric> measuredFiles = files
+            .Where(f => IsMeasuredSource(f.Classification))
             .ToList();
-        List<SourceFileMetric> testFiles = files
-            .Where(f => f.Classification == "test")
+        List<SourceFileMetric> excludedFiles = files
+            .Where(f => !IsMeasuredSource(f.Classification))
             .ToList();
 
-        double runtimeAverage = runtimeFiles.Count == 0 ? 100.0 : runtimeFiles.Average(f => f.CleanCodeScore);
-        double testAverage = testFiles.Count == 0 ? 100.0 : testFiles.Average(f => f.CleanCodeScore);
-        double compactRuntimePercent = runtimeFiles.Count == 0
+        double measuredAverage = measuredFiles.Count == 0 ? 100.0 : measuredFiles.Average(f => f.CleanCodeScore);
+        double compactMeasuredPercent = measuredFiles.Count == 0
             ? 100.0
-            : 100.0 * runtimeFiles.Count(f => f.LineCount <= 600 && !f.HasInlineTests) / runtimeFiles.Count;
-        double structuralScore = RoundScore(0.70 * runtimeAverage + 0.20 * testAverage + 0.10 * compactRuntimePercent);
+            : 100.0 * measuredFiles.Count(f => f.SizeBand != "oversized" && !f.HasInlineTests) / measuredFiles.Count;
+        double structuralScore = RoundScore(0.85 * measuredAverage + 0.15 * compactMeasuredPercent);
 
         double? staticAnalysisScore = buildSummary == null
             ? null
@@ -233,12 +257,12 @@ internal static class Program
             ? structuralScore
             : RoundScore(0.80 * structuralScore + 0.20 * staticAnalysisScore.Value);
 
-        List<string> findings = files
-            .Where(f => f.SizeBand == "oversized" || (f.HasInlineTests && IsRuntimeScored(f.Classification)))
-            .OrderByDescending(f => f.LineCount)
+        List<string> findings = measuredFiles
+            .OrderByDescending(f => f.HotspotScore)
+            .ThenByDescending(f => f.LineCount)
             .ThenBy(f => f.Path, StringComparer.Ordinal)
             .Take(15)
-            .Select(f => $"{f.Path}: {f.LineCount} lines, {f.Classification}, {f.SizeBand}" + (f.HasInlineTests ? ", inline tests detected" : ""))
+            .Select(f => $"{f.Path}: hotspot={FormatScore(f.HotspotScore)}, clean_score={FormatScore(f.CleanCodeScore)}, {f.LineCount} lines, {f.FunctionCount} functions, {f.SizeBand}")
             .ToList();
 
         if (buildSummary is { WarningCount: > 0 })
@@ -247,8 +271,9 @@ internal static class Program
         List<string> notes =
         [
             "Structural scoring follows the Rusaren/Safer template pattern: production size, test separation, and static-analysis evidence are measured separately.",
-            "Generated and migration files are excluded from clean-code headline scoring.",
-            "Inline tests are detected with common C# test attributes such as Fact, Theory, Test, and TestMethod."
+            "Only test and tooling files are excluded from clean-code scoring.",
+            "Generated, migration, designer, and other .cs files are measured with the same source file-size bands.",
+            "Inline tests are detected with common C# test attributes such as Fact, Theory, Test, and TestMethod, then excluded as test code."
         ];
 
         if (buildSummary == null)
@@ -260,9 +285,9 @@ internal static class Program
             Status = score >= 70.0 ? "ok" : "degraded",
             Score = score,
             Grade = GradeScore(score),
-            Summary = $"{runtimeFiles.Count} production files, {testFiles.Count} test files, {files.Count(f => f.SizeBand == "oversized")} oversized files.",
+            Summary = $"{measuredFiles.Count} measured source files, {excludedFiles.Count} test/tooling files excluded, {measuredFiles.Count(f => f.SizeBand == "oversized")} measured oversized files.",
             Formula = staticAnalysisScore == null
-                ? "100% structural clean-code score"
+                ? "85% average measured-file clean score + 15% non-oversized measured-file rate"
                 : "80% structural clean-code score + 20% build warning score",
             Findings = findings,
             Notes = notes,
@@ -270,12 +295,14 @@ internal static class Program
             {
                 ["structural_clean_code_score"] = structuralScore,
                 ["static_analysis_score"] = staticAnalysisScore,
-                ["runtime_files"] = runtimeFiles.Count,
-                ["test_files"] = testFiles.Count,
-                ["oversized_runtime_files"] = runtimeFiles.Count(f => f.SizeBand == "oversized"),
-                ["oversized_test_files"] = testFiles.Count(f => f.SizeBand == "oversized"),
-                ["runtime_inline_tests"] = runtimeFiles.Count(f => f.HasInlineTests),
-                ["compact_runtime_percent"] = RoundScore(compactRuntimePercent)
+                ["measured_source_files"] = measuredFiles.Count,
+                ["excluded_test_tooling_files"] = excludedFiles.Count,
+                ["test_files"] = files.Count(f => f.Classification == "test"),
+                ["tooling_files"] = files.Count(f => f.Classification == "tooling"),
+                ["generated_files_measured"] = files.Count(f => f.Classification == "generated"),
+                ["oversized_measured_files"] = measuredFiles.Count(f => f.SizeBand == "oversized"),
+                ["measured_inline_tests"] = measuredFiles.Count(f => f.HasInlineTests),
+                ["compact_measured_percent"] = RoundScore(compactMeasuredPercent)
             }
         };
     }
@@ -378,10 +405,13 @@ internal static class Program
             Inventory = new InventorySummary
             {
                 SourceFiles = files.Count,
+                MeasuredFiles = files.Count(f => IsMeasuredSource(f.Classification)),
                 RuntimeFiles = files.Count(f => f.Classification == "runtime"),
                 EntrypointFiles = files.Count(f => f.Classification == "entrypoint"),
+                GeneratedFiles = files.Count(f => f.Classification == "generated"),
                 TestFiles = files.Count(f => f.Classification == "test"),
                 ToolingFiles = files.Count(f => f.Classification == "tooling"),
+                ExcludedFromMeasurements = files.Count(f => !IsMeasuredSource(f.Classification)),
                 FunctionCount = files.Sum(f => f.FunctionCount)
             },
             Artifacts = new Dictionary<string, string>
@@ -462,6 +492,9 @@ internal static class Program
             || lower.Contains("/scripts/", StringComparison.Ordinal))
             return SourceClassification.Tooling;
 
+        if (IsTestPath(lower) || HasInlineTests(text))
+            return SourceClassification.Test;
+
         if (lower.Contains("/migrations/", StringComparison.Ordinal)
             || lower.EndsWith(".designer.cs", StringComparison.Ordinal)
             || lower.EndsWith(".g.cs", StringComparison.Ordinal)
@@ -469,9 +502,6 @@ internal static class Program
             || lower.EndsWith("assemblyinfo.cs", StringComparison.Ordinal)
             || lower.EndsWith("globalusings.g.cs", StringComparison.Ordinal))
             return SourceClassification.Generated;
-
-        if (IsTestPath(lower) || HasInlineTests(text))
-            return SourceClassification.Test;
 
         if (fileName.Equals("Program.cs", StringComparison.OrdinalIgnoreCase))
             return SourceClassification.Entrypoint;
@@ -497,8 +527,8 @@ internal static class Program
     private static bool HasInlineTests(string text)
         => Regex.IsMatch(text, @"(?m)^\s*\[\s*(Fact|Theory|Test|TestCase|TestMethod|DataTestMethod)\b", RegexOptions.CultureInvariant);
 
-    private static bool IsRuntimeScored(string classification)
-        => classification is "runtime" or "entrypoint";
+    private static bool IsMeasuredSource(string classification)
+        => classification is not "test" and not "tooling";
 
     private static bool IsEfGrade(string grade)
         => grade is "E" or "F";
@@ -576,12 +606,120 @@ internal static class Program
         return RoundScore(Math.Clamp(score, 0.0, 100.0));
     }
 
+    private static double CalculateFunctionHotspotScore(int cyclomatic, int cognitive, double maintainabilityIndex, int sloc)
+    {
+        double cyclomaticRisk = RiskFromThreshold(cyclomatic, healthy: 5.0, high: 45.0);
+        double cognitiveRisk = RiskFromThreshold(cognitive, healthy: 10.0, high: 90.0);
+        double maintainabilityRisk = 100.0 - maintainabilityIndex;
+        double sizeRisk = RiskFromThreshold(sloc, healthy: 30.0, high: 180.0);
+
+        return RoundScore(0.40 * cyclomaticRisk
+            + 0.25 * cognitiveRisk
+            + 0.20 * maintainabilityRisk
+            + 0.15 * sizeRisk);
+    }
+
+    private static string DescribeFunctionHotspot(int cyclomatic, int cognitive, double maintainabilityIndex, int sloc)
+    {
+        List<string> reasons = [];
+
+        if (cyclomatic > 10)
+            reasons.Add($"cyclomatic {cyclomatic}");
+        if (cognitive > 15)
+            reasons.Add($"cognitive {cognitive}");
+        if (maintainabilityIndex < 70.0)
+            reasons.Add($"maintainability {FormatScore(maintainabilityIndex)}");
+        if (sloc > 60)
+            reasons.Add($"SLOC {sloc}");
+
+        return reasons.Count == 0
+            ? "low local complexity"
+            : string.Join("; ", reasons);
+    }
+
+    private static double CalculateFileComplexityScore(IReadOnlyCollection<FunctionMetric> functions)
+    {
+        if (functions.Count == 0)
+            return 100.0;
+
+        double worstFunctionGradeScore = functions.Min(f => GradeScore(f.Grade));
+        double averageFunctionGradeScore = functions.Average(f => GradeScore(f.Grade));
+        double averageMaintainabilityIndex = functions.Average(f => f.MaintainabilityIndex);
+
+        return RoundScore(0.50 * worstFunctionGradeScore
+            + 0.30 * averageFunctionGradeScore
+            + 0.20 * averageMaintainabilityIndex);
+    }
+
+    private static double CalculateFileHotspotScore(
+        IReadOnlyCollection<FunctionMetric> functions,
+        int meaningfulLineCount,
+        double cleanCodeScore,
+        double complexityScore)
+    {
+        double complexityRisk = 100.0 - complexityScore;
+        double cleanCodeRisk = 100.0 - cleanCodeScore;
+        double sizeRisk = RiskFromThreshold(meaningfulLineCount, healthy: 300.0, high: 1600.0);
+        double functionCountRisk = RiskFromThreshold(functions.Count, healthy: 12.0, high: 120.0);
+
+        return RoundScore(0.45 * complexityRisk
+            + 0.25 * cleanCodeRisk
+            + 0.20 * sizeRisk
+            + 0.10 * functionCountRisk);
+    }
+
+    private static string DescribeFileHotspot(
+        IReadOnlyCollection<FunctionMetric> functions,
+        int meaningfulLineCount,
+        double cleanCodeScore,
+        double complexityScore)
+    {
+        List<string> reasons = [];
+        FunctionMetric? worst = functions
+            .OrderByDescending(f => f.HotspotScore)
+            .ThenByDescending(f => f.Cyclomatic)
+            .FirstOrDefault();
+
+        if (complexityScore < 80.0)
+            reasons.Add($"complexity score {FormatScore(complexityScore)}");
+        if (cleanCodeScore < 80.0)
+            reasons.Add($"clean score {FormatScore(cleanCodeScore)}");
+        if (meaningfulLineCount > 600)
+            reasons.Add($"{meaningfulLineCount} meaningful lines");
+        if (functions.Count > 30)
+            reasons.Add($"{functions.Count} functions");
+        if (worst is { HotspotScore: >= 35.0 })
+            reasons.Add($"worst function {worst.Name}:{worst.StartLine} hotspot {FormatScore(worst.HotspotScore)}");
+
+        return reasons.Count == 0
+            ? "no dominant hotspot signal; ranked by combined score"
+            : string.Join("; ", reasons);
+    }
+
+    private static FunctionMetric? GetWorstFunction(SourceFileMetric file)
+        => file.Functions
+            .OrderByDescending(f => f.HotspotScore)
+            .ThenByDescending(f => f.Cyclomatic)
+            .ThenByDescending(f => f.Cognitive)
+            .FirstOrDefault();
+
+    private static double RiskFromThreshold(double value, double healthy, double high)
+    {
+        if (value <= healthy)
+            return 0.0;
+        if (value >= high)
+            return 100.0;
+
+        return RoundScore(100.0 * (value - healthy) / (high - healthy));
+    }
+
     private static double CalculateCleanCodeFileScore(SourceClassification classification, int lineCount, bool hasInlineTests)
     {
         double score = classification switch
         {
             SourceClassification.Runtime => ScoreByBands(lineCount, [(250, 100), (400, 90), (600, 75), (800, 60), (1000, 45), (1400, 30)], 15),
             SourceClassification.Entrypoint => ScoreByBands(lineCount, [(150, 100), (250, 85), (400, 70), (600, 50)], 25),
+            SourceClassification.Generated => ScoreByBands(lineCount, [(250, 100), (400, 90), (600, 75), (800, 60), (1000, 45), (1400, 30)], 15),
             SourceClassification.Test => ScoreByBands(lineCount, [(250, 100), (400, 92), (600, 82), (900, 68), (1200, 52), (1800, 35)], 20),
             SourceClassification.Tooling => ScoreByBands(lineCount, [(250, 100), (500, 85), (900, 65)], 40),
             _ => 100
@@ -590,7 +728,7 @@ internal static class Program
         if (hasInlineTests && classification is SourceClassification.Runtime or SourceClassification.Entrypoint)
             score -= 35.0;
 
-        if (classification == SourceClassification.Runtime && lineCount > 1000)
+        if ((classification is SourceClassification.Runtime or SourceClassification.Generated) && lineCount > 1000)
             score -= 10.0;
         if (classification == SourceClassification.Entrypoint && lineCount > 500)
             score -= 10.0;
@@ -617,6 +755,7 @@ internal static class Program
         {
             SourceClassification.Runtime => lineCount <= 400 ? "compact" : lineCount <= 800 ? "large" : "oversized",
             SourceClassification.Entrypoint => lineCount <= 250 ? "compact" : lineCount <= 500 ? "large" : "oversized",
+            SourceClassification.Generated => lineCount <= 400 ? "compact" : lineCount <= 800 ? "large" : "oversized",
             SourceClassification.Test => lineCount <= 400 ? "compact" : lineCount <= 1200 ? "large" : "oversized",
             SourceClassification.Tooling => lineCount <= 500 ? "compact" : lineCount <= 900 ? "large" : "oversized",
             _ => "excluded"
@@ -710,7 +849,7 @@ internal static class Program
     private static void WriteCsv(string path, IEnumerable<SourceFileMetric> files)
     {
         StringBuilder builder = new();
-        builder.AppendLine("path,classification,line_count,meaningful_line_count,function_count,worst_cyclomatic,average_cyclomatic,worst_cognitive,size_band,clean_code_score,has_inline_tests");
+        builder.AppendLine("path,classification,line_count,meaningful_line_count,function_count,worst_cyclomatic,average_cyclomatic,worst_cognitive,complexity_score,clean_code_score,hotspot_score,hotspot_reason,size_band,has_inline_tests");
 
         foreach (SourceFileMetric file in files)
         {
@@ -722,8 +861,11 @@ internal static class Program
                 .Append(file.WorstCyclomatic.ToString(CultureInfo.InvariantCulture)).Append(',')
                 .Append(file.AverageCyclomatic.ToString(CultureInfo.InvariantCulture)).Append(',')
                 .Append(file.WorstCognitive.ToString(CultureInfo.InvariantCulture)).Append(',')
-                .Append(Csv(file.SizeBand)).Append(',')
+                .Append(file.ComplexityScore.ToString(CultureInfo.InvariantCulture)).Append(',')
                 .Append(file.CleanCodeScore.ToString(CultureInfo.InvariantCulture)).Append(',')
+                .Append(file.HotspotScore.ToString(CultureInfo.InvariantCulture)).Append(',')
+                .Append(Csv(file.HotspotReason)).Append(',')
+                .Append(Csv(file.SizeBand)).Append(',')
                 .Append(file.HasInlineTests ? "true" : "false")
                 .AppendLine();
         }
@@ -734,7 +876,7 @@ internal static class Program
     private static void WriteCsv(string path, IEnumerable<FunctionMetric> functions)
     {
         StringBuilder builder = new();
-        builder.AppendLine("file_path,name,start_line,end_line,cyclomatic,cognitive,maintainability_index,sloc,grade");
+        builder.AppendLine("file_path,name,start_line,end_line,cyclomatic,cognitive,maintainability_index,sloc,grade,hotspot_score,hotspot_reason");
 
         foreach (FunctionMetric function in functions)
         {
@@ -746,7 +888,9 @@ internal static class Program
                 .Append(function.Cognitive.ToString(CultureInfo.InvariantCulture)).Append(',')
                 .Append(function.MaintainabilityIndex.ToString(CultureInfo.InvariantCulture)).Append(',')
                 .Append(function.Sloc.ToString(CultureInfo.InvariantCulture)).Append(',')
-                .Append(Csv(function.Grade))
+                .Append(Csv(function.Grade)).Append(',')
+                .Append(function.HotspotScore.ToString(CultureInfo.InvariantCulture)).Append(',')
+                .Append(Csv(function.HotspotReason))
                 .AppendLine();
         }
 
@@ -755,15 +899,14 @@ internal static class Program
 
     private static void WriteHtml(string path, QualityReport report, IReadOnlyCollection<SourceFileMetric> files)
     {
-        IEnumerable<FunctionMetric> worstFunctions = files
-            .SelectMany(f => f.Functions)
-            .Where(f => files.Any(file => file.Path == f.FilePath && IsRuntimeScored(file.Classification)))
-            .OrderByDescending(f => f.Cyclomatic)
-            .ThenByDescending(f => f.Cognitive)
+        IEnumerable<SourceFileMetric> fileHotspots = files
+            .Where(f => IsMeasuredSource(f.Classification))
+            .OrderByDescending(f => f.HotspotScore)
+            .ThenBy(f => f.Path, StringComparer.Ordinal)
             .Take(25);
 
         IEnumerable<SourceFileMetric> largestFiles = files
-            .Where(f => IsRuntimeScored(f.Classification))
+            .Where(f => IsMeasuredSource(f.Classification))
             .OrderByDescending(f => f.LineCount)
             .Take(25);
 
@@ -802,22 +945,32 @@ internal static class Program
             builder.AppendLine("</ul>");
         }
 
-        builder.AppendLine("<h2>Worst Runtime Functions</h2>");
-        builder.AppendLine("<table><thead><tr><th>Function</th><th>File</th><th>Line</th><th>Cyclomatic</th><th>Cognitive</th><th>Grade</th></tr></thead><tbody>");
-        foreach (FunctionMetric function in worstFunctions)
+        builder.AppendLine("<h2>File Hotspots</h2>");
+        builder.AppendLine("<p class=\"muted\">Hotspot score is a 0-100 attention score, where higher means the file is more likely to deserve cleanup. It combines complexity risk, clean-code risk, file size, and function count. Tests and tooling are excluded; every other .cs file is included.</p>");
+        builder.AppendLine("<table><thead><tr><th>File</th><th>Hotspot Score</th><th>Complexity Score</th><th>Clean Score</th><th>Why</th><th>Lines</th><th>Meaningful Lines</th><th>Functions</th><th>Worst Function</th><th>Worst Function Hotspot</th><th>Worst Cyclomatic</th><th>Worst Cognitive</th><th>Worst MI</th><th>Classification</th></tr></thead><tbody>");
+        foreach (SourceFileMetric file in fileHotspots)
         {
+            FunctionMetric? worst = GetWorstFunction(file);
             builder.AppendLine("<tr>"
-                + $"<td>{Html(function.Name)}</td>"
-                + $"<td>{Html(function.FilePath)}</td>"
-                + $"<td>{function.StartLine}</td>"
-                + $"<td>{function.Cyclomatic}</td>"
-                + $"<td>{function.Cognitive}</td>"
-                + $"<td>{Html(function.Grade)}</td>"
+                + $"<td>{Html(file.Path)}</td>"
+                + $"<td>{FormatScore(file.HotspotScore)}</td>"
+                + $"<td>{FormatScore(file.ComplexityScore)}</td>"
+                + $"<td>{FormatScore(file.CleanCodeScore)}</td>"
+                + $"<td>{Html(file.HotspotReason)}</td>"
+                + $"<td>{file.LineCount}</td>"
+                + $"<td>{file.MeaningfulLineCount}</td>"
+                + $"<td>{file.FunctionCount}</td>"
+                + $"<td>{Html(worst == null ? "N/A" : $"{worst.Name}:{worst.StartLine}")}</td>"
+                + $"<td>{(worst == null ? "N/A" : FormatScore(worst.HotspotScore))}</td>"
+                + $"<td>{file.WorstCyclomatic}</td>"
+                + $"<td>{file.WorstCognitive}</td>"
+                + $"<td>{(worst == null ? "N/A" : FormatScore(worst.MaintainabilityIndex))}</td>"
+                + $"<td>{Html(file.Classification)}</td>"
                 + "</tr>");
         }
         builder.AppendLine("</tbody></table>");
 
-        builder.AppendLine("<h2>Largest Runtime Files</h2>");
+        builder.AppendLine("<h2>Largest Measured Files</h2>");
         builder.AppendLine("<table><thead><tr><th>File</th><th>Lines</th><th>Meaningful Lines</th><th>Functions</th><th>Size Band</th><th>Clean Score</th></tr></thead><tbody>");
         foreach (SourceFileMetric file in largestFiles)
         {
@@ -960,8 +1113,6 @@ internal sealed record Options
 
     public string? CoverageRoot { get; init; } = Path.Combine(Environment.CurrentDirectory, "artifacts", "TestResults");
 
-    public bool IncludeGenerated { get; init; }
-
     public static Options Parse(string[] args)
     {
         Options options = new();
@@ -982,7 +1133,6 @@ internal sealed record Options
                 "--output" => options with { OutputRoot = Next() },
                 "--build-log" => options with { BuildLog = Next() },
                 "--coverage-root" => options with { CoverageRoot = Next() },
-                "--include-generated" => options with { IncludeGenerated = true },
                 "--help" or "-h" => throw new ArgumentException(Usage),
                 _ => throw new ArgumentException($"Unknown argument '{arg}'.{Environment.NewLine}{Usage}")
             };
@@ -1021,7 +1171,13 @@ internal sealed record SourceFileMetric
 
     public required string SizeBand { get; init; }
 
+    public double ComplexityScore { get; init; }
+
     public double CleanCodeScore { get; init; }
+
+    public double HotspotScore { get; init; }
+
+    public required string HotspotReason { get; init; }
 
     public bool HasInlineTests { get; init; }
 
@@ -1047,6 +1203,10 @@ internal sealed record FunctionMetric
     public int Sloc { get; init; }
 
     public required string Grade { get; init; }
+
+    public double HotspotScore { get; init; }
+
+    public required string HotspotReason { get; init; }
 }
 
 internal sealed record QualityReport
@@ -1081,13 +1241,19 @@ internal sealed record InventorySummary
 {
     public int SourceFiles { get; init; }
 
+    public int MeasuredFiles { get; init; }
+
     public int RuntimeFiles { get; init; }
 
     public int EntrypointFiles { get; init; }
 
+    public int GeneratedFiles { get; init; }
+
     public int TestFiles { get; init; }
 
     public int ToolingFiles { get; init; }
+
+    public int ExcludedFromMeasurements { get; init; }
 
     public int FunctionCount { get; init; }
 }
