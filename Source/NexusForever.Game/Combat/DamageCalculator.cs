@@ -102,6 +102,12 @@ namespace NexusForever.Game.Combat
             // TODO: Queue Proc Events*/
         }
 
+        public uint CalculateBaseEffectAmount(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info)
+        {
+            uint amount = CalculateBaseDamage(executionContext.Spell.Caster, target, info.Entry);
+            return CalculateBaseDamageVariance(amount);
+        }
+
         /// <summary>
         /// Get base damage value for the given <see cref="IUnitEntity"/> with the provided parameter data from the <see cref="Spell4EffectsEntry"/>.
         /// </summary>

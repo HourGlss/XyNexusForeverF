@@ -103,12 +103,12 @@ Completed items are prefixed with `[x]`; open items remain unboxed.
    Problem: physical damage adds `DamageMitigationPctOffsetMagic`; `Property.DamageMitigationPctOffsetPhysical` exists and is probably intended.
    First fix: use the physical offset for `DamageType.Physical`.
 
-3. `P1` Add a real `Heal` effect handler.
+3. [x] `P1` Add a real `Heal` effect handler.
    Missing type: `SpellEffectType.Heal`
    Problem: `DamageCalculator` already has heal-aware formula branches and `CombatLogHeal` exists, but no `Heal` handler is registered. Healing spells currently hit the no-handler path.
    First fix: mirror the damage calculation path with `DamageType.Heal`, call `ModifyHealth(..., DamageType.Heal, caster)`, emit `CombatLogHeal`, and update public event healing stats if available.
 
-4. `P1` Add shield heal/damage handlers.
+4. [x] `P1` Add shield heal/damage handlers.
    Missing types: `HealShields`, `DamageShields`
    Problem: shield-related combat math and vitals exist, but these effect types have no handlers.
    First fix: implement direct shield delta with clamps and combat logs. These should be easier than full damage because they can avoid target health/death flow initially.
@@ -385,4 +385,5 @@ All non-`UNUSED` enum values without a handler as of this audit:
 - `UnlockVanityPet` now uses `ServerUnlockVanityPet` from the `Pet` packet namespace. Old `spells-v2-gr` code used `ServerUnlockMount`, but this branch already had the correct vanity-pet packet model and opcode.
 - `UnlockMount` and `UnlockVanityPet` now guard missing `Spell4Entry`, missing base spell id, and duplicate spell ownership before calling `SpellManager.AddSpell()`. Do not re-add duplicate handling unless changing `SpellManager.AddSpell()` itself.
 - `SpellEffectTeleportHandler` now returns `PreventEffect` for unsupported non-player targets, missing locations, missing housing entrances, or failed `CanTeleport()`. Housing teleport still creates a residence inline; split that into a helper later if touching housing teleport rules.
+- 2026-04-21 batch 3 added `Heal`, `HealShields`, and `DamageShields` handlers. They reuse the `DamageCalculator` damage-style formula fields through `CalculateBaseEffectAmount`, clamp actual health/shield changes before applying, and emit combat logs. `DamageShields` uses `Caster.CanAttack(target)`; healing still relies on target selection because there is no `CanAssist` helper yet.
 - Missing handler list and inventory counts are still from the original audit. If handlers are added, regenerate that section rather than manually guessing counts.
