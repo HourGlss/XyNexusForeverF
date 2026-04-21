@@ -41,11 +41,14 @@ namespace NexusForever.Game.Spell.Effect.Handler
         public SpellEffectExecutionResult Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectTeleportData data)
         {
             if (target is not IPlayer player)
-                return SpellEffectExecutionResult.Ok;
+                return SpellEffectExecutionResult.PreventEffect;
 
             WorldLocation2Entry locationEntry = gameTableManager.WorldLocation2.GetEntry(data.WorldLocationId);
             if (locationEntry == null)
-                return SpellEffectExecutionResult.Ok;
+                return SpellEffectExecutionResult.PreventEffect;
+
+            if (!player.CanTeleport())
+                return SpellEffectExecutionResult.PreventEffect;
 
             // Handle Housing Teleport
             if (locationEntry.WorldId == 1229)
@@ -55,21 +58,18 @@ namespace NexusForever.Game.Spell.Effect.Handler
                     residence = globalResidenceManager.CreateResidence(player);
 
                 IResidenceEntrance entrance = globalResidenceManager.GetResidenceEntrance(residence.PropertyInfoId);
-                if (player.CanTeleport())
-                {
-                    IMapLock mapLock = mapLockManager.GetResidenceLock(residence.Parent ?? residence);
+                if (entrance == null)
+                    return SpellEffectExecutionResult.PreventEffect;
 
-                    player.Rotation = entrance.Rotation.ToEuler();
-                    player.TeleportTo(entrance.Entry, entrance.Position, mapLock);
-                    return SpellEffectExecutionResult.Ok;
-                }
+                IMapLock mapLock = mapLockManager.GetResidenceLock(residence.Parent ?? residence);
+
+                player.Rotation = entrance.Rotation.ToEuler();
+                player.TeleportTo(entrance.Entry, entrance.Position, mapLock);
+                return SpellEffectExecutionResult.Ok;
             }
 
-            if (player.CanTeleport())
-            {
-                player.Rotation = new Quaternion(locationEntry.Facing0, locationEntry.Facing1, locationEntry.Facing2, locationEntry.Facing3).ToEuler();
-                player.TeleportTo((ushort)locationEntry.WorldId, locationEntry.Position0, locationEntry.Position1, locationEntry.Position2);
-            }
+            player.Rotation = new Quaternion(locationEntry.Facing0, locationEntry.Facing1, locationEntry.Facing2, locationEntry.Facing3).ToEuler();
+            player.TeleportTo((ushort)locationEntry.WorldId, locationEntry.Position0, locationEntry.Position1, locationEntry.Position2);
 
             return SpellEffectExecutionResult.Ok;
         }

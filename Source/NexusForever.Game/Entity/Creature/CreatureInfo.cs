@@ -20,7 +20,6 @@ namespace NexusForever.Game.Entity.Creature
 
         private ImmutableList<Creature2DisplayGroupEntryEntry> displayGroup;
         private ImmutableList<Creature2OutfitGroupEntryEntry> outfitGroup;
-        private ImmutableList<PrerequisiteEntry> prerequisitePriorityEntries;
         private ImmutableDictionary<Property, ICreatureInfoProperty> overrideProperties;
         private ImmutableDictionary<Static.Entity.Stat, ICreatureInfoStat> overrideStats;
 

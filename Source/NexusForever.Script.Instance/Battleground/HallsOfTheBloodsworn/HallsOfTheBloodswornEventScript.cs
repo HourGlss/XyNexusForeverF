@@ -124,17 +124,19 @@ namespace NexusForever.Script.Instance.Battleground.HallsOfTheBloodsworn
                     publicEvent.SetPhase(PublicEventPhase.Round1);
                     break;
                 case PublicEventObjective.FightForControl:
+                    SetRoundWinner(1, objective.Team.Team);
                     publicEvent.SetPhase(PublicEventPhase.Preperation2);
                     break;
                 case PublicEventObjective.PrepareForBattle2:
                     publicEvent.SetPhase(PublicEventPhase.Round2);
                     break;
                 case PublicEventObjective.FightForControl2:
+                    SetRoundWinner(2, objective.Team.Team);
                     if (redTeamWonRound1 && blueTeamWonRound2)
                     {
                         publicEvent.SetPhase(PublicEventPhase.Preperation3);
                     }
-                else if (blueTeamWonRound1 && redTeamWonRound2)
+                    else if (blueTeamWonRound1 && redTeamWonRound2)
                     {
                         publicEvent.SetPhase(PublicEventPhase.Preperation3);
                     }
@@ -156,6 +158,29 @@ namespace NexusForever.Script.Instance.Battleground.HallsOfTheBloodsworn
         {
             // TODO: resurrection timer and auto release
             // TODO: spawn flag
+        }
+
+        private void SetRoundWinner(uint round, Game.Static.PublicEvent.PublicEventTeam team)
+        {
+            switch (round, team)
+            {
+                case (1, Game.Static.PublicEvent.PublicEventTeam.RedTeam):
+                case (1, Game.Static.PublicEvent.PublicEventTeam.RedTeam_2):
+                    redTeamWonRound1 = true;
+                    break;
+                case (1, Game.Static.PublicEvent.PublicEventTeam.BlueTeam):
+                case (1, Game.Static.PublicEvent.PublicEventTeam.BlueTeam_2):
+                    blueTeamWonRound1 = true;
+                    break;
+                case (2, Game.Static.PublicEvent.PublicEventTeam.RedTeam):
+                case (2, Game.Static.PublicEvent.PublicEventTeam.RedTeam_2):
+                    redTeamWonRound2 = true;
+                    break;
+                case (2, Game.Static.PublicEvent.PublicEventTeam.BlueTeam):
+                case (2, Game.Static.PublicEvent.PublicEventTeam.BlueTeam_2):
+                    blueTeamWonRound2 = true;
+                    break;
+            }
         }
     }
 }

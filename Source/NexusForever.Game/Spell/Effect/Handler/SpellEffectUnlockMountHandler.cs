@@ -32,9 +32,15 @@ namespace NexusForever.Game.Spell.Effect.Handler
         public SpellEffectExecutionResult Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectUnlockMountData data)
         {
             if (target is not IPlayer player)
-                return SpellEffectExecutionResult.Ok;
+                return SpellEffectExecutionResult.PreventEffect;
 
             Spell4Entry spell4Entry = gameTableManager.Spell4.GetEntry(data.SpellId);
+            if (spell4Entry == null || spell4Entry.Spell4BaseIdBaseSpell == 0)
+                return SpellEffectExecutionResult.PreventEffect;
+
+            if (player.SpellManager.GetSpell(spell4Entry.Spell4BaseIdBaseSpell) != null)
+                return SpellEffectExecutionResult.Ok;
+
             player.SpellManager.AddSpell(spell4Entry.Spell4BaseIdBaseSpell);
 
             player.Session.EnqueueMessageEncrypted(new ServerUnlockMount

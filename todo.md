@@ -46,7 +46,7 @@ Completed items are prefixed with `[x]`; open items remain unboxed.
    Problem: `delayedEffects.Remove(effect)` happens inside a `foreach` over `delayedEffects`.
    First fix: collect elapsed effects, remove after iteration, then execute them.
 
-4. `P0` Implement or disable `SpellChanneledField`.
+4. [x] `P0` Implement or disable `SpellChanneledField`.
    File: `Source/NexusForever.Game/Spell/Type/SpellChanneledField.cs:10`
    Problem: this class only inherits base `Spell.Cast()`. It never sets `status = Casting`, never schedules `Execute()`, and likely stays in `Initiating` forever.
    First fix: either implement channel-field timing based on `SpellChanneled`, or map this cast method to a safe fallback until real behavior is known.
@@ -61,12 +61,12 @@ Completed items are prefixed with `[x]`; open items remain unboxed.
    Problem: `for (int i = 1; i >= Data.Entry.DurationTime / tickTime; i++)` almost never runs. `TickingEvent()` recursively creates a new event but never enqueues or returns it to the scheduler.
    First fix: change the bounded loop to `<=`, and make repeating proxy ticks explicitly re-enqueue the next event.
 
-7. `P0` Add missing `TitleGrant` data implementation and DI registration.
+7. [x] `P0` Add missing `TitleGrant` data implementation and DI registration.
    Files: `Source/NexusForever.Game/Spell/Effect/Handler/SpellEffectTitleGrantHandler.cs:12`, `Source/NexusForever.Game/Spell/Effect/ServiceCollectionExtensions.cs:15`
    Problem: `SpellEffectTitleGrantHandler` requires `ISpellEffectTitleGrantData`, but no concrete `SpellEffectTitleGrantData` class exists and the interface is not registered. The handler will resolve no data and never grant titles.
    First fix: add `SpellEffectTitleGrantData`, populate `TitleId` from the correct data bit, and register it.
 
-8. `P1` Fix vanity pet unlock packet and null handling.
+8. [x] `P1` Fix vanity pet unlock packet and null handling.
    File: `Source/NexusForever.Game/Spell/Effect/Handler/SpellEffectUnlockVanityPetHandler.cs:40`
    Problem: vanity pet unlock sends `ServerUnlockMount`. It also does not null-check the `Spell4Entry` before using it.
    First fix: send the correct vanity-pet unlock packet if one exists, or document/client-verify the expected packet. Add null/duplicate guards.
@@ -202,12 +202,12 @@ Completed items are prefixed with `[x]`; open items remain unboxed.
    Problem: pure no-op despite the name implying a client-visible effect.
    First fix: find the matching network packet or confirm `ServerSpellGo` carries enough visual data.
 
-6. `P2` `SpellEffectTeleportHandler`
+6. [x] `P2` `SpellEffectTeleportHandler`
    File: `Source/NexusForever.Game/Spell/Effect/Handler/SpellEffectTeleportHandler.cs`
    Problems: invalid location, non-player target, and failed `CanTeleport()` all return `Ok` silently. Housing branch creates residences during spell handling.
    First fix: return `PreventEffect` or emit debug logs for failed teleport paths; split housing teleport into a helper.
 
-7. `P2` `SpellEffectUnlockMountHandler`
+7. [x] `P2` `SpellEffectUnlockMountHandler`
    File: `Source/NexusForever.Game/Spell/Effect/Handler/SpellEffectUnlockMountHandler.cs`
    Problems: no null check for spell entry and duplicate `AddSpell()` can throw.
    First fix: guard missing/known spells and return a clear result.
@@ -376,3 +376,13 @@ All non-`UNUSED` enum values without a handler as of this audit:
 4. Implement the first easy missing handlers, starting with `Heal` and cooldown/charge effects.
 5. Move into target/prerequisite correctness, because many “spell feels wrong” bugs will come from target selection rather than individual handlers.
 6. Tackle hard proxy/scripting/summon/vehicle/warplot effects after the basic combat and reward handlers are stable.
+
+## Notes For Next Pass
+
+- 2026-04-21 batch 1 fixed the mechanical runtime bugs above the Missing section: tier loading, dictionary mutation, failed-cast disposal, multiphase capture, proxy tick scheduling, vanity-pet despawn state, duration reporting, rapid transport rotation, damage direction, physical mitigation, RNG reuse, and target-count ordering.
+- 2026-04-21 batch 2 used `origin/spells-v2-gr` as a reference for `TitleGrant`; old code maps title id to `Spell4EffectsEntry.DataBits00`. Added concrete data and DI registration so the handler no longer resolves to `NoHandler`.
+- `SpellChanneledField` now uses the same conservative channel timing shape as `SpellChanneled`: initial execute, optional pulse executes, and max-time finish. Field-specific positional/telegraph semantics still need sniff/data validation before deeper refactors.
+- `UnlockVanityPet` now uses `ServerUnlockVanityPet` from the `Pet` packet namespace. Old `spells-v2-gr` code used `ServerUnlockMount`, but this branch already had the correct vanity-pet packet model and opcode.
+- `UnlockMount` and `UnlockVanityPet` now guard missing `Spell4Entry`, missing base spell id, and duplicate spell ownership before calling `SpellManager.AddSpell()`. Do not re-add duplicate handling unless changing `SpellManager.AddSpell()` itself.
+- `SpellEffectTeleportHandler` now returns `PreventEffect` for unsupported non-player targets, missing locations, missing housing entrances, or failed `CanTeleport()`. Housing teleport still creates a residence inline; split that into a helper later if touching housing teleport rules.
+- Missing handler list and inventory counts are still from the original audit. If handlers are added, regenerate that section rather than manually guessing counts.

@@ -16,8 +16,13 @@ namespace NexusForever.Game.Spell.Effect.Handler
         /// </summary>
         public SpellEffectExecutionResult Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectTitleGrantData data)
         {
-            if (target is IPlayer player)
-                player.TitleManager.AddTitle((ushort)data.TitleId);
+            if (target is not IPlayer player)
+                return SpellEffectExecutionResult.PreventEffect;
+
+            if (data.TitleId == 0)
+                return SpellEffectExecutionResult.PreventEffect;
+
+            player.TitleManager.AddTitle((ushort)data.TitleId);
 
             return SpellEffectExecutionResult.Ok;
         }

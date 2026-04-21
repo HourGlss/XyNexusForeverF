@@ -7,7 +7,7 @@ using NexusForever.Game.Static.Spell;
 using NexusForever.Game.Static.Spell.Effect;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Pet;
 
 namespace NexusForever.Game.Spell.Effect.Handler
 {
@@ -32,12 +32,18 @@ namespace NexusForever.Game.Spell.Effect.Handler
         public SpellEffectExecutionResult Apply(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, ISpellEffectUnlockVanityPetData data)
         {
             if (target is not IPlayer player)
-                return SpellEffectExecutionResult.Ok;
+                return SpellEffectExecutionResult.PreventEffect;
 
             Spell4Entry spell4Entry = gameTableManager.Spell4.GetEntry(data.SpellId);
+            if (spell4Entry == null || spell4Entry.Spell4BaseIdBaseSpell == 0)
+                return SpellEffectExecutionResult.PreventEffect;
+
+            if (player.SpellManager.GetSpell(spell4Entry.Spell4BaseIdBaseSpell) != null)
+                return SpellEffectExecutionResult.Ok;
+
             player.SpellManager.AddSpell(spell4Entry.Spell4BaseIdBaseSpell);
 
-            player.Session.EnqueueMessageEncrypted(new ServerUnlockMount
+            player.Session.EnqueueMessageEncrypted(new ServerUnlockVanityPet
             {
                 Spell4Id = spell4Entry.Id
             });
