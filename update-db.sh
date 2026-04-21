@@ -16,23 +16,20 @@ fi
 
 run_update() {
     local host_project="$1"
-    local database_project="$2"
+    local database_name="$2"
     shift 2
 
-    echo "==> Updating ${database_project#NexusForever.Database.} database"
+    echo "==> Updating $database_name database"
     (
         cd "$SOURCE_DIR/$host_project"
-        "${EF_CMD[@]}" database update \
-            --project "../$database_project" \
-            --startup-project "." \
-            "$@"
+        "${EF_CMD[@]}" database update "$@"
     )
 }
 
-run_update "NexusForever.WorldServer" "NexusForever.Database.Auth" "$@"
-run_update "NexusForever.WorldServer" "NexusForever.Database.Character" "$@"
-run_update "NexusForever.WorldServer" "NexusForever.Database.World" "$@"
-run_update "NexusForever.Server.ChatServer" "NexusForever.Database.Chat" "$@"
-run_update "NexusForever.Server.GroupServer" "NexusForever.Database.Group" "$@"
+run_update "NexusForever.WorldServer" "Auth" --context AuthContext "$@"
+run_update "NexusForever.WorldServer" "Character" --context CharacterContext "$@"
+run_update "NexusForever.WorldServer" "World" --context WorldContext "$@"
+run_update "NexusForever.Server.ChatServer" "Chat" "$@"
+run_update "NexusForever.Server.GroupServer" "Group" "$@"
 
 echo "==> Database updates complete"

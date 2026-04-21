@@ -182,8 +182,10 @@ Apply all EF database migrations from the repository root:
 The database update helper applies Auth, Character, World, Chat, and Group
 migrations in order. It changes into each host directory before running EF so
 `WorldServer.json`, `ChatServer.json`, and `GroupServer.json` are read from the
-same locations the existing design-time factories expect. Extra EF options are
-forwarded to each update, so after a successful build you can run:
+same locations the existing design-time factories expect. The helper supplies
+the required Auth, Character, and World context names internally because
+`WorldServer` exposes more than one EF context. Extra EF options are forwarded
+to each update, so after a successful build you can run:
 
 ```bash
 ./update-db.sh --no-build
