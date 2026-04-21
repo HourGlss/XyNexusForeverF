@@ -318,12 +318,15 @@ namespace NexusForever.Game.Spell
             if (Caster is not IPlayer player)
                 return CastResult.Ok;
 
+            IUnitEntity explicitTarget = GetExplicitPrerequisiteTarget();
+
             // Runners override the Caster Check, allowing the Caster to Cast the spell due to this Prerequisite being met
             if (Parameters.SpellInfo.CasterCastPrerequisite != null && !CheckRunnerOverride(player))
             {
                 var parameters = new PrerequisiteParameters
                 {
                     TaxiNode = Parameters.TaxiNode,
+                    Target   = explicitTarget
                 };
                 if (!PrerequisiteManager.Instance.Meets(player, Parameters.SpellInfo.CasterCastPrerequisite.Id, parameters))
                     return parameters.CastResult != null ? parameters.CastResult.Value : CastResult.PrereqCasterCast;
@@ -332,6 +335,16 @@ namespace NexusForever.Game.Spell
             // not sure if this should be for explicit and/or implicit targets
             if (Parameters.SpellInfo.TargetCastPrerequisites != null)
             {
+                if (explicitTarget == null)
+                    return CastResult.PrereqTargetCast;
+
+                var parameters = new PrerequisiteParameters
+                {
+                    TaxiNode = Parameters.TaxiNode,
+                    Target   = explicitTarget
+                };
+                if (!PrerequisiteManager.Instance.Meets(player, Parameters.SpellInfo.TargetCastPrerequisites.Id, parameters))
+                    return parameters.CastResult != null ? parameters.CastResult.Value : CastResult.PrereqTargetCast;
             }
 
             // this probably isn't the correct place, name implies this should be constantly checked
@@ -344,6 +357,14 @@ namespace NexusForever.Game.Spell
             }
 
             return CastResult.Ok;
+        }
+
+        private IUnitEntity GetExplicitPrerequisiteTarget()
+        {
+            if (Parameters.PrimaryTargetId == 0u)
+                return Caster;
+
+            return Caster.GetVisible<IUnitEntity>(Parameters.PrimaryTargetId);
         }
 
         /// <summary>

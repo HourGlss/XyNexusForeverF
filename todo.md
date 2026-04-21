@@ -15,9 +15,9 @@ Scope checked:
 
 Current inventory:
 
-- Implemented spell effect handlers: 28.
+- Implemented spell effect handlers: 45.
 - Non-`UNUSED` spell effect enum values: 136.
-- Missing effect handlers: 108.
+- Missing effect handlers: 91.
 - No dedicated spell tests were found, so every fix below should include a small regression test once a test project exists.
 
 Priority legend:
@@ -139,6 +139,7 @@ Completed items are prefixed with `[x]`; open items remain unboxed.
    File: `Source/NexusForever.Game/Spell/Spell.cs:321`
    Problem: target cast prerequisites, caster persistence prerequisites, and target persistence prerequisites are loaded but empty or partially implemented. Target persistence is explicitly TODO.
    First fix: evaluate explicit target first. If prerequisite system only supports players, add safe non-player behavior and log unsupported cases.
+   Progress: explicit target cast prerequisites are now checked against the primary target or caster fallback. Caster and target persistence prerequisites still need lifetime re-check behavior.
 
 3. [x] `P1` Fix target count ordering.
    File: `Source/NexusForever.Game/Spell/Target/Implicit/Filter/SpellTargetImplicitConstraintFilter.cs:25`
@@ -221,26 +222,9 @@ Completed items are prefixed with `[x]`; open items remain unboxed.
 
 These appear lower effort because nearby systems or packets already exist.
 
-- `Heal`
-- `HealShields`
-- `DamageShields`
-- `CooldownReset`
-- `ActivateSpellCooldown`
 - `ModifyAbilityCharges`
-- `AddSpell`
-- `SpellForceRemoveChanneled`
-- `TitleRevoke`
-- `GrantXP`
-- `GrantLevelScaledXP`
-- `GrantLevelScaledPrestige`
-- `PathXpModify`
-- `PathMissionIncrement`
-- `AchievementAdvance`
-- `QuestAdvanceObjective`
 - `GiveAbilityPointsToPlayer`
-- `GiveItemToPlayer`
 - `GiveLootTableToPlayer`
-- `ReputationModify`
 - `VacuumLoot`
 - `Kill`
 - `SetBusy`
@@ -251,16 +235,16 @@ These appear lower effort because nearby systems or packets already exist.
 
 Suggested first batch:
 
-1. `Heal`
-2. `HealShields`
-3. `CooldownReset`
-4. `ModifyAbilityCharges`
-5. `TitleRevoke`
-6. `GrantXP`
-7. `AchievementAdvance`
-8. `QuestAdvanceObjective`
-9. `GiveItemToPlayer`
-10. `Kill`
+1. `ModifyAbilityCharges`
+2. `GiveAbilityPointsToPlayer`
+3. `GiveLootTableToPlayer`
+4. `Kill`
+5. `SetBusy`
+6. `Disembark`
+7. `HousingEscape`
+8. `SupportStuck`
+9. `MiniMapIcon`
+10. `VacuumLoot`
 
 ## Missing Effect Handlers: Medium Effort
 
@@ -353,7 +337,7 @@ These likely require larger architecture, scripting, content research, or major 
 
 All non-`UNUSED` enum values without a handler as of this audit:
 
-`Absorption`, `AchievementAdvance`, `ActionBarSet`, `ActivateSpellCooldown`, `AddSpell`, `AddSpellEffect`, `AggroImmune`, `ApplyLASChanges`, `ChangeDisplayName`, `ChangeIcon`, `ChangePhase`, `ChangePlane`, `ClampVital`, `CooldownReset`, `CraftItem`, `DamageShields`, `DelayDeath`, `DespawnUnit`, `DisallowPvP`, `Disembark`, `DisguiseOutfit`, `DistanceDependentDamage`, `DistributedDamage`, `FacilityModification`, `ForceFacing`, `ForcedAction`, `GiveAbilityPointsToPlayer`, `GiveAugmentPowerToPlayer`, `GiveItemToPlayer`, `GiveLootTableToPlayer`, `GiveSchematic`, `GoMap`, `GrantLevelScaledPrestige`, `GrantLevelScaledXP`, `GrantXP`, `HazardEnable`, `HazardModify`, `HazardSuspend`, `Heal`, `HealShields`, `HealingAbsorption`, `HousingEscape`, `HousingPlantSeed`, `HousingTeleport`, `ItemVisualSwap`, `Kill`, `MimicDisguise`, `MimicDisplayName`, `MiniMapIcon`, `ModifyAbilityCharges`, `ModifyCreatureFlags`, `ModifyRestedXP`, `ModifySpell`, `ModifySpellEffect`, `NPCForceAIMovement`, `NpcExecutionDelay`, `NpcForceFacing`, `NpcLootTableModify`, `PathActionExplorerDig`, `PathMissionIncrement`, `PathXpModify`, `PersonalDmgHealMod`, `PetCastSpell`, `ProxyChannel`, `ProxyChannelVariableTime`, `ProxyLinearAE`, `ProxyRandomExclusive`, `QuestAdvanceObjective`, `RavelSignal`, `ReputationModify`, `RestedXpDecorBonus`, `ReturnMap`, `RewardBuffModifier`, `RewardPropertyModifier`, `SapVital`, `Scale`, `Script`, `SetBusy`, `SetMatchingEligibility`, `SettlerCampfire`, `SharedHealthPool`, `ShieldOverload`, `SpellCounter`, `SpellDispel`, `SpellEffectImmunity`, `SpellForceRemoveChanneled`, `SpellImmunity`, `SummonCreature`, `SummonPet`, `SummonTrap`, `SummonVehicle`, `SupportStuck`, `SuppressSpellEffect`, `TemporarilyUnflagPvp`, `ThreatModification`, `ThreatTransfer`, `TitleRevoke`, `TradeSkillProfession`, `Transference`, `UnitPropertyConversion`, `UnitStateSet`, `UnlockActionBar`, `UnlockInlaidAugment`, `VacuumLoot`, `VectorSlide`, `VendorPriceModifier`, `WarplotPlugUpgrade`, `WarplotTeleport`.
+`Absorption`, `ActionBarSet`, `AddSpellEffect`, `AggroImmune`, `ApplyLASChanges`, `ChangeDisplayName`, `ChangeIcon`, `ChangePhase`, `ChangePlane`, `ClampVital`, `CraftItem`, `DelayDeath`, `DespawnUnit`, `DisallowPvP`, `Disembark`, `DisguiseOutfit`, `DistanceDependentDamage`, `DistributedDamage`, `FacilityModification`, `ForceFacing`, `ForcedAction`, `GiveAbilityPointsToPlayer`, `GiveAugmentPowerToPlayer`, `GiveLootTableToPlayer`, `GiveSchematic`, `GoMap`, `HazardEnable`, `HazardModify`, `HazardSuspend`, `HealingAbsorption`, `HousingEscape`, `HousingPlantSeed`, `HousingTeleport`, `ItemVisualSwap`, `Kill`, `MimicDisguise`, `MimicDisplayName`, `MiniMapIcon`, `ModifyAbilityCharges`, `ModifyCreatureFlags`, `ModifyRestedXP`, `ModifySpell`, `ModifySpellEffect`, `NPCForceAIMovement`, `NpcExecutionDelay`, `NpcForceFacing`, `NpcLootTableModify`, `PathActionExplorerDig`, `PersonalDmgHealMod`, `PetCastSpell`, `ProxyChannel`, `ProxyChannelVariableTime`, `ProxyLinearAE`, `ProxyRandomExclusive`, `RavelSignal`, `RestedXpDecorBonus`, `ReturnMap`, `RewardBuffModifier`, `RewardPropertyModifier`, `SapVital`, `Scale`, `Script`, `SetBusy`, `SetMatchingEligibility`, `SettlerCampfire`, `SharedHealthPool`, `ShieldOverload`, `SpellCounter`, `SpellDispel`, `SpellEffectImmunity`, `SpellImmunity`, `SummonCreature`, `SummonPet`, `SummonTrap`, `SummonVehicle`, `SupportStuck`, `SuppressSpellEffect`, `TemporarilyUnflagPvp`, `ThreatModification`, `ThreatTransfer`, `TradeSkillProfession`, `Transference`, `UnitPropertyConversion`, `UnitStateSet`, `UnlockActionBar`, `UnlockInlaidAugment`, `VacuumLoot`, `VectorSlide`, `VendorPriceModifier`, `WarplotPlugUpgrade`, `WarplotTeleport`.
 
 ## Regression Tests To Add Before Big Refactors
 
@@ -366,14 +350,14 @@ All non-`UNUSED` enum values without a handler as of this audit:
 7. Multiphase test: final phase transitions the spell to finishing/finished.
 8. Duration packet test: `EffectInfo.TimeRemaining` decreases after update.
 9. Damage direction test: caster-target faction/duel rules are checked from caster to target.
-10. Handler smoke tests for the first easy batch: `Heal`, `HealShields`, `CooldownReset`, `ModifyAbilityCharges`, `TitleRevoke`, `GrantXP`, `AchievementAdvance`, `QuestAdvanceObjective`, `GiveItemToPlayer`, and `Kill`.
+10. Handler smoke tests for the first easy batches: `Heal`, `HealShields`, `DamageShields`, `CooldownReset`, `ActivateSpellCooldown`, `AddSpell`, `TitleRevoke`, `GrantXP`, `GrantLevelScaledXP`, `GrantLevelScaledPrestige`, `PathXpModify`, `PathMissionIncrement`, `AchievementAdvance`, `QuestAdvanceObjective`, `GiveItemToPlayer`, `ReputationModify`, `SpellForceRemoveChanneled`, `ModifyAbilityCharges`, and `Kill`.
 
 ## Suggested Work Order
 
 1. Fix the P0 lifecycle/runtime exceptions first: spell tiers, dictionary mutation, channeled field, multiphase completion, proxy ticks, and TitleGrant data.
 2. Fix the P1 one-line or localized correctness bugs: vanity pet packet/state, rapid transport rotation, remaining duration, damage direction, and physical mitigation.
 3. Add reflection/regression tests so new handlers do not silently resolve to `NoHandler`.
-4. Implement the first easy missing handlers, starting with `Heal` and cooldown/charge effects.
+4. Implement the remaining easy missing handlers, starting with `ModifyAbilityCharges`, ability-point/item-loot rewards, and `Kill`.
 5. Move into target/prerequisite correctness, because many “spell feels wrong” bugs will come from target selection rather than individual handlers.
 6. Tackle hard proxy/scripting/summon/vehicle/warplot effects after the basic combat and reward handlers are stable.
 
@@ -387,4 +371,5 @@ All non-`UNUSED` enum values without a handler as of this audit:
 - `SpellEffectTeleportHandler` now returns `PreventEffect` for unsupported non-player targets, missing locations, missing housing entrances, or failed `CanTeleport()`. Housing teleport still creates a residence inline; split that into a helper later if touching housing teleport rules.
 - 2026-04-21 batch 3 added `Heal`, `HealShields`, and `DamageShields` handlers. They reuse the `DamageCalculator` damage-style formula fields through `CalculateBaseEffectAmount`, clamp actual health/shield changes before applying, and emit combat logs. `DamageShields` uses `Caster.CanAttack(target)`; healing still relies on target selection because there is no `CanAssist` helper yet.
 - 2026-04-21 batch 4 made unsupported non-threshold spells with threshold rows fail with `SpellBad` instead of throwing during initialise, fixed sparse tier and threshold lookup ordering, and made `VitalModifier` apply signed deltas with `CombatLogVitalModifier` for the actual clamped change.
-- Missing handler list and inventory counts are still from the original audit. If handlers are added, regenerate that section rather than manually guessing counts.
+- 2026-04-21 batch 5 added conservative default-data handlers for cooldown reset/activation, spell grants, title revoke, XP/path XP/prestige rewards, reputation modification, quest/achievement progress, item grants, path mission increments, and channeled spell removal. It also evaluates explicit target-cast prerequisites. Several handlers support common `DataBits00`/`DataBits01` shapes but should still be data-verified against live spell rows when odd reward behavior shows up.
+- Missing handler list and inventory counts were regenerated after batch 5.
