@@ -65,6 +65,11 @@ namespace NexusForever.Game.Abstract.Entity
         void RelocateOnMap(Vector3 position, OnRelocateDelegate callback = null);
 
         /// <summary>
+        /// Return the distance between this entity and the supplied position.
+        /// </summary>
+        float GetDistanceTo(Vector3 position);
+
+        /// <summary>
         /// Enqueue <see cref="IGridEntity"/> for visibility update on the <see cref="IBaseMap"/>.
         /// </summary>
         void VisibilityUpdate();

@@ -31,7 +31,7 @@ namespace NexusForever.Game.Prerequisite.Check
                     return player.Class != (Class)value;
                 default:
                     log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.Class}!");
-                    return true;
+                    return false;
             }
         }
     }

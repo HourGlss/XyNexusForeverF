@@ -71,6 +71,7 @@ namespace NexusForever.Network.Message
         ServerPathExplorerPowerMapFailed = 0x00F8,
         ClientPathExplorerPowerMapProgress = 0x00F9,
         ServerPathExplorerPowerMapWaiting = 0x00FA,
+        ClientFallingDamage             = 0x00FB,
         ServerCharacterFlagsUpdated     = 0x00FE,
         ServerResurrectionState         = 0x0100,
         ServerResurrectionForced        = 0x0101,

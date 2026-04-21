@@ -40,6 +40,11 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         byte GetSpellTier(uint spell4BaseId);
 
+        /// <summary>
+        /// Return if supplied AMP id is enabled in the active action set.
+        /// </summary>
+        bool IsAmpEnabled(ushort ampId);
+
         List<ICharacterSpell> GetPets();
 
         /// <summary>

@@ -155,6 +155,36 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// Returns whether an item with the supplied id exists in any non-spell inventory bag.
+        /// </summary>
+        public bool HasItem(uint itemId)
+        {
+            return bags
+                .Where(b => b.Key != InventoryLocation.Ability)
+                .Any(b => b.Value.HasItem(itemId));
+        }
+
+        /// <summary>
+        /// Returns whether an item with the supplied id exists in any supplied inventory location.
+        /// </summary>
+        public bool HasItem(uint itemId, IEnumerable<InventoryLocation> locations)
+        {
+            return locations.Any(l => HasItem(itemId, l));
+        }
+
+        /// <summary>
+        /// Returns whether an item with the supplied id exists in the supplied inventory location.
+        /// </summary>
+        public bool HasItem(uint itemId, InventoryLocation location)
+        {
+            IBag bag = GetBag(location);
+            if (bag == null)
+                return false;
+
+            return bag.HasItem(itemId);
+        }
+
+        /// <summary>
         /// Return <see cref="IItem"/> at supplied <see cref="ItemLocation"/>.
         /// </summary>
         public IItem GetItem(ItemLocation itemLocation)

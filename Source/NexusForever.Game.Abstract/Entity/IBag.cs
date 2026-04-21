@@ -15,6 +15,11 @@ namespace NexusForever.Game.Abstract.Entity
         IItem GetItem(ulong guid);
 
         /// <summary>
+        /// Returns whether an item with the supplied id exists in this bag.
+        /// </summary>
+        bool HasItem(uint itemId);
+
+        /// <summary>
         /// Returns <see cref="IItem"/> found at the supplied bag index.
         /// </summary>
         IItem GetItem(uint bagIndex);

@@ -8,6 +8,7 @@ using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Prerequisite;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -100,23 +101,26 @@ namespace NexusForever.Game.Entity
             for (uint i = 0; i <= maxGlobalSpellCooldownEnum; i++)
                 globalSpellCooldowns.Add(i, 0d);
 
-            GrantSpells();
+            activeActionSet = model.ActiveSpec;
+            innateIndex     = model.InnateIndex;
 
             for (byte i = 0; i < ActionSet.MaxActionSets; i++)
             {
                 actionSets[i] = new ActionSet(i, player);
-
-                foreach (CharacterActionSetShortcutModel shortcutModel in model.ActionSetShortcut
-                    .Where(c => c.SpecIndex == i))
-                    actionSets[i].AddShortcut(shortcutModel);
 
                 foreach (CharacterActionSetAmpModel ampModel in model.ActionSetAmp
                     .Where(c => c.SpecIndex == i))
                     actionSets[i].AddAmp(ampModel);
             }
 
-            activeActionSet = model.ActiveSpec;
-            innateIndex     = model.InnateIndex;
+            GrantSpells();
+
+            for (byte i = 0; i < ActionSet.MaxActionSets; i++)
+            {
+                foreach (CharacterActionSetShortcutModel shortcutModel in model.ActionSetShortcut
+                    .Where(c => c.SpecIndex == i))
+                    actionSets[i].AddShortcut(shortcutModel);
+            }
         }
 
         public void GrantSpells()
@@ -126,8 +130,7 @@ namespace NexusForever.Game.Entity
                 .Where(s => s.ClassId == (byte)player.Class && s.CharacterLevel <= player.Level)
                 .OrderBy(s => s.CharacterLevel))
             {
-                //FIXME
-                if (spellLevel.PrerequisiteId > 0)
+                if (spellLevel.PrerequisiteId > 0 && !MeetsSpellLevelPrerequisite(spellLevel.PrerequisiteId))
                     continue;
 
                 Spell4Entry spell4Entry = GameTableManager.Instance.Spell4.GetEntry(spellLevel.Spell4Id);
@@ -171,6 +174,73 @@ namespace NexusForever.Game.Entity
 
                 if (GetSpell(spell4Entry.Spell4BaseIdBaseSpell) == null)
                     AddSpell(spell4Entry.Spell4BaseIdBaseSpell);
+            }
+        }
+
+        private bool MeetsSpellLevelPrerequisite(uint prerequisiteId)
+        {
+            PrerequisiteEntry entry = GameTableManager.Instance.Prerequisite.GetEntry(prerequisiteId);
+            if (entry == null)
+                return false;
+
+            return entry.Flags switch
+            {
+                EvaluationMode.EvaluateAND => MeetsSpellLevelPrerequisiteAnd(entry),
+                EvaluationMode.EvaluateOR  => MeetsSpellLevelPrerequisiteOr(entry),
+                _                          => false
+            };
+        }
+
+        private bool MeetsSpellLevelPrerequisiteAnd(PrerequisiteEntry entry)
+        {
+            for (int i = 0; i < entry.PrerequisiteTypeId.Length; i++)
+            {
+                PrerequisiteType type = entry.PrerequisiteTypeId[i];
+                if (type == PrerequisiteType.None)
+                    continue;
+
+                if (!MeetsSpellLevelPrerequisite(type, entry.PrerequisiteComparisonId[i], entry.Value[i], entry.ObjectId[i]))
+                    return false;
+            }
+
+            return true;
+        }
+
+        private bool MeetsSpellLevelPrerequisiteOr(PrerequisiteEntry entry)
+        {
+            for (int i = 0; i < entry.PrerequisiteTypeId.Length; i++)
+            {
+                PrerequisiteType type = entry.PrerequisiteTypeId[i];
+                if (type == PrerequisiteType.None)
+                    continue;
+
+                if (MeetsSpellLevelPrerequisite(type, entry.PrerequisiteComparisonId[i], entry.Value[i], entry.ObjectId[i]))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private bool MeetsSpellLevelPrerequisite(PrerequisiteType type, PrerequisiteComparison comparison, uint value, uint objectId)
+        {
+            switch (type)
+            {
+                case PrerequisiteType.EldanAugmentation227:
+                {
+                    uint ampId = objectId != 0u ? objectId : value;
+                    if (ampId > ushort.MaxValue)
+                        return false;
+
+                    bool enabled = IsAmpEnabled((ushort)ampId);
+                    return comparison switch
+                    {
+                        PrerequisiteComparison.Equal    => enabled,
+                        PrerequisiteComparison.NotEqual => !enabled,
+                        _                               => false
+                    };
+                }
+                default:
+                    return false;
             }
         }
 
@@ -336,6 +406,11 @@ namespace NexusForever.Game.Entity
             IActionSet actionSet = GetActionSet(ActiveActionSet);
             IActionSetShortcut shortcut = actionSet.GetShortcut(ShortcutType.SpellbookItem, spell4BaseId);
             return shortcut?.Tier ?? spell.Tier;
+        }
+
+        public bool IsAmpEnabled(ushort ampId)
+        {
+            return GetActionSet(ActiveActionSet).GetAmp(ampId) != null;
         }
 
         public List<ICharacterSpell> GetPets()

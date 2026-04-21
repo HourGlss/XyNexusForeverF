@@ -46,6 +46,7 @@ using NexusForever.GameTable.Model;
 using NexusForever.Network.Internal;
 using NexusForever.Network.Internal.Message.Player;
 using NexusForever.Network.Session;
+using NexusForever.Network.World.Combat;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
 using NexusForever.Network.World.Message.Model;
@@ -1320,6 +1321,30 @@ namespace NexusForever.Game.Entity
             }, true);
 
             currentChairGuid = null;
+        }
+
+        /// <summary>
+        /// Process falling damage for this <see cref="IPlayer"/>.
+        /// </summary>
+        public void TakeFallingDamage(float healthPercent)
+        {
+            if (!IsAlive || !float.IsFinite(healthPercent) || healthPercent <= 0f)
+                return;
+
+            uint damage = (uint)Math.Ceiling(MaxHealth * Math.Clamp(healthPercent, 0f, 1f));
+            if (damage == 0u)
+                return;
+
+            EnqueueToVisible(new ServerCombatLog
+            {
+                CombatLog = new CombatLogFallingDamage
+                {
+                    CasterId = Guid,
+                    Damage   = damage
+                }
+            }, true);
+
+            ModifyHealth(damage, DamageType.Fall, this);
         }
 
         /// <summary>

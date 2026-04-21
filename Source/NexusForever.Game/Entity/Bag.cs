@@ -49,7 +49,15 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public IItem GetItem(ulong guid)
         {
-            return items.SingleOrDefault(i => i.Guid == guid);
+            return items.SingleOrDefault(i => i?.Guid == guid);
+        }
+
+        /// <summary>
+        /// Returns whether an item with the supplied id exists in this bag.
+        /// </summary>
+        public bool HasItem(uint itemId)
+        {
+            return items.Any(i => i?.Id == itemId);
         }
 
         /// <summary>

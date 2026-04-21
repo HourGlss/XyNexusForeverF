@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System;
+using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Prerequisite;
 using NexusForever.Game.Static.Prerequisite;
@@ -22,12 +23,21 @@ namespace NexusForever.Game.Prerequisite.Check
 
         public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
+            if (value > 1u)
+            {
+                log.LogWarning($"Unhandled prerequisite value {value} for {PrerequisiteType.AchievementState}!");
+                return false;
+            }
+
+            bool completed = player.AchievementManager.HasCompletedAchievement((ushort)objectId);
+            bool expected  = Convert.ToBoolean(value);
+
             switch (comparison)
             {
                 case PrerequisiteComparison.NotEqual:
-                    return !player.AchievementManager.HasCompletedAchievement((ushort)objectId);
+                    return completed != expected;
                 case PrerequisiteComparison.Equal:
-                    return player.AchievementManager.HasCompletedAchievement((ushort)objectId);
+                    return completed == expected;
                 default:
                     log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.AchievementState}!");
                     return false;

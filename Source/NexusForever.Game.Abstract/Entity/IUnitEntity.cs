@@ -25,6 +25,11 @@ namespace NexusForever.Game.Abstract.Entity
         bool IsAlive { get; }
 
         /// <summary>
+        /// Current death state for this unit, or <see langword="null"/> while alive.
+        /// </summary>
+        EntityDeathState? DeathState { get; }
+
+        /// <summary>
         /// Determines whether or not this <see cref="IUnitEntity"/> is in combat.
         /// </summary>
         bool InCombat { get; }

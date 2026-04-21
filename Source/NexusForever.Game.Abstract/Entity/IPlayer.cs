@@ -171,6 +171,11 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         void Unsit();
 
+        /// <summary>
+        /// Apply client-reported falling damage percentage to this <see cref="IPlayer"/>.
+        /// </summary>
+        void TakeFallingDamage(float healthPercent);
+
         void SendGenericError(GenericError error);
         void SendSystemMessage(string text);
 

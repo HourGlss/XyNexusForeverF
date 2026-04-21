@@ -247,6 +247,9 @@ namespace NexusForever.Game.Spell
             if (amps.TryGetValue(id, out IActionSetAmp amp) && !amp.PendingDelete)
                 throw new InvalidOperationException($"Failed to add AMP {id}, location is already occupied!");
 
+            if (entry.PowerCost > AmpPoints)
+                throw new InvalidOperationException($"Failed to add AMP {id}, not enough AMP power!");
+
             checked
             {
                 AmpPoints -= (byte)entry.PowerCost;
@@ -270,6 +273,9 @@ namespace NexusForever.Game.Spell
             EldanAugmentationEntry entry = GameTableManager.Instance.EldanAugmentation.GetEntry(model.AmpId);
             if (entry == null)
                 throw new ArgumentException();
+
+            if (entry.PowerCost > AmpPoints)
+                throw new InvalidOperationException($"Failed to load AMP {model.AmpId}, not enough AMP power!");
 
             checked
             {
