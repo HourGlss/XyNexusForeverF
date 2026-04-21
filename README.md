@@ -18,6 +18,7 @@ organized by runtime layer rather than by feature.
 | [README.md](README.md) | This developer orientation file. |
 | [todo.md](todo.md) | Branch-local spell audit backlog, ordered so easier spell fixes can be knocked out first. |
 | [CODEQUALITY.md](CODEQUALITY.md) | Notes for the local C# quality tooling and how to interpret its output. |
+| [update-db.sh](update-db.sh) | Root-level helper for applying all EF database migrations on a deployed server. |
 | [eng/](eng/) | Engineering support files. Currently includes coverage runsettings. |
 | [scripts/](scripts/) | Developer scripts, including quality report wrappers for Bash and PowerShell. |
 | `artifacts/` | Generated local build/test/quality output. It is ignored by git. |
@@ -170,6 +171,22 @@ Build the full solution:
 
 ```bash
 dotnet build Source/NexusForever.sln -c Release
+```
+
+Apply all EF database migrations from the repository root:
+
+```bash
+./update-db.sh
+```
+
+The database update helper applies Auth, Character, World, Chat, and Group
+migrations in order. It changes into each host directory before running EF so
+`WorldServer.json`, `ChatServer.json`, and `GroupServer.json` are read from the
+same locations the existing design-time factories expect. Extra EF options are
+forwarded to each update, so after a successful build you can run:
+
+```bash
+./update-db.sh --no-build
 ```
 
 Generate the quality report only:
