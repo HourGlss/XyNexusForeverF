@@ -150,15 +150,19 @@ namespace NexusForever.Game.Spell
         {
             var executionContext = new SpellExecutionContext();
             executionContext.Initialise(this, true);
+            List<Spell4EffectsEntry> elapsedEffects = [];
 
             foreach ((Spell4EffectsEntry effect, UpdateTimer updateTimer) in delayedEffects)
             {
                 updateTimer.Update(lastTick);
                 if (updateTimer.HasElapsed)
-                {
-                    executionContext.AddSpellEffect(effect);
-                    delayedEffects.Remove(effect);
-                }
+                    elapsedEffects.Add(effect);
+            }
+
+            foreach (Spell4EffectsEntry effect in elapsedEffects)
+            {
+                delayedEffects.Remove(effect);
+                executionContext.AddSpellEffect(effect);
             }
 
             Execute(executionContext);

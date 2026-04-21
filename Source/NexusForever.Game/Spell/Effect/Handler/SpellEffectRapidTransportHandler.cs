@@ -82,7 +82,7 @@ namespace NexusForever.Game.Spell.Effect.Handler
                 player.CurrencyManager.CurrencySubtractAmount(CurrencyType.Credits, creditPrice.Value);
             }
 
-            var rotation = new Quaternion(worldLocationEntry.Facing0, worldLocationEntry.Facing0, worldLocationEntry.Facing2, worldLocationEntry.Facing3);
+            var rotation = new Quaternion(worldLocationEntry.Facing0, worldLocationEntry.Facing1, worldLocationEntry.Facing2, worldLocationEntry.Facing3);
             player.Rotation = rotation.ToEuler();
             player.TeleportTo((ushort)worldLocationEntry.WorldId, worldLocationEntry.Position0, worldLocationEntry.Position1, worldLocationEntry.Position2);
 

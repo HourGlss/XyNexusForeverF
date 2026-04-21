@@ -44,7 +44,7 @@ namespace NexusForever.Game.Spell.Effect.Handler
             {
                 IPetEntity oldVanityPet = player.GetVisible<IPetEntity>(player.VanityPetGuid.Value);
                 oldVanityPet?.RemoveFromMap();
-                player.VanityPetGuid = 0u;
+                player.VanityPetGuid = null;
             }
 
             var pet = entityFactory.CreateEntity<IPetEntity>();

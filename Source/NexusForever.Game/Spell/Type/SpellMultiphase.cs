@@ -46,7 +46,7 @@ namespace NexusForever.Game.Spell.Type
                     currentPhase = (byte)spellPhase.OrderIndex;
                     Execute();
 
-                    if (i == Parameters.SpellInfo.Phases.Count - 1)
+                    if (index == Parameters.SpellInfo.Phases.Count - 1)
                     {
                         status = SpellStatus.Finishing;
                         log.LogTrace($"SpellMultiphase {Parameters.SpellInfo.Entry.Id} has finished executing.");

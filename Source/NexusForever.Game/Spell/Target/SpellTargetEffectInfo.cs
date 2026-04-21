@@ -97,7 +97,7 @@ namespace NexusForever.Game.Spell.Target
                 Spell4EffectId = Entry.Id,
                 EffectUniqueId = EffectId,
                 DelayTime      = Entry.DelayTime,
-                TimeRemaining  = duration != null ? (int)TimeSpan.FromSeconds(duration.Duration).TotalMilliseconds : -1
+                TimeRemaining  = duration != null ? (int)TimeSpan.FromSeconds(duration.Time).TotalMilliseconds : -1
             };
 
             if (Damage != null)
@@ -228,7 +228,7 @@ namespace NexusForever.Game.Spell.Target
                     CastingId           = Target.Collection.Spell.CastingId,
                     TargetId            = target.Guid,
                     SpellEffectUniqueId = EffectId,
-                    Duration            = duration != null ? (int)TimeSpan.FromSeconds(duration.Duration).TotalMilliseconds : -1
+                    Duration            = duration != null ? (int)TimeSpan.FromSeconds(duration.Time).TotalMilliseconds : -1
                 }, true);
             }
         }

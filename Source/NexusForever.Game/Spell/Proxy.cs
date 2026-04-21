@@ -64,16 +64,17 @@ namespace NexusForever.Game.Spell
                 double tickTime = Data.Entry.TickTime;
                 if (Data.Entry.DurationTime > 0)
                 {
-                    for (int i = 1; i >= Data.Entry.DurationTime / tickTime; i++)
+                    for (int i = 1; i <= Data.Entry.DurationTime / tickTime; i++)
                     {
-                        events.EnqueueEvent(new SpellEvent(tickTime * i / 1000d, () =>
+                        int tick = i;
+                        events.EnqueueEvent(new SpellEvent(tickTime * tick / 1000d, () =>
                         {
                             caster.CastSpell(Data.PeriodicSpellId, proxyParameters);
                         }));
                     }
                 }
                 else
-                    events.EnqueueEvent(TickingEvent(tickTime, () =>
+                    events.EnqueueEvent(TickingEvent(tickTime, events, () =>
                     {
                         caster.CastSpell(Data.PeriodicSpellId, proxyParameters);
                     }));
@@ -82,12 +83,12 @@ namespace NexusForever.Game.Spell
                 caster.CastSpell(Data.SpellId, proxyParameters);
         }
 
-        private SpellEvent TickingEvent(double tickTime, Action action)
+        private SpellEvent TickingEvent(double tickTime, ISpellEventManager events, Action action)
         {
             return new SpellEvent(tickTime / 1000d, () =>
             {
                 action.Invoke();
-                TickingEvent(tickTime, action);
+                events.EnqueueEvent(TickingEvent(tickTime, events, action));
             });
         }
     }

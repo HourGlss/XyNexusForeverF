@@ -38,9 +38,10 @@ namespace NexusForever.Game.Spell
             set
             {
                 if (tier != value)
-                    SpellInfo = BaseInfo.GetSpellInfo(tier);
+                    SetSpellInfo(value);
+                else
+                    tier = value;
 
-                tier = value;
                 saveMask |= UnlockedSpellSaveMask.Tier;
             }
         }
@@ -63,15 +64,9 @@ namespace NexusForever.Game.Spell
         {
             Owner     = player;
             BaseInfo  = baseInfo;
-            SpellInfo = baseInfo.GetSpellInfo(tier);
             Item      = item;
-            tier      = model.Tier;
             castMethod = (CastMethod)baseInfo.Entry.CastMethod;
-            if (SpellInfo.Entry.Spell4IdMechanicAlternateSpell > 0)
-            {
-                Spell4Entry alternativeEntry = GameTableManager.Instance.Spell4.GetEntry(SpellInfo.Entry.Spell4IdMechanicAlternateSpell);
-                AlternateSpellInfo = LegacyServiceProvider.Provider.GetService<ISpellInfoManager>().GetSpellBaseInfo(alternativeEntry.Spell4BaseIdBaseSpell).GetSpellInfo(tier);
-            }
+            SetSpellInfo(model.Tier);
 
             InitialiseAbilityCharges();
         }
@@ -83,19 +78,27 @@ namespace NexusForever.Game.Spell
         {
             Owner     = player;
             BaseInfo  = baseInfo ?? throw new ArgumentNullException();
-            SpellInfo = baseInfo.GetSpellInfo(tier);
             Item      = item;
-            this.tier = tier;
             castMethod = (CastMethod)baseInfo.Entry.CastMethod;
-            if (SpellInfo.Entry.Spell4IdMechanicAlternateSpell > 0)
-            {
-                Spell4Entry alternativeEntry = GameTableManager.Instance.Spell4.GetEntry(SpellInfo.Entry.Spell4IdMechanicAlternateSpell);
-                AlternateSpellInfo = LegacyServiceProvider.Provider.GetService<ISpellInfoManager>().GetSpellBaseInfo(alternativeEntry.Spell4BaseIdBaseSpell).GetSpellInfo(tier);
-            }
+            SetSpellInfo(tier);
 
             InitialiseAbilityCharges();
 
             saveMask = UnlockedSpellSaveMask.Create;
+        }
+
+        private void SetSpellInfo(byte tier)
+        {
+            this.tier = tier;
+            SpellInfo = BaseInfo.GetSpellInfo(tier);
+            AlternateSpellInfo = null;
+
+            if (SpellInfo.Entry.Spell4IdMechanicAlternateSpell > 0)
+            {
+                Spell4Entry alternativeEntry = GameTableManager.Instance.Spell4.GetEntry(SpellInfo.Entry.Spell4IdMechanicAlternateSpell);
+                if (alternativeEntry != null)
+                    AlternateSpellInfo = LegacyServiceProvider.Provider.GetService<ISpellInfoManager>().GetSpellBaseInfo(alternativeEntry.Spell4BaseIdBaseSpell).GetSpellInfo(tier);
+            }
         }
 
         private void InitialiseAbilityCharges()

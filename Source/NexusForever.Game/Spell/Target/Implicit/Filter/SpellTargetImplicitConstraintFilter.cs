@@ -22,26 +22,23 @@ namespace NexusForever.Game.Spell.Target.Implicit.Filter
             if (constraints == null)
                 return;
 
-            uint count = 0u;
             foreach (ISpellTargetImplicit target in targets)
             {
                 // no point evaluating if the target is not inside the telegraph
                 if (target.Result != null)
                     continue;
 
-                SpellTargetImplicitSelectionResult? result = FilterImplicitTarget(target, count++);
+                SpellTargetImplicitSelectionResult? result = FilterImplicitTarget(target);
                 if (result.HasValue)
                     target.Result = result.Value;
             }
 
             OrderForSelectionType(targets);
+            FilterTargetCount(targets);
         }
 
-        private SpellTargetImplicitSelectionResult? FilterImplicitTarget(ISpellTargetImplicit target, uint count)
+        private SpellTargetImplicitSelectionResult? FilterImplicitTarget(ISpellTargetImplicit target)
         {
-            if (constraints.TargetCount > 0 && count >= constraints.TargetCount)
-                return SpellTargetImplicitSelectionResult.CountConstraintFailed;
-
             // TODO
             if (constraints.Angle > 0)
             {
@@ -54,6 +51,22 @@ namespace NexusForever.Game.Spell.Target.Implicit.Filter
                 return SpellTargetImplicitSelectionResult.DistanceConstraintFailed;
 
             return null;
+        }
+
+        private void FilterTargetCount(List<ISpellTargetImplicit> targets)
+        {
+            if (constraints.TargetCount == 0)
+                return;
+
+            uint count = 0u;
+            foreach (ISpellTargetImplicit target in targets)
+            {
+                if (target.Result != null)
+                    continue;
+
+                if (count++ >= constraints.TargetCount)
+                    target.Result = SpellTargetImplicitSelectionResult.CountConstraintFailed;
+            }
         }
 
         private void OrderForSelectionType(List<ISpellTargetImplicit> targets)

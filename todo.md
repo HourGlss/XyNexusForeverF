@@ -27,19 +27,21 @@ Priority legend:
 - `P2`: partial/stubbed behavior that needs data research or packet validation.
 - `P3`: larger systems work.
 
+Completed items are prefixed with `[x]`; open items remain unboxed.
+
 ## Start Here: Smallest High-Impact Fixes
 
-1. `P0` Fix loaded and updated spell tiers.
+1. [x] `P0` Fix loaded and updated spell tiers.
    File: `Source/NexusForever.Game/Spell/CharacterSpell.cs:40`
    Problem: the `Tier` setter calls `BaseInfo.GetSpellInfo(tier)` before assigning the new value, so it reloads the old tier. The DB constructor also calls `baseInfo.GetSpellInfo(tier)` before `tier = model.Tier`, so loaded character spells appear to use tier 1 spell data even when the saved tier is higher.
    First fix: assign `tier` first or call `BaseInfo.GetSpellInfo(value)`, and load `model.Tier` before resolving `SpellInfo`.
 
-2. `P0` Stop mutating active spell dictionaries while iterating.
+2. [x] `P0` Stop mutating active spell dictionaries while iterating.
    File: `Source/NexusForever.Game/Entity/UnitEntity.cs:150`
    Problem: `spells.Remove(spell.CastingId)` runs inside `foreach (ISpell spell in spells.Values)`, which can throw `InvalidOperationException` as soon as a spell finishes during update.
    First fix: collect finished spell ids into a list and remove them after the loop.
 
-3. `P0` Stop mutating delayed effect dictionaries while iterating.
+3. [x] `P0` Stop mutating delayed effect dictionaries while iterating.
    File: `Source/NexusForever.Game/Spell/Spell.cs:154`
    Problem: `delayedEffects.Remove(effect)` happens inside a `foreach` over `delayedEffects`.
    First fix: collect elapsed effects, remove after iteration, then execute them.
@@ -49,12 +51,12 @@ Priority legend:
    Problem: this class only inherits base `Spell.Cast()`. It never sets `status = Casting`, never schedules `Execute()`, and likely stays in `Initiating` forever.
    First fix: either implement channel-field timing based on `SpellChanneled`, or map this cast method to a safe fallback until real behavior is known.
 
-5. `P0` Fix multiphase completion.
+5. [x] `P0` Fix multiphase completion.
    File: `Source/NexusForever.Game/Spell/Type/SpellMultiphase.cs:49`
    Problem: the lambda checks `if (i == Parameters.SpellInfo.Phases.Count - 1)` but captures the loop variable `i`. After the loop, this condition will not represent the phase that scheduled the event. The unused `index` local was probably intended for this.
    First fix: use the captured `index` local in the lambda.
 
-6. `P0` Fix proxy tick scheduling.
+6. [x] `P0` Fix proxy tick scheduling.
    File: `Source/NexusForever.Game/Spell/Proxy.cs:67`
    Problem: `for (int i = 1; i >= Data.Entry.DurationTime / tickTime; i++)` almost never runs. `TickingEvent()` recursively creates a new event but never enqueues or returns it to the scheduler.
    First fix: change the bounded loop to `<=`, and make repeating proxy ticks explicitly re-enqueue the next event.
@@ -69,34 +71,34 @@ Priority legend:
    Problem: vanity pet unlock sends `ServerUnlockMount`. It also does not null-check the `Spell4Entry` before using it.
    First fix: send the correct vanity-pet unlock packet if one exists, or document/client-verify the expected packet. Add null/duplicate guards.
 
-9. `P1` Fix vanity pet despawn state.
+9. [x] `P1` Fix vanity pet despawn state.
    File: `Source/NexusForever.Game/Spell/Effect/Handler/SpellEffectSummonVanityPetHandler.cs:47`
    Problem: removed vanity pets set `player.VanityPetGuid = 0u` instead of `null`, but other call sites check `!= null`, so later code can keep trying to interact with guid `0`.
    First fix: set `VanityPetGuid = null`.
 
-10. `P1` Report actual remaining effect duration.
+10. [x] `P1` Report actual remaining effect duration.
     File: `Source/NexusForever.Game/Spell/Target/SpellTargetEffectInfo.cs:100`
     Problem: `Build()` and `ServerSpellUpdateEffectDuration` use `duration.Duration`, not `duration.Time`, so the client receives the original duration instead of remaining time.
     First fix: use `duration.Time` for remaining time.
 
-11. `P1` Fix rapid transport rotation.
+11. [x] `P1` Fix rapid transport rotation.
     File: `Source/NexusForever.Game/Spell/Effect/Handler/SpellEffectRapidTransportHandler.cs:85`
     Problem: quaternion construction uses `Facing0` twice and skips `Facing1`.
     First fix: use `(Facing0, Facing1, Facing2, Facing3)`.
 
-12. `P1` Dispose spells that fail during cast setup.
+12. [x] `P1` Dispose spells that fail during cast setup.
     File: `Source/NexusForever.Game/Entity/UnitEntity.cs:443`
     Problem: `spell.Initialise()` creates script collections. If `spell.Cast()` returns false or the spell fails before being added to `pendingSpells`, it is not disposed.
     First fix: call `spell.Dispose()` before returning on failed cast paths.
 
 ## Combat and Effect Correctness
 
-1. `P1` Check damage eligibility from caster to target, not target to caster.
+1. [x] `P1` Check damage eligibility from caster to target, not target to caster.
    File: `Source/NexusForever.Game/Spell/Effect/Handler/SpellEffectDamageHandler.cs:39`
    Problem: damage checks `target.CanAttack(executionContext.Spell.Caster)`. The readable intent is `caster.CanAttack(target)`. This is especially risky around one-way validity rules, scripted factions, duels, and pets.
    First fix: switch the call direction and validate duel/PvE behavior.
 
-2. `P1` Fix physical mitigation property.
+2. [x] `P1` Fix physical mitigation property.
    File: `Source/NexusForever.Game/Combat/DamageCalculator.cs:268`
    Problem: physical damage adds `DamageMitigationPctOffsetMagic`; `Property.DamageMitigationPctOffsetPhysical` exists and is probably intended.
    First fix: use the physical offset for `DamageType.Physical`.
@@ -121,7 +123,7 @@ Priority legend:
    Gaps: strikethrough, armor pierce, multi-hit, lifesteal, reflect, crit deflect, critical mitigation, glance combat logging, defensive modifiers, proc queueing, and robust null handling when a `GameFormulaEntry` is missing.
    First fix: add focused tests around current damage math before changing formulas.
 
-7. `P2` Replace `new Random()` in combat chance checks.
+7. [x] `P2` Replace `new Random()` in combat chance checks.
    File: `Source/NexusForever.Game/Combat/DamageCalculator.cs:280`
    Problem: repeated `new Random()` can create correlated rolls under high-frequency combat.
    First fix: use `Random.Shared` or inject an RNG for deterministic tests.
@@ -138,7 +140,7 @@ Priority legend:
    Problem: target cast prerequisites, caster persistence prerequisites, and target persistence prerequisites are loaded but empty or partially implemented. Target persistence is explicitly TODO.
    First fix: evaluate explicit target first. If prerequisite system only supports players, add safe non-player behavior and log unsupported cases.
 
-3. `P1` Fix target count ordering.
+3. [x] `P1` Fix target count ordering.
    File: `Source/NexusForever.Game/Spell/Target/Implicit/Filter/SpellTargetImplicitConstraintFilter.cs:25`
    Problem: target count is applied before `OrderForSelectionType()`, so `Closest`, `Furthest`, `Random`, and health-based selection can cull the wrong units.
    First fix: filter range/angle first, sort, then apply `TargetCount`.

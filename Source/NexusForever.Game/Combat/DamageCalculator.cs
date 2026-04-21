@@ -266,7 +266,7 @@ namespace NexusForever.Game.Combat
             float mitigationPct = (armorFormulaEntry.Datafloat0 / victim.Level * armorFormulaEntry.Datafloat01) * victim.GetPropertyValue(Property.Armor) / 100;
 
             if (damageType == DamageType.Physical)
-                mitigationPct += victim.GetPropertyValue(Property.DamageMitigationPctOffsetMagic);
+                mitigationPct += victim.GetPropertyValue(Property.DamageMitigationPctOffsetPhysical);
             else if (damageType == DamageType.Tech)
                 mitigationPct += victim.GetPropertyValue(Property.DamageMitigationPctOffsetTech);
             else if (damageType == DamageType.Magic)
@@ -280,7 +280,7 @@ namespace NexusForever.Game.Combat
 
         private bool IsSuccessfulChance(float percentage)
         {
-            return new Random().Next(1, 10000) <= percentage * 10000f;
+            return Random.Shared.Next(1, 10000) <= percentage * 10000f;
         }
 
         /// <summary>

@@ -147,13 +147,17 @@ namespace NexusForever.Game.Entity
 
             pendingSpells.Clear();
 
+            List<uint> finishedSpells = [];
             foreach (ISpell spell in spells.Values)
             {
                 spell.Update(lastTick);
                 spell.LateUpdate(lastTick);
                 if (spell.IsFinished)
-                    spells.Remove(spell.CastingId);
+                    finishedSpells.Add(spell.CastingId);
             }
+
+            foreach (uint castingId in finishedSpells)
+                spells.Remove(castingId);
 
             statUpdateManager.Update(lastTick);
 
@@ -442,11 +446,17 @@ namespace NexusForever.Game.Entity
 
             spell.Initialise(this, parameters);
             if (!spell.Cast())
+            {
+                spell.Dispose();
                 return;
+            }
 
             // Don't store spell if it failed to initialise
             if (spell.IsFailed)
+            {
+                spell.Dispose();
                 return;
+            }
 
             pendingSpells.Add(spell);
         }
