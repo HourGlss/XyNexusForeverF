@@ -4,12 +4,14 @@ using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Network.Session;
+using NexusForever.WorldServer.Storefront;
 
 namespace NexusForever.WorldServer.Network
 {
     public interface IWorldSession : IGameSession
     {
         IAccount Account { get; }
+        IPurchaseManager PurchaseManager { get; }
         IPlayer Player { get; set; }
 
         List<CharacterModel> Characters { get; }

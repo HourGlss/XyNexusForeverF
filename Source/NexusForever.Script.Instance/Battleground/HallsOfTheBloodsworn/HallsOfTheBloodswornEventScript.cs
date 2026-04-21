@@ -81,7 +81,7 @@ namespace NexusForever.Script.Instance.Battleground.HallsOfTheBloodsworn
         }
 
         /// <summary>
-        /// Invoked when a PvP match <see cref="PvpGameState"/> changes on the same map the public event is on. 
+        /// Invoked when a PvP match <see cref="PvpGameState"/> changes on the same map the public event is on.
         /// </summary>
         public void OnMatchState(PvpGameState state)
         {
@@ -138,7 +138,7 @@ namespace NexusForever.Script.Instance.Battleground.HallsOfTheBloodsworn
                     {
                         publicEvent.SetPhase(PublicEventPhase.Preperation3);
                     }
-                    else 
+                    else
                     {
                         publicEvent.Finish(PublicEventTeam.PublicTeam);
                     }

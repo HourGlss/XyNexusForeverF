@@ -344,6 +344,50 @@ namespace NexusForever.Database.Auth.Migrations
                     b.ToTable("account_role", (string)null);
                 });
 
+            modelBuilder.Entity("NexusForever.Database.Auth.Model.AccountStoreTransactionModel", b =>
+                {
+                    b.Property<uint>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("id");
+
+                    b.Property<ulong>("TransactionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul)
+                        .HasColumnName("transactionId");
+
+                    b.Property<float>("Cost")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(0f)
+                        .HasColumnName("cost");
+
+                    b.Property<ushort>("CurrencyType")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint(5) unsigned")
+                        .HasDefaultValue((ushort)0)
+                        .HasColumnName("currencyType");
+
+                    b.Property<string>("Name")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("varchar(256)")
+                        .HasDefaultValue("")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime>("TransactionDateTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("transactionDateTime")
+                        .HasDefaultValueSql("current_timestamp()");
+
+                    b.HasKey("Id", "TransactionId")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("account_store_transaction", (string)null);
+                });
+
             modelBuilder.Entity("NexusForever.Database.Auth.Model.AccountSuspensionModel", b =>
                 {
                     b.Property<uint>("Id")
@@ -1325,6 +1369,18 @@ namespace NexusForever.Database.Auth.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("NexusForever.Database.Auth.Model.AccountStoreTransactionModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.Auth.Model.AccountModel", "Account")
+                        .WithMany("AccountStoreTransaction")
+                        .HasForeignKey("Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK__account_store_transaction_id__account_id");
+
+                    b.Navigation("Account");
+                });
+
             modelBuilder.Entity("NexusForever.Database.Auth.Model.AccountSuspensionModel", b =>
                 {
                     b.HasOne("NexusForever.Database.Auth.Model.AccountModel", "Account")
@@ -1377,6 +1433,8 @@ namespace NexusForever.Database.Auth.Migrations
                     b.Navigation("AccountRole");
 
                     b.Navigation("AccountSuspension");
+
+                    b.Navigation("AccountStoreTransaction");
                 });
 
             modelBuilder.Entity("NexusForever.Database.Auth.Model.PermissionModel", b =>

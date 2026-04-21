@@ -700,9 +700,12 @@ namespace NexusForever.Network.Message
         Server081B                      = 0x081B, // spline related
         Server081C                      = 0x081C, // spline related
         ClientSteamAchievements         = 0x0823,
+        ClientStorefrontPurchaseGift    = 0x0828,
         ClientStorefrontPurchaseAccount = 0x0828,
+        ClientStorefrontPurchase        = 0x082A,
         ClientStorefrontPurchaseCharacter = 0x082A,
         ClientStorefrontRequestCatalog  = 0x082D,
+        ClientStorefrontRequestPurchaseHistory = 0x082E,
         ClientSummonVanityPet           = 0x082F,
         ClientReportBug                 = 0x0830,
         ClientStuck                     = 0x0831,
@@ -766,6 +769,7 @@ namespace NexusForever.Network.Message
         ServerVehiclePassengerRemove    = 0x08C7,
         ServerUnitSetChair              = 0x08CF,
         ServerReputationOverrideAdd     = 0x08D7,
+        ServerUnitStealth               = 0x08F5,
         ServerEntityVisualUpdate        = 0x0905,
         ServerEntityTargetUnit          = 0x0908,
         ServerEntityThreatListUpdate    = 0x0909,
@@ -806,6 +810,8 @@ namespace NexusForever.Network.Message
         ServerAccountItemCooldownSet    = 0x0974,
         ServerAccountItemAdd            = 0x0975,
         ServerAccountItemsPending       = 0x0979,
+        ServerAccountItemDelete         = 0x097C,
+        ServerAccountTransactionUpdate  = 0x097D,
         ServerAccountTier               = 0x097F,
         ServerGenericUnlockAccountList  = 0x0981,
         ServerGenericUnlockAccount      = 0x0982,
@@ -814,6 +820,9 @@ namespace NexusForever.Network.Message
         ServerGenericUnlockResult       = 0x0985,
         ServerStoreFinalise             = 0x0987,
         ServerStoreCategories           = 0x0988,
+        ServerStoreError                = 0x098A,
         ServerStoreOffers               = 0x098B,
+        ServerStorePurchaseResult       = 0x098C,
+        ServerStorePurchaseHistory      = 0x098E,
     }
 }

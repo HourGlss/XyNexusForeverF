@@ -6,6 +6,6 @@
         BlueTeamMoodieMasksCollected = 776,
         //366
         ParticipateInTheSmashAndGrab = 1383,
-        PrepareForBattle             = 1392 
+        PrepareForBattle             = 1392
     }
 }

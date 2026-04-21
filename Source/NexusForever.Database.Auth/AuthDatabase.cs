@@ -80,6 +80,7 @@ namespace NexusForever.Database.Auth
                 .Include(a => a.AccountEntitlement)
                 .Include(a => a.AccountPermission)
                 .Include(a => a.AccountRole)
+                .Include(a => a.AccountStoreTransaction)
                 .SingleOrDefaultAsync(a => a.Email == email && a.SessionKey == sessionKey);
         }
 
@@ -249,6 +250,23 @@ namespace NexusForever.Database.Auth
                 .Include(r => r.RolePermission)
                 .AsNoTracking()
                 .ToImmutableList();
+        }
+
+        public async Task<AccountStoreTransactionModel> CreateStoreTransactionAsync(AccountStoreTransactionModel transaction)
+        {
+            await using var context = new AuthContext(config);
+
+            ulong transactionId = await context.AccountStoreTransaction
+                .Select(t => t.TransactionId)
+                .DefaultIfEmpty()
+                .MaxAsync();
+
+            transaction.TransactionId = transactionId < 10000000ul ? 10000001ul : transactionId + 1ul;
+
+            context.AccountStoreTransaction.Add(transaction);
+            await context.SaveChangesAsync();
+
+            return transaction;
         }
 
         public void BanAccount(uint accountId, string reason, DateTime? endTime)

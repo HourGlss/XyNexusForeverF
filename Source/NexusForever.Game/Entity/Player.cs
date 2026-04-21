@@ -27,6 +27,7 @@ using NexusForever.Game.Configuration.Model;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
+using NexusForever.Game.Pvp;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Reputation;
 using NexusForever.Game.Static;
@@ -204,6 +205,10 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public bool SignatureEnabled => Account.RbacManager.HasPermission(Permission.Signature);
 
+        public bool IgnoreDuelRequests { get; set; }
+        public uint? DuelOpponentGuid { get; set; }
+        public bool IsDueling => DuelOpponentGuid != null;
+
         public PvPFlag PvPFlags
         {
             get => pvpFlags;
@@ -215,7 +220,7 @@ namespace NexusForever.Game.Entity
                 {
                     UnitId = Guid,
                     State  = pvpFlags
-                });
+                }, true);
             }
         }
 
@@ -233,6 +238,7 @@ namespace NexusForever.Game.Entity
         public IInventory Inventory { get; private set; }
         public ICurrencyManager CurrencyManager { get; }
         public IPathManager PathManager { get; private set; }
+        public PathMissionManager PathMissionManager { get; private set; }
         public ITitleManager TitleManager { get; private set; }
         public ISpellManager SpellManager { get; private set; }
         public ICostumeManager CostumeManager { get; private set; }
@@ -361,6 +367,7 @@ namespace NexusForever.Game.Entity
             Inventory               = new Inventory(this, model);
             CurrencyManager.Initialise(this, model);
             PathManager             = new PathManager(this, model);
+            PathMissionManager      = new PathMissionManager(this, model);
             TitleManager            = new TitleManager(this, model);
             SpellManager            = new SpellManager(this, model);
             PetCustomisationManager = new PetCustomisationManager(this, model);
@@ -597,6 +604,7 @@ namespace NexusForever.Game.Entity
             Inventory.Save(context);
             CurrencyManager.Save(context);
             PathManager.Save(context);
+            PathMissionManager.Save(context);
             TitleManager.Save(context);
             CostumeManager.Save(context);
             PetCustomisationManager.Save(context);
@@ -719,6 +727,7 @@ namespace NexusForever.Game.Entity
             }
 
             ZoneMapManager.OnZoneUpdate();
+            PathMissionManager.SetCurrentZoneEpisode();
 
             messagePublisher.PublishAsync(new PlayerWorldZoneUpdatedMessage
             {
@@ -733,6 +742,7 @@ namespace NexusForever.Game.Entity
 
             SendInGameTime();
             PathManager.SendInitialPackets();
+            PathMissionManager.SendInitialPackets();
             BuybackManager.Instance.SendBuybackItems(this);
 
             ResidenceManager.SendHousingBasics();
@@ -822,6 +832,7 @@ namespace NexusForever.Game.Entity
 
         protected override void OnRemoveFromMap()
         {
+            DuelManager.Instance.EndDuelsForPlayer(this);
             DestroyDependents();
             base.OnRemoveFromMap();
         }
@@ -878,6 +889,15 @@ namespace NexusForever.Game.Entity
                 {
                     UnitId = unitEntity.Guid,
                     InCombat = unitEntity.InCombat
+                });
+            }
+
+            if (entity is IUnitEntity stealthUnit && stealthUnit.Stealthed)
+            {
+                Session.EnqueueMessageEncrypted(new ServerUnitStealth
+                {
+                    UnitId = stealthUnit.Guid,
+                    Stealthed = true
                 });
             }
         }
@@ -1567,6 +1587,9 @@ namespace NexusForever.Game.Entity
         {
             if (target is IPlayer player)
             {
+                if (DuelOpponentGuid == player.Guid && player.DuelOpponentGuid == Guid)
+                    return true;
+
                 if (player.PvPFlags == PvPFlag.Disabled)
                     return false;
             }
@@ -1609,6 +1632,7 @@ namespace NexusForever.Game.Entity
         {
             base.OnDeath(killer);
 
+            DuelManager.Instance.OnPlayerDeath(this);
             Dismount();
             RemoveControlUnit();
 

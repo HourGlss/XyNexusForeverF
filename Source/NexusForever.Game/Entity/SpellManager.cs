@@ -360,6 +360,11 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void SetSpellCooldownByCooldownId(uint spell4CooldownId, double newCooldown)
         {
+            SetSpellCooldownByCooldownId(spell4CooldownId, newCooldown, null);
+        }
+
+        private void SetSpellCooldownByCooldownId(uint spell4CooldownId, double newCooldown, uint? excludeSpell4Id)
+        {
             if (newCooldown < 0d)
                 throw new ArgumentOutOfRangeException();
 
@@ -367,6 +372,17 @@ namespace NexusForever.Game.Entity
                 cooldownIds[spell4CooldownId] = newCooldown;
             else
                 cooldownIds.TryAdd(spell4CooldownId, newCooldown);
+
+            foreach (ICharacterSpell spell in spells.Values)
+            {
+                if (excludeSpell4Id.HasValue && spell.SpellInfo.Entry.Id == excludeSpell4Id.Value)
+                    continue;
+
+                if (!spell.SpellInfo.Cooldowns.Any(c => c.Id == spell4CooldownId))
+                    continue;
+
+                _SetSpellCooldown(spell.SpellInfo.Entry.Id, newCooldown, true);
+            }
         }
 
         /// <summary>
@@ -418,7 +434,7 @@ namespace NexusForever.Game.Entity
             _SetSpellCooldown(spellInfo.Entry.Id, cooldown, emit);
 
             foreach (SpellCoolDownEntry coolDownEntry in spellInfo.Cooldowns)
-                SetSpellCooldownByCooldownId(coolDownEntry.Id, cooldown);
+                SetSpellCooldownByCooldownId(coolDownEntry.Id, cooldown, emit ? spellInfo.Entry.Id : null);
         }
 
         /// <summary>

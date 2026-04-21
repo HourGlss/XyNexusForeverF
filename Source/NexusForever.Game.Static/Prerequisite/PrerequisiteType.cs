@@ -283,7 +283,7 @@
         Unknown272                  = 272, // Exist in PrerequisiteType.tbl but does not have a description
         EntitlementCount            = 273, // Entitlement count requirement not met
         // 274 is unused in PrerequisiteType.tbl
-        Unknown275                  = 275, // Exist in PrerequisiteType.tbl but does not have a description
+        CostumeUnlocked             = 275, // Costume unlock requirement not met
         OutOfBounds                 = 276, // You're out of bounds
         Unknown277                  = 277, // You cannot do that right now
         Unknown278                  = 278, // Requirements not met

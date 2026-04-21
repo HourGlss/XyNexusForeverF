@@ -62,6 +62,10 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         bool SignatureEnabled { get; }
 
+        bool IgnoreDuelRequests { get; set; }
+        uint? DuelOpponentGuid { get; set; }
+        bool IsDueling { get; }
+
         PvPFlag PvPFlags { get; set; }
 
         IGameSession Session { get; }

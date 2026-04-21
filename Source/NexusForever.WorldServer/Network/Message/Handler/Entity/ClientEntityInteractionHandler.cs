@@ -3,10 +3,12 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.PathContent;
 using NexusForever.Game.Static.PublicEvent;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
+using GamePlayer = NexusForever.Game.Entity.Player;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Entity
 {
@@ -45,6 +47,12 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
 
             switch (entityInteraction.Event)
             {
+                case 30: // Settler Improvement
+                {
+                    if (entity != null && session.Player is GamePlayer player)
+                        GlobalPathContentManager.Instance.OnEntityInteract(player, entity, entityInteraction.Event);
+                    break;
+                }
                 case 37: // Quest NPC
                 {
                     session.EnqueueMessageEncrypted(new ServerDialogStart

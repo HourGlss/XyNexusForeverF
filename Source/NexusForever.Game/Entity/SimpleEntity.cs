@@ -13,6 +13,8 @@ namespace NexusForever.Game.Entity
     {
         public override EntityType Type => EntityType.Simple;
 
+        public uint ImprovementGroupId { get; set; }
+
         #region Dependency Injection
 
         public SimpleEntity(

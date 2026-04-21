@@ -22,5 +22,6 @@ namespace NexusForever.Database.Auth.Model
         public ICollection<AccountPermissionModel> AccountPermission { get; set; } = [];
         public ICollection<AccountRoleModel> AccountRole { get; set; } = [];
         public ICollection<AccountSuspensionModel> AccountSuspension { get; set; } = [];
+        public ICollection<AccountStoreTransactionModel> AccountStoreTransaction { get; set; } = [];
     }
 }

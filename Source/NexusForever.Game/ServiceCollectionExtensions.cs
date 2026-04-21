@@ -13,6 +13,8 @@ using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
 using NexusForever.Game.Matching;
+using NexusForever.Game.PathContent;
+using NexusForever.Game.Pvp;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Quest;
 using NexusForever.Game.RBAC;
@@ -38,6 +40,8 @@ namespace NexusForever.Game
             sc.AddSingletonLegacy<IDamageCalculator, DamageCalculator>();
 
             sc.AddTransient<IRapidTransportCostCalculator, RapidTransportCostCalculator>();
+            sc.AddSingleton<GlobalPathContentManager>();
+            sc.AddSingleton<DuelManager>();
 
             sc.AddGameAchievement();
             sc.AddGameCharacter();

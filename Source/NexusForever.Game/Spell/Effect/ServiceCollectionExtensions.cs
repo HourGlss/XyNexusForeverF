@@ -20,6 +20,7 @@ namespace NexusForever.Game.Spell.Effect
             sc.AddTransient<ISpellEffectFactionSetData, SpellEffectFactionSetData>();
             sc.AddTransient<ISpellEffectForcedMoveData, SpellEffectForcedMoveData>();
             sc.AddTransient<ISpellEffectLearnDyeColourData, SpellEffectLearnDyeColourData>();
+            sc.AddTransient<ISpellEffectModifySpellCooldownData, SpellEffectModifySpellCooldownData>();
             sc.AddTransient<ISpellEffectModifyInterruptArmourData, SpellEffectModifyInterruptArmourData>();
             sc.AddTransient<ISpellEffectProcData, SpellEffectProcData>();
             sc.AddTransient<ISpellEffectProxyData, SpellEffectProxyData>();

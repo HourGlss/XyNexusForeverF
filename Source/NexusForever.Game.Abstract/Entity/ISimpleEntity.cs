@@ -2,5 +2,6 @@
 {
     public interface ISimpleEntity : IUnitEntity
     {
+        uint ImprovementGroupId { get; set; }
     }
 }

@@ -23,6 +23,7 @@ using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.GameTable.Static;
 using NexusForever.Network.Message;
+using NexusForever.Network.World.Combat;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
@@ -235,6 +236,8 @@ namespace NexusForever.Game.Entity
             set => SetStat(Static.Entity.Stat.Sheathed, Convert.ToUInt32(value));
         }
 
+        public bool Stealthed => statusEffects.Values.Any(s => s.Contains(EntityStatus.Stealth));
+
         public StandState StandState
         {
             get => (StandState)(GetStatInteger(Static.Entity.Stat.StandState) ?? 0u);
@@ -256,6 +259,7 @@ namespace NexusForever.Game.Entity
         public IEnumerable<uint> TargetingGuids => targetingGuids;
 
         private readonly HashSet<uint> targetingGuids = new();
+        private readonly Dictionary<uint, HashSet<EntityStatus>> statusEffects = [];
 
         /// <summary>
         /// Guid of the <see cref="IPlayer"/> currently controlling this <see cref="IWorldEntity"/>.
@@ -1100,6 +1104,72 @@ namespace NexusForever.Game.Entity
 
                 player.Session.EnqueueMessageEncrypted(message);
             }
+        }
+
+        public void AddStatus(uint sourceId, EntityStatus status)
+        {
+            bool wasStealthed = Stealthed;
+
+            if (!statusEffects.TryGetValue(sourceId, out HashSet<EntityStatus> statuses))
+            {
+                statuses = [];
+                statusEffects[sourceId] = statuses;
+            }
+
+            if (!statuses.Add(status))
+                return;
+
+            OnStatusChanged(status, wasStealthed);
+        }
+
+        public void RemoveStatus(uint sourceId, EntityStatus status)
+        {
+            bool wasStealthed = Stealthed;
+
+            if (!statusEffects.TryGetValue(sourceId, out HashSet<EntityStatus> statuses))
+                return;
+
+            if (!statuses.Remove(status))
+                return;
+
+            if (statuses.Count == 0)
+                statusEffects.Remove(sourceId);
+
+            OnStatusChanged(status, wasStealthed);
+        }
+
+        public void RemoveStatus(EntityStatus status)
+        {
+            bool wasStealthed = Stealthed;
+
+            foreach ((uint sourceId, HashSet<EntityStatus> statuses) in statusEffects.ToArray())
+            {
+                statuses.Remove(status);
+                if (statuses.Count == 0)
+                    statusEffects.Remove(sourceId);
+            }
+
+            OnStatusChanged(status, wasStealthed);
+        }
+
+        private void OnStatusChanged(EntityStatus status, bool wasStealthed)
+        {
+            if (status != EntityStatus.Stealth || wasStealthed == Stealthed || !InWorld)
+                return;
+
+            EnqueueToVisible(new ServerUnitStealth
+            {
+                UnitId = Guid,
+                Stealthed = Stealthed
+            }, true);
+            EnqueueToVisible(new ServerCombatLog
+            {
+                CombatLog = new CombatLogStealth
+                {
+                    UnitId = Guid,
+                    BExiting = !Stealthed
+                }
+            }, true);
         }
 
         /// <summary>

@@ -61,6 +61,7 @@ namespace NexusForever.Game.Abstract.Entity
 
         uint Level { get; set; }
         bool Sheathed { get; set; }
+        bool Stealthed { get; }
 
         StandState StandState { get; set; }
 
@@ -123,6 +124,10 @@ namespace NexusForever.Game.Abstract.Entity
         /// Invoked when <see cref="IWorldEntity"/>'s activation fails.
         /// </summary>
         void OnActivateFail(IPlayer activator);
+
+        void AddStatus(uint sourceId, EntityStatus status);
+        void RemoveStatus(uint sourceId, EntityStatus status);
+        void RemoveStatus(EntityStatus status);
 
         /// <summary>
         /// Return a collection of <see cref="IItemVisual"/> for <see cref="IWorldEntity"/>.

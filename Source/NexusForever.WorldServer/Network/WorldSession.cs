@@ -13,12 +13,14 @@ using NexusForever.Network.Message;
 using NexusForever.Network.Message.Model;
 using NexusForever.Network.Session;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.WorldServer.Storefront;
 
 namespace NexusForever.WorldServer.Network
 {
     public class WorldSession : GameSession, IWorldSession
     {
         public IAccount Account { get; private set; }
+        public IPurchaseManager PurchaseManager { get; private set; }
         public IPlayer Player { get; set; }
 
         // this really needs to go away
@@ -110,6 +112,7 @@ namespace NexusForever.WorldServer.Network
 
             Account = new Account();
             Account.Initialise(account, this);
+            PurchaseManager = new PurchaseManager(this, account);
 
             networkManager.UpdateSessionId(this, account.Id.ToString());
         }
