@@ -434,7 +434,16 @@ namespace NexusForever.Game.Entity.Movement
         /// </summary>
         public void SetPositionMultiSpline(List<ushort> splineIds, SplineMode mode, float speed)
         {
-            throw new NotImplementedException();
+            if (!ServerControl)
+                return;
+
+            if (splineIds == null || splineIds.Count == 0)
+                return;
+
+            // Multi-spline packets are decoded, but the runtime command is still missing.
+            // A single id is equivalent to the existing spline command and avoids a crash.
+            if (splineIds.Count == 1)
+                SetPositionSpline(splineIds[0], mode, speed);
         }
 
         /// <summary>
@@ -582,7 +591,10 @@ namespace NexusForever.Game.Entity.Movement
         /// </summary>
         public void SetRotationSpline()
         {
-            throw new NotImplementedException();
+            if (!ServerControl)
+                return;
+
+            SetRotationDefaults();
         }
 
         /// <summary>
@@ -590,7 +602,10 @@ namespace NexusForever.Game.Entity.Movement
         /// </summary>
         public void SetRotationMultiSpline()
         {
-            throw new NotImplementedException();
+            if (!ServerControl)
+                return;
+
+            SetRotationDefaults();
         }
 
         /// <summary>

@@ -2,6 +2,7 @@
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network.World.Entity;
+using NexusForever.Network.World.Entity.Model;
 
 namespace NexusForever.Game.Entity
 {
@@ -17,7 +18,10 @@ namespace NexusForever.Game.Entity
 
         protected override IEntityModel BuildEntityModel()
         {
-            throw new NotImplementedException();
+            return new TriggerEntityModel
+            {
+                Name = string.Empty
+            };
         }
     }
 }

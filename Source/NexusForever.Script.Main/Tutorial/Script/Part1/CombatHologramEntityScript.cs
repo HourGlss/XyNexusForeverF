@@ -14,13 +14,10 @@ namespace NexusForever.Script.Main.Tutorial.Script.Part1
         /// </summary>
         public void OnActivateSuccess(IPlayer activator)
         {
-            Vector3 position = activator.Faction2 switch
-            {
-                Faction.Exile => new Vector3(-172.937f, -879.5415f, 263.561f),
-                _             => throw new NotImplementedException()
-            };
+            if (activator.Faction2 != Faction.Exile)
+                return;
 
-            activator.TeleportToLocal(position);
+            activator.TeleportToLocal(new Vector3(-172.937f, -879.5415f, 263.561f));
         }
     }
 }

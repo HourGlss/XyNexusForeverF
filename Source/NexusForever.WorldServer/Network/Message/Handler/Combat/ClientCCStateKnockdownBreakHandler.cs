@@ -3,6 +3,7 @@ using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Combat.CrowdControl;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
 
@@ -34,7 +35,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Combat
                 DashDirection.Right    => 28771,
                 DashDirection.Forward  => 28772,
                 DashDirection.Backward => 28773,
-                _                      => throw new NotImplementedException()
+                _                      => throw new InvalidPacketValueException($"Unsupported knockdown break direction: {packet.Direction}")
             };
 
             spellParameters.UserInitiatedSpellCast = false;

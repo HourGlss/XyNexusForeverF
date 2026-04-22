@@ -1,375 +1,114 @@
-# Spell System TODO
-
-Goal: make spell work easy to pick up in small wins first, while still tracking the deeper combat, target, aura, proxy, and missing-effect work.
-
-Audit date: 2026-04-21
-
-Scope checked:
-
-- `Source/NexusForever.Game/Spell/**`
-- `Source/NexusForever.Game/Entity/SpellManager.cs`
-- `Source/NexusForever.Game/Entity/UnitEntity.cs`
-- `Source/NexusForever.Game/Combat/DamageCalculator.cs`
-- `Source/NexusForever.WorldServer/Network/Message/Handler/Spell/**`
-- `Source/NexusForever.Game.Static/Spell/SpellEffectType.cs`
-
-Current inventory:
-
-- Implemented spell effect handlers: 45.
-- Non-`UNUSED` spell effect enum values: 136.
-- Missing effect handlers: 91.
-- No dedicated spell tests were found, so every fix below should include a small regression test once a test project exists.
-
-Priority legend:
-
-- `P0`: likely broken at runtime or blocks whole spell categories.
-- `P1`: localized fix with high gameplay impact.
-- `P2`: partial/stubbed behavior that needs data research or packet validation.
-- `P3`: larger systems work.
-
-Completed items are prefixed with `[x]`; open items remain unboxed.
-
-## Start Here: Smallest High-Impact Fixes
-
-1. [x] `P0` Fix loaded and updated spell tiers.
-   File: `Source/NexusForever.Game/Spell/CharacterSpell.cs:40`
-   Problem: the `Tier` setter calls `BaseInfo.GetSpellInfo(tier)` before assigning the new value, so it reloads the old tier. The DB constructor also calls `baseInfo.GetSpellInfo(tier)` before `tier = model.Tier`, so loaded character spells appear to use tier 1 spell data even when the saved tier is higher.
-   First fix: assign `tier` first or call `BaseInfo.GetSpellInfo(value)`, and load `model.Tier` before resolving `SpellInfo`.
-
-2. [x] `P0` Stop mutating active spell dictionaries while iterating.
-   File: `Source/NexusForever.Game/Entity/UnitEntity.cs:150`
-   Problem: `spells.Remove(spell.CastingId)` runs inside `foreach (ISpell spell in spells.Values)`, which can throw `InvalidOperationException` as soon as a spell finishes during update.
-   First fix: collect finished spell ids into a list and remove them after the loop.
-
-3. [x] `P0` Stop mutating delayed effect dictionaries while iterating.
-   File: `Source/NexusForever.Game/Spell/Spell.cs:154`
-   Problem: `delayedEffects.Remove(effect)` happens inside a `foreach` over `delayedEffects`.
-   First fix: collect elapsed effects, remove after iteration, then execute them.
-
-4. [x] `P0` Implement or disable `SpellChanneledField`.
-   File: `Source/NexusForever.Game/Spell/Type/SpellChanneledField.cs:10`
-   Problem: this class only inherits base `Spell.Cast()`. It never sets `status = Casting`, never schedules `Execute()`, and likely stays in `Initiating` forever.
-   First fix: either implement channel-field timing based on `SpellChanneled`, or map this cast method to a safe fallback until real behavior is known.
-
-5. [x] `P0` Fix multiphase completion.
-   File: `Source/NexusForever.Game/Spell/Type/SpellMultiphase.cs:49`
-   Problem: the lambda checks `if (i == Parameters.SpellInfo.Phases.Count - 1)` but captures the loop variable `i`. After the loop, this condition will not represent the phase that scheduled the event. The unused `index` local was probably intended for this.
-   First fix: use the captured `index` local in the lambda.
-
-6. [x] `P0` Fix proxy tick scheduling.
-   File: `Source/NexusForever.Game/Spell/Proxy.cs:67`
-   Problem: `for (int i = 1; i >= Data.Entry.DurationTime / tickTime; i++)` almost never runs. `TickingEvent()` recursively creates a new event but never enqueues or returns it to the scheduler.
-   First fix: change the bounded loop to `<=`, and make repeating proxy ticks explicitly re-enqueue the next event.
-
-7. [x] `P0` Add missing `TitleGrant` data implementation and DI registration.
-   Files: `Source/NexusForever.Game/Spell/Effect/Handler/SpellEffectTitleGrantHandler.cs:12`, `Source/NexusForever.Game/Spell/Effect/ServiceCollectionExtensions.cs:15`
-   Problem: `SpellEffectTitleGrantHandler` requires `ISpellEffectTitleGrantData`, but no concrete `SpellEffectTitleGrantData` class exists and the interface is not registered. The handler will resolve no data and never grant titles.
-   First fix: add `SpellEffectTitleGrantData`, populate `TitleId` from the correct data bit, and register it.
-
-8. [x] `P1` Fix vanity pet unlock packet and null handling.
-   File: `Source/NexusForever.Game/Spell/Effect/Handler/SpellEffectUnlockVanityPetHandler.cs:40`
-   Problem: vanity pet unlock sends `ServerUnlockMount`. It also does not null-check the `Spell4Entry` before using it.
-   First fix: send the correct vanity-pet unlock packet if one exists, or document/client-verify the expected packet. Add null/duplicate guards.
-
-9. [x] `P1` Fix vanity pet despawn state.
-   File: `Source/NexusForever.Game/Spell/Effect/Handler/SpellEffectSummonVanityPetHandler.cs:47`
-   Problem: removed vanity pets set `player.VanityPetGuid = 0u` instead of `null`, but other call sites check `!= null`, so later code can keep trying to interact with guid `0`.
-   First fix: set `VanityPetGuid = null`.
-
-10. [x] `P1` Report actual remaining effect duration.
-    File: `Source/NexusForever.Game/Spell/Target/SpellTargetEffectInfo.cs:100`
-    Problem: `Build()` and `ServerSpellUpdateEffectDuration` use `duration.Duration`, not `duration.Time`, so the client receives the original duration instead of remaining time.
-    First fix: use `duration.Time` for remaining time.
-
-11. [x] `P1` Fix rapid transport rotation.
-    File: `Source/NexusForever.Game/Spell/Effect/Handler/SpellEffectRapidTransportHandler.cs:85`
-    Problem: quaternion construction uses `Facing0` twice and skips `Facing1`.
-    First fix: use `(Facing0, Facing1, Facing2, Facing3)`.
-
-12. [x] `P1` Dispose spells that fail during cast setup.
-    File: `Source/NexusForever.Game/Entity/UnitEntity.cs:443`
-    Problem: `spell.Initialise()` creates script collections. If `spell.Cast()` returns false or the spell fails before being added to `pendingSpells`, it is not disposed.
-    First fix: call `spell.Dispose()` before returning on failed cast paths.
-
-## Combat and Effect Correctness
-
-1. [x] `P1` Check damage eligibility from caster to target, not target to caster.
-   File: `Source/NexusForever.Game/Spell/Effect/Handler/SpellEffectDamageHandler.cs:39`
-   Problem: damage checks `target.CanAttack(executionContext.Spell.Caster)`. The readable intent is `caster.CanAttack(target)`. This is especially risky around one-way validity rules, scripted factions, duels, and pets.
-   First fix: switch the call direction and validate duel/PvE behavior.
-
-2. [x] `P1` Fix physical mitigation property.
-   File: `Source/NexusForever.Game/Combat/DamageCalculator.cs:268`
-   Problem: physical damage adds `DamageMitigationPctOffsetMagic`; `Property.DamageMitigationPctOffsetPhysical` exists and is probably intended.
-   First fix: use the physical offset for `DamageType.Physical`.
-
-3. [x] `P1` Add a real `Heal` effect handler.
-   Missing type: `SpellEffectType.Heal`
-   Problem: `DamageCalculator` already has heal-aware formula branches and `CombatLogHeal` exists, but no `Heal` handler is registered. Healing spells currently hit the no-handler path.
-   First fix: mirror the damage calculation path with `DamageType.Heal`, call `ModifyHealth(..., DamageType.Heal, caster)`, emit `CombatLogHeal`, and update public event healing stats if available.
-
-4. [x] `P1` Add shield heal/damage handlers.
-   Missing types: `HealShields`, `DamageShields`
-   Problem: shield-related combat math and vitals exist, but these effect types have no handlers.
-   First fix: implement direct shield delta with clamps and combat logs. These should be easier than full damage because they can avoid target health/death flow initially.
-
-5. [x] `P1` Improve `VitalModifier`.
-   File: `Source/NexusForever.Game/Spell/Effect/Handler/SpellEffectVitalModifierHandler.cs:14`
-   Problem: directly calls `ModifyVital` with no combat log, no sign/data validation, and no clamping policy beyond the underlying vital setter.
-   First fix: add `CombatLogVitalModifier`, validate signed/float interpretation of `DataBits01`, and confirm whether some effects use negative values encoded in uint bits.
-
-6. `P2` Complete damage calculator combat mechanics.
-   File: `Source/NexusForever.Game/Combat/DamageCalculator.cs`
-   Gaps: strikethrough, armor pierce, multi-hit, lifesteal, reflect, crit deflect, critical mitigation, glance combat logging, defensive modifiers, proc queueing, and robust null handling when a `GameFormulaEntry` is missing.
-   First fix: add focused tests around current damage math before changing formulas.
-
-7. [x] `P2` Replace `new Random()` in combat chance checks.
-   File: `Source/NexusForever.Game/Combat/DamageCalculator.cs:280`
-   Problem: repeated `new Random()` can create correlated rolls under high-frequency combat.
-   First fix: use `Random.Shared` or inject an RNG for deterministic tests.
-
-## Targeting, Prerequisites, and Lifecycle
-
-1. [x] `P0` Decide how threshold data maps to spell classes.
-   File: `Source/NexusForever.Game/Spell/Spell.cs:115`
-   Problem: any non-`SpellThreshold` spell with threshold rows throws `NotImplementedException` during initialise.
-   First fix: log/report affected spell ids from game tables, then either support those cast methods or prevent them cleanly without crashing.
-
-2. `P1` Apply target cast and persistence prerequisites.
-   File: `Source/NexusForever.Game/Spell/Spell.cs:321`
-   Problem: target cast prerequisites, caster persistence prerequisites, and target persistence prerequisites are loaded but empty or partially implemented. Target persistence is explicitly TODO.
-   First fix: evaluate explicit target first. If prerequisite system only supports players, add safe non-player behavior and log unsupported cases.
-   Progress: explicit target cast prerequisites are now checked against the primary target or caster fallback. Caster and target persistence prerequisites still need lifetime re-check behavior.
-
-3. [x] `P1` Fix target count ordering.
-   File: `Source/NexusForever.Game/Spell/Target/Implicit/Filter/SpellTargetImplicitConstraintFilter.cs:25`
-   Problem: target count is applied before `OrderForSelectionType()`, so `Closest`, `Furthest`, `Random`, and health-based selection can cull the wrong units.
-   First fix: filter range/angle first, sort, then apply `TargetCount`.
-
-4. `P1` Implement AOE angle constraints.
-   File: `Source/NexusForever.Game/Spell/Target/Implicit/Filter/SpellTargetImplicitConstraintFilter.cs:45`
-   Problem: `constraints.Angle` is checked but ignored.
-   First fix: calculate angle from caster/telegraph facing to candidate target and mark `AngleConstraintFailed`.
-
-5. `P2` Use target mechanics for implicit target search positions.
-   File: `Source/NexusForever.Game/Spell/Target/Implicit/SpellTargetImplicitSelector.cs:51`
-   Problem: selector always searches around `initialPosition`; target type flags are not used to derive primary-target, caster, cone, or field origins.
-   First fix: implement the most common target mechanics first: self, primary target, caster position, and positional unit.
-
-6. `P2` Add valid target, hit result, caster/target condition, and CC-condition validators.
-   Files: `Source/NexusForever.Game/Spell/Info/SpellBaseInfo.cs`, `Source/NexusForever.Game/Spell/Info/SpellInfo.cs`, `Source/NexusForever.Game/Spell/Validator/**`
-   Problem: data is loaded but much of it is not enforced in `CheckCast()` or effect application.
-   First fix: add validator classes rather than growing `Spell.CheckCast()`.
-
-7. `P2` Handle moving/rotating telegraphs.
-   File: `Source/NexusForever.Game/Spell/Spell.cs:238`
-   Problem: NPC telegraphs are initialized as if non-player casters stand still. Comments note moving/rotating unit telegraphs are wrong.
-   First fix: add a telegraph attachment/update path for unit-attached telegraphs.
-
-8. [x] `P2` Fix `SpellBaseInfo` tier storage assumptions.
-   File: `Source/NexusForever.Game/Spell/Info/SpellBaseInfo.cs`
-   Problem: the comment says spell tiers are not always sequential, but the array size uses `spellEntries[0].TierIndex` and lookup is `tier - 1`.
-   First fix: sort entries and size by max tier, or use a dictionary keyed by tier.
-
-9. [x] `P2` Fix threshold cache ordering.
-   File: `Source/NexusForever.Game/Spell/Info/SpellInfo.cs`
-   Problem: `thresholdCache.Last()` depends on dictionary enumeration order, and `Thresholds[index]` assumes order index equals list index.
-   First fix: order by `OrderIndex` and store both `SpellInfo` and `Spell4ThresholdsEntry` together.
-
-## Implemented Handlers That Are Partial or Suspicious
-
-1. `P1` `SpellEffectForcedMoveHandler`
-   File: `Source/NexusForever.Game/Spell/Effect/Handler/SpellEffectForcedMoveHandler.cs`
-   Problems: several move types and flags are TODO/no-op, velocity movement does not compute velocity, terrain handling is approximate, and `Unknown11` through `Unknown15` can return `Ok` without movement.
-   First fix: finish known flag handling for `Target`, `Facing`, and velocity movement, then add data-driven examples for pull/knockback/jump spells.
-
-2. `P1` `SpellEffectModifySpellCooldownHandler`
-   File: `Source/NexusForever.Game/Spell/Effect/Handler/SpellEffectModifySpellCooldownHandler.cs`
-   Problems: only `Spell4` and `SpellCooldownId` are handled. Ability charge timers explicitly say they are not adjusted by cooldown modification.
-   First fix: connect cooldown modification to `CharacterSpell` charge recharge timers or move charge state into `SpellManager`.
-
-3. `P1` `SpellEffectSummonMountHandler`
-   File: `Source/NexusForever.Game/Spell/Effect/Handler/SpellEffectSummonMountHandler.cs`
-   Problems: hard-coded follow-up casts `52539` and `80530`, no NPC mounting, and no duplicate/previous mount cleanup in the handler.
-   First fix: replace hard-coded follow-up spells with data-driven mount aura/passive behavior or document why they are universal.
-
-4. `P2` `SpellEffectFluffHandler`
-   File: `Source/NexusForever.Game/Spell/Effect/Handler/SpellEffectFluffHandler.cs`
-   Problem: pure no-op. This may be acceptable if visuals are entirely client-side, but it should be documented with known spell ids.
-   First fix: add a comment/report list of fluff spell ids and confirm no server state is expected.
-
-5. `P2` `SpellEffectFullScreenEffectHandler`
-   File: `Source/NexusForever.Game/Spell/Effect/Handler/SpellEffectFullScreenEffectHandler.cs`
-   Problem: pure no-op despite the name implying a client-visible effect.
-   First fix: find the matching network packet or confirm `ServerSpellGo` carries enough visual data.
-
-6. [x] `P2` `SpellEffectTeleportHandler`
-   File: `Source/NexusForever.Game/Spell/Effect/Handler/SpellEffectTeleportHandler.cs`
-   Problems: invalid location, non-player target, and failed `CanTeleport()` all return `Ok` silently. Housing branch creates residences during spell handling.
-   First fix: return `PreventEffect` or emit debug logs for failed teleport paths; split housing teleport into a helper.
-
-7. [x] `P2` `SpellEffectUnlockMountHandler`
-   File: `Source/NexusForever.Game/Spell/Effect/Handler/SpellEffectUnlockMountHandler.cs`
-   Problems: no null check for spell entry and duplicate `AddSpell()` can throw.
-   First fix: guard missing/known spells and return a clear result.
-
-8. `P2` `SpellEffectProcHandler` and proc runtime
-   Files: `Source/NexusForever.Game/Spell/Effect/Handler/SpellEffectProcHandler.cs`, `Source/NexusForever.Game/Spell/Proc/**`
-   Problems: prerequisites only work when target/caster is a player, trigger scheduling is timer based and sparse, and proc types are only triggered from a few places.
-   First fix: inventory `ProcType` values and add trigger call sites for damage taken, heal, deflect, kill, shield, interrupt, and movement events.
-
-## Missing Effect Handlers: Easiest-Looking First
-
-These appear lower effort because nearby systems or packets already exist.
-
-- `ModifyAbilityCharges`
-- `GiveAbilityPointsToPlayer`
-- `GiveLootTableToPlayer`
-- `VacuumLoot`
-- `Kill`
-- `SetBusy`
-- `Disembark`
-- `HousingEscape`
-- `SupportStuck`
-- `MiniMapIcon`
-
-Suggested first batch:
-
-1. `ModifyAbilityCharges`
-2. `GiveAbilityPointsToPlayer`
-3. `GiveLootTableToPlayer`
-4. `Kill`
-5. `SetBusy`
-6. `Disembark`
-7. `HousingEscape`
-8. `SupportStuck`
-9. `MiniMapIcon`
-10. `VacuumLoot`
-
-## Missing Effect Handlers: Medium Effort
-
-These need more gameplay rules, combat math, or existing-manager integration.
-
-- `Absorption`
-- `HealingAbsorption`
-- `ClampVital`
-- `SapVital`
-- `ShieldOverload`
-- `SpellCounter`
-- `SpellDispel`
-- `SpellEffectImmunity`
-- `SpellImmunity`
-- `AggroImmune`
-- `ThreatModification`
-- `ThreatTransfer`
-- `UnitStateSet`
-- `ForceFacing`
-- `NpcForceFacing`
-- `NPCForceAIMovement`
-- `PetCastSpell`
-- `SummonPet`
-- `SummonCreature`
-- `SummonTrap`
-- `DespawnUnit`
-- `HazardEnable`
-- `HazardModify`
-- `HazardSuspend`
-- `PathActionExplorerDig`
-- `SettlerCampfire`
-- `HousingPlantSeed`
-- `RestedXpDecorBonus`
-- `ModifyRestedXP`
-- `RewardBuffModifier`
-- `RewardPropertyModifier`
-- `VendorPriceModifier`
-- `SetMatchingEligibility`
-- `TemporarilyUnflagPvp`
-- `DisallowPvP`
-
-## Missing Effect Handlers: Hard / Needs Design
-
-These likely require larger architecture, scripting, content research, or major packet work.
-
-- `Script`
-- `ModifySpell`
-- `ModifySpellEffect`
-- `AddSpellEffect`
-- `SuppressSpellEffect`
-- `ProxyLinearAE`
-- `ProxyChannel`
-- `ProxyChannelVariableTime`
-- `ProxyRandomExclusive`
-- `SummonVehicle`
-- `ForcedAction`
-- `ChangePhase`
-- `ChangePlane`
-- `GoMap`
-- `ReturnMap`
-- `WarplotTeleport`
-- `WarplotPlugUpgrade`
-- `FacilityModification`
-- `CraftItem`
-- `TradeSkillProfession`
-- `GiveSchematic`
-- `GiveAugmentPowerToPlayer`
-- `UnlockInlaidAugment`
-- `UnlockActionBar`
-- `ActionBarSet`
-- `ApplyLASChanges`
-- `ModifyCreatureFlags`
-- `ChangeDisplayName`
-- `MimicDisplayName`
-- `MimicDisguise`
-- `DisguiseOutfit`
-- `ChangeIcon`
-- `ItemVisualSwap`
-- `RavelSignal`
-- `SharedHealthPool`
-- `UnitPropertyConversion`
-- `PersonalDmgHealMod`
-- `DelayDeath`
-- `DistanceDependentDamage`
-- `DistributedDamage`
-- `Scale`
-- `Transference`
-
-## Complete Missing Handler List
-
-All non-`UNUSED` enum values without a handler as of this audit:
-
-`Absorption`, `ActionBarSet`, `AddSpellEffect`, `AggroImmune`, `ApplyLASChanges`, `ChangeDisplayName`, `ChangeIcon`, `ChangePhase`, `ChangePlane`, `ClampVital`, `CraftItem`, `DelayDeath`, `DespawnUnit`, `DisallowPvP`, `Disembark`, `DisguiseOutfit`, `DistanceDependentDamage`, `DistributedDamage`, `FacilityModification`, `ForceFacing`, `ForcedAction`, `GiveAbilityPointsToPlayer`, `GiveAugmentPowerToPlayer`, `GiveLootTableToPlayer`, `GiveSchematic`, `GoMap`, `HazardEnable`, `HazardModify`, `HazardSuspend`, `HealingAbsorption`, `HousingEscape`, `HousingPlantSeed`, `HousingTeleport`, `ItemVisualSwap`, `Kill`, `MimicDisguise`, `MimicDisplayName`, `MiniMapIcon`, `ModifyAbilityCharges`, `ModifyCreatureFlags`, `ModifyRestedXP`, `ModifySpell`, `ModifySpellEffect`, `NPCForceAIMovement`, `NpcExecutionDelay`, `NpcForceFacing`, `NpcLootTableModify`, `PathActionExplorerDig`, `PersonalDmgHealMod`, `PetCastSpell`, `ProxyChannel`, `ProxyChannelVariableTime`, `ProxyLinearAE`, `ProxyRandomExclusive`, `RavelSignal`, `RestedXpDecorBonus`, `ReturnMap`, `RewardBuffModifier`, `RewardPropertyModifier`, `SapVital`, `Scale`, `Script`, `SetBusy`, `SetMatchingEligibility`, `SettlerCampfire`, `SharedHealthPool`, `ShieldOverload`, `SpellCounter`, `SpellDispel`, `SpellEffectImmunity`, `SpellImmunity`, `SummonCreature`, `SummonPet`, `SummonTrap`, `SummonVehicle`, `SupportStuck`, `SuppressSpellEffect`, `TemporarilyUnflagPvp`, `ThreatModification`, `ThreatTransfer`, `TradeSkillProfession`, `Transference`, `UnitPropertyConversion`, `UnitStateSet`, `UnlockActionBar`, `UnlockInlaidAugment`, `VacuumLoot`, `VectorSlide`, `VendorPriceModifier`, `WarplotPlugUpgrade`, `WarplotTeleport`.
-
-## Regression Tests To Add Before Big Refactors
-
-1. Reflection test: every `[SpellEffectHandler]` generic data interface has a concrete registered data implementation.
-2. Reflection test: report effect enum values with no handler, but allow an explicit ignored list.
-3. Character spell tier test: constructing from DB model tier 4 resolves tier 4 `SpellInfo`.
-4. Spell update test: finishing a spell during `UnitEntity.Update()` does not mutate the active dictionary during enumeration.
-5. Delayed effect test: delayed effects execute once after delay and do not mutate `delayedEffects` during enumeration.
-6. Proxy periodic test: finite duration/tick schedules the expected number of child casts.
-7. Multiphase test: final phase transitions the spell to finishing/finished.
-8. Duration packet test: `EffectInfo.TimeRemaining` decreases after update.
-9. Damage direction test: caster-target faction/duel rules are checked from caster to target.
-10. Handler smoke tests for the first easy batches: `Heal`, `HealShields`, `DamageShields`, `CooldownReset`, `ActivateSpellCooldown`, `AddSpell`, `TitleRevoke`, `GrantXP`, `GrantLevelScaledXP`, `GrantLevelScaledPrestige`, `PathXpModify`, `PathMissionIncrement`, `AchievementAdvance`, `QuestAdvanceObjective`, `GiveItemToPlayer`, `ReputationModify`, `SpellForceRemoveChanneled`, `ModifyAbilityCharges`, and `Kill`.
-
-## Suggested Work Order
-
-1. Fix the P0 lifecycle/runtime exceptions first: spell tiers, dictionary mutation, channeled field, multiphase completion, proxy ticks, and TitleGrant data.
-2. Fix the P1 one-line or localized correctness bugs: vanity pet packet/state, rapid transport rotation, remaining duration, damage direction, and physical mitigation.
-3. Add reflection/regression tests so new handlers do not silently resolve to `NoHandler`.
-4. Implement the remaining easy missing handlers, starting with `ModifyAbilityCharges`, ability-point/item-loot rewards, and `Kill`.
-5. Move into target/prerequisite correctness, because many “spell feels wrong” bugs will come from target selection rather than individual handlers.
-6. Tackle hard proxy/scripting/summon/vehicle/warplot effects after the basic combat and reward handlers are stable.
-
-## Notes For Next Pass
-
-- 2026-04-21 batch 1 fixed the mechanical runtime bugs above the Missing section: tier loading, dictionary mutation, failed-cast disposal, multiphase capture, proxy tick scheduling, vanity-pet despawn state, duration reporting, rapid transport rotation, damage direction, physical mitigation, RNG reuse, and target-count ordering.
-- 2026-04-21 batch 2 used `origin/spells-v2-gr` as a reference for `TitleGrant`; old code maps title id to `Spell4EffectsEntry.DataBits00`. Added concrete data and DI registration so the handler no longer resolves to `NoHandler`.
-- `SpellChanneledField` now uses the same conservative channel timing shape as `SpellChanneled`: initial execute, optional pulse executes, and max-time finish. Field-specific positional/telegraph semantics still need sniff/data validation before deeper refactors.
-- `UnlockVanityPet` now uses `ServerUnlockVanityPet` from the `Pet` packet namespace. Old `spells-v2-gr` code used `ServerUnlockMount`, but this branch already had the correct vanity-pet packet model and opcode.
-- `UnlockMount` and `UnlockVanityPet` now guard missing `Spell4Entry`, missing base spell id, and duplicate spell ownership before calling `SpellManager.AddSpell()`. Do not re-add duplicate handling unless changing `SpellManager.AddSpell()` itself.
-- `SpellEffectTeleportHandler` now returns `PreventEffect` for unsupported non-player targets, missing locations, missing housing entrances, or failed `CanTeleport()`. Housing teleport still creates a residence inline; split that into a helper later if touching housing teleport rules.
-- 2026-04-21 batch 3 added `Heal`, `HealShields`, and `DamageShields` handlers. They reuse the `DamageCalculator` damage-style formula fields through `CalculateBaseEffectAmount`, clamp actual health/shield changes before applying, and emit combat logs. `DamageShields` uses `Caster.CanAttack(target)`; healing still relies on target selection because there is no `CanAssist` helper yet.
-- 2026-04-21 batch 4 made unsupported non-threshold spells with threshold rows fail with `SpellBad` instead of throwing during initialise, fixed sparse tier and threshold lookup ordering, and made `VitalModifier` apply signed deltas with `CombatLogVitalModifier` for the actual clamped change.
-- 2026-04-21 batch 5 added conservative default-data handlers for cooldown reset/activation, spell grants, title revoke, XP/path XP/prestige rewards, reputation modification, quest/achievement progress, item grants, path mission increments, and channeled spell removal. It also evaluates explicit target-cast prerequisites. Several handlers support common `DataBits00`/`DataBits01` shapes but should still be data-verified against live spell rows when odd reward behavior shows up.
-- Missing handler list and inventory counts were regenerated after batch 5.
+# NexusTogether Completion TODO
+
+Goal: track unfinished gameplay/server work by the source data needed to finish it safely. Prefer small, testable fixes when behavior is obvious from existing code. When behavior depends on WildStar client/server semantics, collect source data first instead of guessing.
+
+Audit date: 2026-04-22
+
+## Source Data To Collect First
+
+These unlock the most future work:
+
+- Client/server packet captures for login, map transfer, chat, combat, spell casts, housing visits, path missions, vendors, store purchases, resurrection, movement splines, and common error cases.
+- Full matching game-table extracts for the systems being touched, especially `Spell4*`, prerequisites, target mechanics, `GameFormula`, `Creature2`, `Item2`, `ItemDisplay`, `WorldSocket`, path mission tables, housing plug/decor tables, reward tracks, storefront tables, and achievement/objective tables.
+- Known-good database rows from a working branch/server for world entities, public event entities, path mission persistence, account rewards, store purchases, housing, guild/community residences, and character spell/action-set state.
+- Before/after state snapshots for player inventory, currencies, reputation, titles, achievements, quest objectives, path missions, path XP, account unlocks, and spell cooldowns when using representative spells or commands.
+- Combat logs and packet traces for damage, healing, shields, CC, interrupts, procs, channel ticks, proxy spells, forced movement, death, resurrection, threat, pets, summons, vehicles, and stealth.
+- Branch references with exact commit/branch names and test notes from Krakal, kirmmin, derdotte, Googletone, and any other known working forks.
+- A small regression-test harness or smoke-test scripts for handlers, packet serialization, map load, chat format round trips, spell effect dispatch, and database migration startup.
+
+## Things Still Safe To Do Without More Data
+
+These are mostly mechanical hardening or wiring gaps where the intended behavior is already visible in code:
+
+- Add null guards around factory-created entities before map/public-event spawn loops call `Initialise()`.
+- Replace packet-facing `NotImplementedException` paths with `InvalidPacketValueException` or a client result packet when an enum value is unsupported.
+- Add reflection smoke checks for DI registrations: chat formatters, spell effect handlers, movement command handlers, entity models, prerequisite checks, and keyed packet models.
+- Add round-trip tests for chat format conversion and action-set shortcut validation.
+- Add map-load smoke tests that instantiate every `EntityType` with a minimal model and assert `BuildEntityModel()` does not throw.
+- Add spell handler smoke tests for already implemented reward/cooldown/objective handlers using fake managers and table rows.
+
+## Spell System Data Needs
+
+Targeting and prerequisites:
+
+- `Spell4TargetMechanics`, `Spell4Prerequisites`, target flags, explicit target type, implicit target type, telegraph type, and cast-method rows for representative self, target, ground, cone, field, channeled, proxy, and vehicle spells.
+- Packet captures for cast success, cast failure, target failure, persistence expiry, target moving out of range, caster moving/rotating during telegraph, and non-player casters.
+- Expected `CastResult`/`SpellCastResult` values for failed prerequisites and invalid targets.
+- Source examples for caster persistence and target persistence checks during spell lifetime, not only at cast start.
+
+Effect handlers:
+
+- For each missing or partial `SpellEffectType`, collect spell ids, `Spell4Effects` rows, all data-bit meanings, expected target kind, before/after player or unit state, and expected combat log or client packet.
+- Reward effects need source rows for inventory/full-bag handling, currency caps, reputation limits, title/achievement/objective updates, path mission increments, account unlocks, and duplicate ownership.
+- Cooldown/charge effects need examples for normal cooldowns, global cooldown groups, ability charges, reset behavior, and active recharge timers.
+- Summon/pet/vehicle effects need entity type, ownership, despawn rules, seat/passenger data, visuals, spell auras, and cleanup packets.
+- Proxy effects need child spell timing, proxy unit placement, tick schedule, target selection, and cancellation behavior.
+
+Combat and procs:
+
+- `GameFormula` rows and live combat logs for each damage type, heal type, shield interaction, glance, deflect, crit deflect, strikethrough, armor pierce, lifesteal, reflect, multi-hit, mitigation offsets, vulnerability, and proc trigger.
+- Proc trigger source data for damage dealt, damage taken, heal, shield, interrupt, CC, movement, kill, death, periodic tick, and aura expiration.
+- Threat samples for NPC combat, pets, scripted encounters, taunts, threat transfer, and aggro immunity.
+
+## Movement And Map Data Needs
+
+- Packet captures for `SetPositionMultiSpline`, `SetRotationSpline`, `SetRotationMultiSpline`, path movement, spline rotation, negative spline speeds, reverse modes, cyclic modes, and platform/vehicle movement.
+- `Spline2` and `Spline2Node` rows for single-spline and multi-spline examples, including takeoff/landing heights, formation data, flags, offsets, blend, and continuation behavior.
+- Terrain collision samples for forced movement, jumps, knockbacks, pulls, fall damage, water/hoverboard movement, and map props.
+- Return-location data for tutorial/content maps, resurrection holocrypts, default graveyards, and failed instance transfers.
+
+## Entity And Content Data Needs
+
+- World DB rows for every `EntityType`, especially trigger, trap, scanner unit, esper pet, pinata loot, lockbox, structured plug, housing harvest plug, and housing plant.
+- Expected entity create packet fields for the above types: owner id, display item id, socket id, active prop id, plug id, current tier, trigger bounds, loot item/count/type, and names.
+- Public event phase entity rows with activation/despawn conditions and phase transitions.
+- Tutorial branch data for Dominion and Exile tutorial teleports, cinematic return points, and hologram/script interactions.
+- Source rows and captures for unsupported path mission types, settler improvement tiers, and path mission reward scaling.
+
+## Housing, Guild, And Community Data Needs
+
+- Residence privacy result packets and client error packets for private, neighbors-only, roommates-only, public, community, missing residence, missing entrance, and invalid visit target.
+- Housing plug/decor placement rows tying `WorldSocketId`, `ActivePropId`, decor ids, plug ids, and structure tiers together.
+- Roommate/neighbour permission captures for decor updates, plot updates, privacy changes, crate/uncrate, remodel, vendor lists, and community donations.
+- Guild/community residence persistence rows and internal message flows once GuildServer behavior is better known.
+
+## Storefront, Rewards, And Account Data Needs
+
+- Store catalog, entitlement, reward-track, purchase, refund, grant, and rotation data from a working source.
+- Account transaction rows before and after purchases, failures, duplicate claims, insufficient currency, and service-token spending.
+- Reward property and entitlement mappings for account unlocks, character unlocks, costumes, mounts, pets, dyes, titles, AMP/ability grants, and path rewards.
+- Packet captures for store UI open, offer list, purchase result, claim result, account item delivery, and error handling.
+
+## Chat, Social, And UI Data Needs
+
+- Chat packet samples for every `ChatFormatType`, including item id, item guid, item full, quest, archive article, nav point, loot, alien, profanity, roleplay, and unknown format values.
+- Item link behavior when the sender owns the item, no longer owns the item, links an inventory item by guid, or links static item data by id.
+- Social flows for channels, whispers, ignore/block checks, guild/community chat, cross-world relay, and chat server persistence.
+
+## Current Audit Notes
+
+Completed in the 2026-04-22 pass:
+
+- Registered the existing chat formatter implementations instead of only the item/quest subset.
+- Added item-guid chat round-trip support and fixed the internal item-guid format type.
+- Made missing chat formatter registrations drop unsupported formatting instead of crashing chat conversion.
+- Converted several packet-facing unsupported values to invalid-packet handling.
+- Added conservative entity models for several entity classes that already had packet models but threw during creation.
+- Corrected `PinataLootEntity.Type`.
+- Hardened unfinished movement spline/rotation entry points so they fall back safely instead of throwing.
+- Fixed the rotation command resynchronization typo from position multi-spline to rotation multi-spline.
+- Replaced a housing privacy default throw with public fallback.
+- Replaced a costume mannequin save throw with `InvalidMannequinIndex`.
+- Made item display fallback return the table display id instead of throwing.
+- Stopped the Exile tutorial combat hologram script from throwing for unsupported factions.
+
+High-risk areas intentionally left for source data:
+
+- Full multi-spline movement and spline rotation runtime commands.
+- Settler improvement tiers beyond tier 0.
+- Unsupported path mission types.
+- Housing plug/plant/structured plug packet field correctness beyond conservative ids.
+- Trigger bounds and trigger entity model details.
+- Holocrypt resurrection behavior and tutorial/content return locations.
+- Marketplace auction filters and Who query parameter semantics.
+- Deep spell target persistence, proxy behavior, summon/vehicle effects, threat/proc completeness, and combat formula parity.

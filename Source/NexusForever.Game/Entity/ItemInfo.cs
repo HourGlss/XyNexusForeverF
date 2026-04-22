@@ -333,7 +333,7 @@ namespace NexusForever.Game.Entity
             }
 
             // TODO: research this...
-            throw new NotImplementedException();
+            return (ushort)Entry.ItemDisplayId;
         }
 
         /// <summary>

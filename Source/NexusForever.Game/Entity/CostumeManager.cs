@@ -116,7 +116,10 @@ namespace NexusForever.Game.Entity
         {
             // TODO: used for housing mannequins
             if (costumeSave.MannequinIndex != 0)
-                throw new NotImplementedException();
+            {
+                SendCostumeSaveResult(CostumeSaveResult.InvalidMannequinIndex);
+                return;
+            }
 
             if (costumeSave.Index < 0 || costumeSave.Index >= MaxCostumes)
             {
