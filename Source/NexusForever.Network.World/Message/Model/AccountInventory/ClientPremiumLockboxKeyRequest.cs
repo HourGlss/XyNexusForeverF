@@ -1,0 +1,12 @@
+using NexusForever.Network.Message;
+
+namespace NexusForever.Network.World.Message.Model.AccountInventory
+{
+    [Message(GameMessageOpcode.ClientPremiumLockboxKeyRequest)]
+    public class ClientPremiumLockboxKeyRequest : IReadable
+    {
+        public void Read(GamePacketReader reader)
+        {
+        }
+    }
+}
