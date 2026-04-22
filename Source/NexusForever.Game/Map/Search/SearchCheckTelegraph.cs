@@ -27,7 +27,26 @@ namespace NexusForever.Game.Map.Search
             if (telegraph.TelegraphTargetTypeFlags.HasFlag(TelegraphTargetTypeFlags.Other) && entity == caster)
                 return false;
 
+            if (!EvaluateDamageFlags(entity))
+                return false;
+
             return telegraph.InsideTelegraph(entity.Position, entity.HitRadius);
+        }
+
+        private bool EvaluateDamageFlags(IUnitEntity entity)
+        {
+            TelegraphDamageFlag damageFlag = (TelegraphDamageFlag)telegraph.TelegraphDamage.TelegraphDamageFlags;
+
+            if (damageFlag.HasFlag(TelegraphDamageFlag.CasterMustBeNPC) && caster is IPlayer)
+                return false;
+
+            if (damageFlag.HasFlag(TelegraphDamageFlag.CasterMustBePlayer) && caster is not IPlayer)
+                return false;
+
+            if (damageFlag.HasFlag(TelegraphDamageFlag.TargetMustBeUnit) && entity is not IUnitEntity)
+                return false;
+
+            return true;
         }
     }
 }

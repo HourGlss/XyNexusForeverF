@@ -120,6 +120,22 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// Return tracked summons matching the supplied entity type.
+        /// </summary>
+        public IEnumerable<T> GetSummons<T>() where T : IWorldEntity
+        {
+            if (owner.Map == null)
+                yield break;
+
+            foreach (uint guid in summonGuids.ToList())
+            {
+                IWorldEntity summon = owner.Map.GetEntity<IWorldEntity>(guid);
+                if (summon is T typedSummon)
+                    yield return typedSummon;
+            }
+        }
+
+        /// <summary>
         /// Unsummon an summoned entity with supplied guid.
         /// </summary>
         public void Unsummon(uint guid)
@@ -163,7 +179,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void Unsummon()
         {
-            foreach (uint guid in summonGuids)
+            foreach (uint guid in summonGuids.ToList())
                 Unsummon(guid);
 
             summonGuids.Clear();

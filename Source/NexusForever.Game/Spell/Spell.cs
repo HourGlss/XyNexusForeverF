@@ -70,6 +70,7 @@ namespace NexusForever.Game.Spell
         private bool unsupportedThresholdData;
 
         private readonly Dictionary<Spell4EffectsEntry, UpdateTimer> delayedEffects = [];
+        private float? esperResourceAtExecution;
 
         private IScriptCollection scriptCollection;
 
@@ -474,6 +475,8 @@ namespace NexusForever.Game.Spell
 
         protected virtual void Execute(bool handleCDAndCost = true)
         {
+            CaptureEsperResourceAtExecution();
+
             if (handleCDAndCost)
             {
                 if ((currentPhase == 0 || currentPhase == 255))
@@ -487,9 +490,13 @@ namespace NexusForever.Game.Spell
             executionContext.Initialise(this);
 
             foreach (Spell4EffectsEntry entry in Parameters.SpellInfo.Effects)
-                executionContext.AddSpellEffect(entry);
+            {
+                if (ShouldExecuteEffect(entry))
+                    executionContext.AddSpellEffect(entry);
+            }
 
             Execute(executionContext);
+            esperResourceAtExecution = null;
         }
 
         protected void Execute(ISpellExecutionContext executionContext)
@@ -536,6 +543,8 @@ namespace NexusForever.Game.Spell
 
         protected void CostSpell()
         {
+            CaptureEsperResourceAtExecution();
+
             if (Parameters.CharacterSpell?.MaxAbilityCharges > 0)
                 Parameters.CharacterSpell.UseCharge();
 
@@ -545,8 +554,61 @@ namespace NexusForever.Game.Spell
                 if (innateCostType == 0)
                     continue;
 
-                Caster.ModifyVital((Vital)innateCostType, Parameters.SpellInfo.Entry.InnateCosts[i] * -1f);
+                Vital vital = (Vital)innateCostType;
+                if (IsEsperResourceCost(vital))
+                {
+                    Caster.ModifyVital(vital, -Caster.GetVitalValue(vital));
+                    continue;
+                }
+
+                Caster.ModifyVital(vital, Parameters.SpellInfo.Entry.InnateCosts[i] * -1f);
             }
+        }
+
+        private void CaptureEsperResourceAtExecution()
+        {
+            if (esperResourceAtExecution != null)
+                return;
+
+            if (HasEsperResourceCost())
+                esperResourceAtExecution = Caster.GetVitalValue(Vital.Resource1);
+        }
+
+        private bool ShouldExecuteEffect(Spell4EffectsEntry entry)
+        {
+            if (!HasEsperResourceCost())
+                return true;
+
+            if (entry.EffectType != SpellEffectType.Damage)
+                return true;
+
+            if (esperResourceAtExecution == null)
+                return true;
+
+            return CanUseEsperEffect(entry, (uint)MathF.Floor(esperResourceAtExecution.Value));
+        }
+
+        private bool HasEsperResourceCost()
+        {
+            if (Caster is not IPlayer player || player.Class != Class.Esper)
+                return false;
+
+            return Parameters.SpellInfo.Entry.InnateCostTypes.Contains((uint)Vital.Resource1);
+        }
+
+        private bool IsEsperResourceCost(Vital vital)
+        {
+            return vital == Vital.Resource1 && HasEsperResourceCost();
+        }
+
+        private bool CanUseEsperEffect(Spell4EffectsEntry entry, uint currentEmm)
+        {
+            return entry.EmmComparison switch
+            {
+                0u => currentEmm == entry.EmmValue,
+                1u => currentEmm >= entry.EmmValue,
+                _  => true
+            };
         }
 
         protected virtual void SelectTargets(ISpellExecutionContext executionContext)

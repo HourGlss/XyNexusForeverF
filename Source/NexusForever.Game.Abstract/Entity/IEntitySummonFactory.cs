@@ -46,6 +46,11 @@ namespace NexusForever.Game.Abstract.Entity
         void UntrackSummon(IWorldEntity entity);
 
         /// <summary>
+        /// Return tracked summons matching the supplied entity type.
+        /// </summary>
+        IEnumerable<T> GetSummons<T>() where T : IWorldEntity;
+
+        /// <summary>
         /// Unsummon an summoned entity with supplied guid.
         /// </summary>
         void Unsummon(uint guid);

@@ -41,30 +41,5 @@ namespace NexusForever.Game.Spell.Target.Implicit.Filter
                 if (!searchCheckTelegraph.CheckEntity(target.Entity))
                     target.Result = SpellTargetImplicitSelectionResult.OutsideTelegraph;
         }
-
-        // TODO: this needs more research...
-        /*private bool EvaluateDamageFlagsForTarget(IGridEntity target, ISpell spell)
-        {
-            TelegraphDamageFlag damageFlag = (TelegraphDamageFlag)TelegraphDamage.TelegraphDamageFlags;
-
-            // This is Invalid
-            //if (damageFlag.HasFlag(TelegraphDamageFlag.SpellMustBeMultiPhase))
-            //    if (spell.CastMethod != CastMethod.Multiphase)
-            //        return false;
-
-            if (damageFlag.HasFlag(TelegraphDamageFlag.CasterMustBeNPC))
-                if (Caster is IPlayer)
-                    return false;
-
-            if (damageFlag.HasFlag(TelegraphDamageFlag.CasterMustBePlayer))
-                if (Caster is not IPlayer)
-                    return false;
-
-            if (damageFlag.HasFlag(TelegraphDamageFlag.TargetMustBeUnit))
-                if (target is not IUnitEntity)
-                    return false;
-
-            return true;
-        }*/
     }
 }
