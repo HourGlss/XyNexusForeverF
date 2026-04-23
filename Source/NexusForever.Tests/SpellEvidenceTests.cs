@@ -3,21 +3,27 @@ using System.Numerics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Map.Search;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Effect;
 using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Game.Abstract.Spell.Info.Patch;
 using NexusForever.Game.Abstract.Spell.Target;
+using NexusForever.Game.Abstract.Spell.Target.Implicit;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Spell.Effect;
 using NexusForever.Game.Spell.Effect.Data;
 using NexusForever.Game.Spell.Effect.Handler;
 using NexusForever.Game.Spell.Info.Patch;
+using NexusForever.Game.Spell.Target.Implicit;
+using NexusForever.Game.Spell.Target.Implicit.Filter;
 using NexusForever.Game.Spell.Type;
 using NexusForever.Game.Static.Spell;
 using NexusForever.Game.Static.Spell.Effect;
+using NexusForever.Game.Static.Spell.Target;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Static;
+using NexusForever.Shared;
 
 namespace NexusForever.Tests;
 
@@ -150,6 +156,39 @@ public class SpellEvidenceTests
         Assert.Equal(2, executionContext.GetProxies().Count());
     }
 
+    [Fact]
+    public void TelegraphFilterKeepsTargetsInsideAnyTelegraph()
+    {
+        IUnitEntity caster = CreateUnit(100u);
+        IUnitEntity targetInFirstTelegraph = CreateUnit(1u);
+        IUnitEntity targetInSecondTelegraph = CreateUnit(2u);
+        IUnitEntity targetOutsideBoth = CreateUnit(3u);
+
+        ITelegraph firstTelegraph = TestProxy.Create<ITelegraph>();
+        ITelegraph secondTelegraph = TestProxy.Create<ITelegraph>();
+
+        var hitsByTelegraph = new Dictionary<ITelegraph, HashSet<uint>>
+        {
+            [firstTelegraph] = [targetInFirstTelegraph.Guid],
+            [secondTelegraph] = [targetInSecondTelegraph.Guid]
+        };
+
+        var targets = new List<ISpellTargetImplicit>
+        {
+            new SpellTargetImplicit(targetInFirstTelegraph, 0f),
+            new SpellTargetImplicit(targetInSecondTelegraph, 0f),
+            new SpellTargetImplicit(targetOutsideBoth, 0f)
+        };
+
+        var filter = new SpellTargetImplicitTelegraphFilter(new FakeTelegraphSearchCheckFactory(hitsByTelegraph));
+        filter.Initialise(new[] { firstTelegraph, secondTelegraph }, caster);
+        filter.Filter(targets);
+
+        Assert.Null(targets[0].Result);
+        Assert.Null(targets[1].Result);
+        Assert.Equal(SpellTargetImplicitSelectionResult.OutsideTelegraph, targets[2].Result);
+    }
+
     [Theory]
     [InlineData(typeof(BioShellVolatilitySpellInfoPatch), 35967u)]
     [InlineData(typeof(RicochetVolatilitySpellInfoPatch), 35741u)]
@@ -203,5 +242,42 @@ public class SpellEvidenceTests
         return TestProxy.Create<IUnitEntity>(
             ("get_Guid", guid),
             ("get_Position", new Vector3(guid, 0f, 0f)));
+    }
+
+    private sealed class FakeTelegraphSearchCheckFactory : IFactory<ISearchCheckTelegraph>
+    {
+        private readonly IReadOnlyDictionary<ITelegraph, HashSet<uint>> hitsByTelegraph;
+
+        public FakeTelegraphSearchCheckFactory(IReadOnlyDictionary<ITelegraph, HashSet<uint>> hitsByTelegraph)
+        {
+            this.hitsByTelegraph = hitsByTelegraph;
+        }
+
+        public ISearchCheckTelegraph Resolve()
+        {
+            return new FakeTelegraphSearchCheck(hitsByTelegraph);
+        }
+    }
+
+    private sealed class FakeTelegraphSearchCheck : ISearchCheckTelegraph
+    {
+        private readonly IReadOnlyDictionary<ITelegraph, HashSet<uint>> hitsByTelegraph;
+        private ITelegraph telegraph;
+
+        public FakeTelegraphSearchCheck(IReadOnlyDictionary<ITelegraph, HashSet<uint>> hitsByTelegraph)
+        {
+            this.hitsByTelegraph = hitsByTelegraph;
+        }
+
+        public void Initialise(ITelegraph telegraph, IUnitEntity caster)
+        {
+            this.telegraph = telegraph;
+        }
+
+        public bool CheckEntity(IUnitEntity entity)
+        {
+            return hitsByTelegraph.TryGetValue(telegraph, out HashSet<uint> targetGuids)
+                && targetGuids.Contains(entity.Guid);
+        }
     }
 }

@@ -643,10 +643,10 @@ namespace NexusForever.Game.Spell
 
             InitialiseTelegraphs();
 
-            foreach (ITelegraph telegraph in telegraphs)
+            if (telegraphs.Count != 0)
             {
                 var telegraphFilter = LegacyServiceProvider.Provider.GetService<ISpellTargetImplicitTelegraphFilter>();
-                telegraphFilter.Initialise(telegraph, Caster);
+                telegraphFilter.Initialise(telegraphs, Caster);
                 telegraphFilter.Filter(implicitTargets);
             }
 

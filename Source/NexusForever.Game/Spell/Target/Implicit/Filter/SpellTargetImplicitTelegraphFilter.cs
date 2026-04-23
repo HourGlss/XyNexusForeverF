@@ -4,42 +4,68 @@ using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Target.Implicit;
 using NexusForever.Game.Abstract.Spell.Target.Implicit.Filter;
 using NexusForever.Game.Static.Spell.Target;
+using NexusForever.Shared;
 
 namespace NexusForever.Game.Spell.Target.Implicit.Filter
 {
     public class SpellTargetImplicitTelegraphFilter : ISpellTargetImplicitTelegraphFilter
     {
-        private ITelegraph telegraph;
+        private IReadOnlyList<ITelegraph> telegraphs;
         private IUnitEntity caster;
 
         #region Dependency Injection
 
-        private readonly ISearchCheckTelegraph searchCheckTelegraph;
+        private readonly IFactory<ISearchCheckTelegraph> searchCheckTelegraphFactory;
 
         public SpellTargetImplicitTelegraphFilter(
-            ISearchCheckTelegraph searchCheckTelegraph)
+            IFactory<ISearchCheckTelegraph> searchCheckTelegraphFactory)
         {
-            this.searchCheckTelegraph = searchCheckTelegraph;
+            this.searchCheckTelegraphFactory = searchCheckTelegraphFactory;
         }
 
         #endregion
 
         public void Initialise(ITelegraph telegraph, IUnitEntity caster)
         {
-            if (this.telegraph != null)
+            Initialise([telegraph], caster);
+        }
+
+        public void Initialise(IEnumerable<ITelegraph> telegraphs, IUnitEntity caster)
+        {
+            if (this.telegraphs != null)
                 throw new InvalidOperationException("SpellTargetImplicitTelegraphFilter has already been initialised.");
 
-            this.telegraph = telegraph;
-            this.caster    = caster;
-
-            searchCheckTelegraph.Initialise(telegraph, caster);
+            this.telegraphs = telegraphs.ToList();
+            this.caster     = caster;
         }
 
         public void Filter(List<ISpellTargetImplicit> targets)
         {
+            if (telegraphs.Count == 0)
+                return;
+
             foreach (ISpellTargetImplicit target in targets)
-                if (!searchCheckTelegraph.CheckEntity(target.Entity))
+            {
+                if (target.Result != null)
+                    continue;
+
+                if (!IsInsideAnyTelegraph(target.Entity))
                     target.Result = SpellTargetImplicitSelectionResult.OutsideTelegraph;
+            }
+        }
+
+        private bool IsInsideAnyTelegraph(IUnitEntity entity)
+        {
+            foreach (ITelegraph telegraph in telegraphs)
+            {
+                ISearchCheckTelegraph searchCheckTelegraph = searchCheckTelegraphFactory.Resolve();
+                searchCheckTelegraph.Initialise(telegraph, caster);
+
+                if (searchCheckTelegraph.CheckEntity(entity))
+                    return true;
+            }
+
+            return false;
         }
     }
 }
