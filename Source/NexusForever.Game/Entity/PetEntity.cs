@@ -33,9 +33,9 @@ namespace NexusForever.Game.Entity
 
         public uint OwnerGuid { get; private set; }
         public bool IsCombatPet { get; private set; }
+        public uint SummoningSpell4Id { get; private set; }
         public PetStance Stance { get; private set; }
 
-        private uint summoningSpell4Id;
         private ShortcutSet miniPetShortcutSet = ShortcutSet.PetMiniBar0;
 
         private readonly UpdateTimer followTimer = new(1d);
@@ -73,7 +73,7 @@ namespace NexusForever.Game.Entity
             SummonerGuid          = owner.Guid;
             IsCombatPet           = true;
             Stance                = PetStance.Stay;
-            this.summoningSpell4Id = summoningSpell4Id;
+            SummoningSpell4Id     = summoningSpell4Id;
 
             Initialise(creatureInfo);
 
@@ -154,6 +154,7 @@ namespace NexusForever.Game.Entity
             base.OnRemoveFromMap();
 
             OwnerGuid = 0u;
+            SummoningSpell4Id = 0u;
         }
 
         public override void Update(double lastTick)
@@ -224,7 +225,7 @@ namespace NexusForever.Game.Entity
             owner.Session.EnqueueMessageEncrypted(new ServerPetSpawned
             {
                 PetUnitId        = Guid,
-                SummoningSpell4Id = summoningSpell4Id,
+                SummoningSpell4Id = SummoningSpell4Id,
                 ValidStances     = AllPetStances,
                 Stance           = (uint)Stance
             });

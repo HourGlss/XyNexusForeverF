@@ -327,6 +327,7 @@ namespace NexusForever.Game.Spell
                 var parameters = new PrerequisiteParameters
                 {
                     TaxiNode = Parameters.TaxiNode,
+                    SpellInfo = Parameters.SpellInfo,
                     Target   = explicitTarget
                 };
                 if (!PrerequisiteManager.Instance.Meets(player, Parameters.SpellInfo.CasterCastPrerequisite.Id, parameters))
@@ -342,6 +343,7 @@ namespace NexusForever.Game.Spell
                 var parameters = new PrerequisiteParameters
                 {
                     TaxiNode = Parameters.TaxiNode,
+                    SpellInfo = Parameters.SpellInfo,
                     Target   = explicitTarget
                 };
                 if (!PrerequisiteManager.Instance.Meets(player, Parameters.SpellInfo.TargetCastPrerequisites.Id, parameters))
@@ -673,8 +675,17 @@ namespace NexusForever.Game.Spell
             if (Caster is IPlayer player)
             {
                 // Ensure caster can apply this effect
-                if (spell4EffectsEntry.PrerequisiteIdCasterApply > 0 && !PrerequisiteManager.Instance.Meets(player, spell4EffectsEntry.PrerequisiteIdCasterApply))
-                    return false;
+                if (spell4EffectsEntry.PrerequisiteIdCasterApply > 0)
+                {
+                    var parameters = new PrerequisiteParameters
+                    {
+                        TaxiNode = Parameters.TaxiNode,
+                        SpellInfo = Parameters.SpellInfo,
+                        Target = Caster
+                    };
+                    if (!PrerequisiteManager.Instance.Meets(player, spell4EffectsEntry.PrerequisiteIdCasterApply, parameters))
+                        return false;
+                }
             }
 
             if (delayedEffects.TryGetValue(spell4EffectsEntry, out UpdateTimer updateTimer)
@@ -727,7 +738,13 @@ namespace NexusForever.Game.Spell
                 // TODO
                 if (spell4EffectsEntry.PrerequisiteIdCasterApply > 0)
                 {
-                    effectCanApply = PrerequisiteManager.Instance.Meets(player, spell4EffectsEntry.PrerequisiteIdCasterApply);
+                    var parameters = new PrerequisiteParameters
+                    {
+                        TaxiNode = Parameters.TaxiNode,
+                        SpellInfo = Parameters.SpellInfo,
+                        Target = unit
+                    };
+                    effectCanApply = PrerequisiteManager.Instance.Meets(player, spell4EffectsEntry.PrerequisiteIdCasterApply, parameters);
                 }
             }
 
@@ -735,7 +752,13 @@ namespace NexusForever.Game.Spell
             {
                 if (spell4EffectsEntry.PrerequisiteIdTargetApply > 0)
                 {
-                    effectCanApply = PrerequisiteManager.Instance.Meets(player, spell4EffectsEntry.PrerequisiteIdTargetApply);
+                    var parameters = new PrerequisiteParameters
+                    {
+                        TaxiNode = Parameters.TaxiNode,
+                        SpellInfo = Parameters.SpellInfo,
+                        Target = unit
+                    };
+                    effectCanApply = PrerequisiteManager.Instance.Meets(player, spell4EffectsEntry.PrerequisiteIdTargetApply, parameters);
                 }
             }
 
@@ -987,6 +1010,7 @@ namespace NexusForever.Game.Spell
                 var parameters = new PrerequisiteParameters
                 {
                     TaxiNode = Parameters.TaxiNode,
+                    SpellInfo = Parameters.SpellInfo,
                 };
                 if (Parameters.SpellInfo.Entry.PrerequisiteIdCasterPersistence > 0 && !PrerequisiteManager.Instance.Meets(player, Parameters.SpellInfo.Entry.PrerequisiteIdCasterPersistence, parameters))
                     Finish();

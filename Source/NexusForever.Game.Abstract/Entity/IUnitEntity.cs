@@ -94,6 +94,11 @@ namespace NexusForever.Game.Abstract.Entity
         bool HasSpell(Func<ISpell, bool> predicate, out ISpell spell);
 
         /// <summary>
+        /// Count active spells matching the provided <see cref="Func"/> predicate.
+        /// </summary>
+        uint CountSpells(Func<ISpell, bool> predicate);
+
+        /// <summary>
         /// Cast a <see cref="ISpell"/> with the supplied spell id and <see cref="ISpellParameters"/>.
         /// </summary>
         void CastSpell<T>(T spell4Id, ISpellParameters parameters) where T : Enum;

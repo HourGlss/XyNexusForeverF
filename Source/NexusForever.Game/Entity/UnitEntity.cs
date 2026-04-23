@@ -364,6 +364,14 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// Count active spells matching the provided <see cref="Func"/> predicate.
+        /// </summary>
+        public uint CountSpells(Func<ISpell, bool> predicate)
+        {
+            return (uint)spells.Values.Count(i => !i.IsFinished && predicate(i));
+        }
+
+        /// <summary>
         /// Cast a <see cref="ISpell"/> with the supplied spell id and <see cref="ISpellParameters"/>.
         /// </summary>
         public void CastSpell<T>(T spell4Id, ISpellParameters parameters) where T : Enum
