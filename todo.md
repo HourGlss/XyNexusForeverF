@@ -20,6 +20,8 @@ is healthier only when a player can actually:
 - `xywikif` sqlite data and targeted Ghidra work are source truth when the
   current C# disagrees.
 - `class_skills.md` and `class_amps.md` are the live gameplay backlogs.
+- `class_skills_issue_map.md` is the sync map between `class_skills.md` and
+  GitHub issue anchors.
 - `[x]` means human-confirmed in game or confirmed by a closed GitHub issue.
 - `2` means "probably works" from code, tests, and evidence, but not yet human
   confirmed.
@@ -56,8 +58,8 @@ Source: `class_skills.md`
 
 | State | Count |
 | --- | ---: |
-| `[x]` human-confirmed | 21 |
-| `2` probably works | 115 |
+| `[x]` human-confirmed | 7 |
+| `2` probably works | 129 |
 | `1` partial/suspicious | 53 |
 | `0` no believable path | 0 |
 | Total | 189 |
@@ -158,7 +160,7 @@ Exit criteria for this lane:
 
 - `class_skills.md` score-1 count drops from `53` to `20` or lower,
 - no class has more than `5` score-1 skills left,
-- `[x]` count rises from `21` to `40` or higher through human verification.
+- `[x]` count rises from `7` to `40` or higher through human verification.
 
 ### XYF-1.4 Score-2 Verification And Promotion
 

@@ -8,11 +8,11 @@
 - [ ] Warrior Smackdown - 1
 - [ ] Warrior Tremor - 2
 - [ ] Warrior Whirlwind - 2
-- [x] Warrior Atomic Spear
+- [ ] Warrior Atomic Spear - 2
 - [ ] Warrior Atomic Surge - 2
 - [ ] Warrior Bolstering Strike - 2
 - [ ] Warrior Bum Rush - 2
-- [x] Warrior Expulsion
+- [ ] Warrior Expulsion - 2
 - [ ] Warrior Jolt - 2
 - [ ] Warrior Menacing Strike - 2
 - [ ] Warrior Plasma Wall - 2
@@ -69,7 +69,7 @@
 - [ ] Esper Psychic Frenzy - 1
 - [ ] Esper Reap - 2
 - [ ] Esper Spectral Swarm - 1
-- [x] Esper Telekinetic Storm
+- [ ] Esper Telekinetic Storm - 2
 - [ ] Esper Telekinetic Strike - 2
 - [ ] Esper Bolster - 1
 - [ ] Esper Mending Banner - 1
@@ -81,7 +81,7 @@
 - [ ] Esper Reverie - 1
 - [ ] Esper Soothe - 2
 - [ ] Esper Warden - 1
-- [x] Esper Catharsis
+- [ ] Esper Catharsis - 2
 - [ ] Esper Crush - 2
 - [ ] Esper Fade Out - 1
 - [ ] Esper Fixation - 2
@@ -112,7 +112,7 @@
 - [ ] Medic Rejuvenator - 1
 - [ ] Medic Shield Surge - 2
 - [ ] Medic Triage - 2
-- [x] Medic Antidote
+- [ ] Medic Antidote - 2
 - [ ] Medic Calm - 1
 - [ ] Medic Empowering Probes - 2
 - [ ] Medic Field Probes - 2
@@ -132,8 +132,8 @@
 - [ ] Stalker Phlebotomize - 1
 - [ ] Stalker Punish - 2
 - [ ] Stalker Ruin - 1
-- [x] Stalker Shred
-- [x] Stalker Amplification Spike
+- [ ] Stalker Shred - 2
+- [ ] Stalker Amplification Spike - 2
 - [ ] Stalker Decimate - 2
 - [ ] Stalker Frenzy - 1
 - [ ] Stalker Nano Dart - 1
@@ -146,17 +146,17 @@
 - [ ] Stalker Bloodthirst - 1
 - [ ] Stalker Collapse - 2
 - [ ] Stalker False Retreat - 2
-- [x] Stalker Pounce
+- [ ] Stalker Pounce - 2
 - [ ] Stalker Preparation - 2
 - [ ] Stalker Reaver - 2
 - [ ] Stalker Stagger - 2
-- [x] Stalker Stim Drone
-- [x] Stalker Tactical Retreat
+- [ ] Stalker Stim Drone - 2
+- [ ] Stalker Tactical Retreat - 2
 - [ ] Stalker Tether Mine - 1
 - [ ] Stalker Nano Skin: Agile - 1
 - [ ] Stalker Nano Skin: Evasive - 1
 - [ ] Stalker Nano Skin: Lethal - 1
-- [x] Spellslinger Arcane Missiles
+- [ ] Spellslinger Arcane Missiles - 2
 - [ ] Spellslinger Assassinate - 2
 - [ ] Spellslinger Charged Shot - 2
 - [ ] Spellslinger Chill - 2
@@ -177,12 +177,12 @@
 - [ ] Spellslinger Vitality Burst - 2
 - [ ] Spellslinger Voidspring - 2
 - [ ] Spellslinger Affinity - 2
-- [x] Spellslinger Arcane Shock
+- [ ] Spellslinger Arcane Shock - 2
 - [ ] Spellslinger Flash Freeze - 2
-- [x] Spellslinger Gate
+- [ ] Spellslinger Gate - 2
 - [ ] Spellslinger Gather Focus - 2
 - [ ] Spellslinger Phase Shift - 2
-- [x] Spellslinger Purify
+- [ ] Spellslinger Purify - 2
 - [ ] Spellslinger Spatial Shift - 1
 - [ ] Spellslinger Void Pact - 2
 - [ ] Spellslinger Void Slip - 1

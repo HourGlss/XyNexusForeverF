@@ -1,0 +1,211 @@
+# Class Skills Issue Map
+
+Generated from `class_skills.md`, `SpellEvidenceTests.cs`, and live GitHub issues.
+
+- `tracker` is the status currently written in `class_skills.md`.
+- `issue anchor` lists the matching GitHub issue(s) for that skill.
+- `closed anchor` means at least one matching issue is closed.
+- `open-only anchor` means the skill is tracked on GitHub but not yet backed by a closed issue.
+
+## Warrior
+
+- `Warrior Augmented Blade` | tracker: `2` | issue anchor: #41 (open) | closed anchor: `no` | effects: VitalModifier, Damage, UnitPropertyModifier, Proc, Fluff, Proxy, ModifySpellCooldown, SpellForceRemove
+- `Warrior Breaching Strikes` | tracker: `2` | issue anchor: #42 (open) | closed anchor: `no` | effects: Damage, UnitPropertyModifier, Fluff, Proxy, ModifySpellCooldown, SpellForceRemove, RavelSignal
+- `Warrior Leap` | tracker: `2` | issue anchor: #43 (open) | closed anchor: `no` | effects: VitalModifier, ForcedMove, CCStateSet, Damage, UnitPropertyModifier, Fluff, Proxy, CCStateBreak, ForceFacing, SpellForceRemove
+- `Warrior Power Strike` | tracker: `2` | issue anchor: #39 (open) | closed anchor: `no`
+- `Warrior Relentless Strikes` | tracker: `2` | issue anchor: #23 (open) | closed anchor: `no` | effects: VitalModifier, Damage, Fluff, Proxy, ModifySpellCooldown, SpellForceRemove
+- `Warrior Ripsaw` | tracker: `1` | issue anchor: #44 (open) | closed anchor: `no` | effects: ForcedMove, CCStateSet, Damage, UnitPropertyModifier, Proc, Fluff, Proxy, ShieldOverload, SpellForceRemove
+- `Warrior Savage Strike` | tracker: `2` | issue anchor: #45 (open) | closed anchor: `no` | effects: VitalModifier, CCStateSet, Damage, UnitPropertyModifier, Proxy
+- `Warrior Smackdown` | tracker: `1` | issue anchor: #46 (open) | closed anchor: `no` | effects: Damage, UnitPropertyModifier, Fluff, Proxy, ModifySpellEffect, ModifySpellCooldown, SpellForceRemove, ModifyAbilityCharges
+- `Warrior Tremor` | tracker: `2` | issue anchor: #47 (open) | closed anchor: `no` | effects: ForcedMove, CCStateSet, Damage, Fluff, Proxy
+- `Warrior Whirlwind` | tracker: `2` | issue anchor: #48 (open) | closed anchor: `no` | effects: ForcedMove, CCStateSet, Damage, UnitPropertyModifier, Proxy, ModifyInterruptArmour, SpellForceRemove
+- `Warrior Atomic Spear` | tracker: `2` | issue anchor: #25 (open) | closed anchor: `no` | effects: Damage, UnitPropertyModifier, Fluff, Proxy, DistributedDamage, SpellForceRemove
+- `Warrior Atomic Surge` | tracker: `2` | issue anchor: #49 (open) | closed anchor: `no` | effects: CCStateSet, Damage, UnitPropertyModifier, Proxy
+- `Warrior Bolstering Strike` | tracker: `2` | issue anchor: #50 (open) | closed anchor: `no` | effects: VitalModifier, Damage, UnitPropertyModifier, Fluff, Proxy, ModifySpellCooldown, SpellForceRemove, HealShields
+- `Warrior Bum Rush` | tracker: `2` | issue anchor: #51 (open) | closed anchor: `no` | effects: ForcedMove, CCStateSet, Damage, UnitPropertyModifier, Fluff, Proxy
+- `Warrior Expulsion` | tracker: `2` | issue anchor: #32 (open) | closed anchor: `no` | effects: Damage, Proxy, SpellDispel
+- `Warrior Jolt` | tracker: `2` | issue anchor: #52 (open) | closed anchor: `no` | effects: Damage, UnitPropertyModifier, Fluff, Proxy, ModifySpellCooldown
+- `Warrior Menacing Strike` | tracker: `2` | issue anchor: #53 (open) | closed anchor: `no` | effects: Damage, Heal, UnitPropertyModifier, Proxy
+- `Warrior Plasma Wall` | tracker: `2` | issue anchor: #54 (open) | closed anchor: `no` | effects: VitalModifier, Damage, UnitPropertyModifier, Proc, Fluff, Proxy, SpellForceRemove
+- `Warrior Polarity Field` | tracker: `2` | issue anchor: #55 (open) | closed anchor: `no` | effects: VitalModifier, Damage, UnitPropertyModifier, Fluff, Proxy
+- `Warrior Shield Burst` | tracker: `2` | issue anchor: #56 (open) | closed anchor: `no` | effects: Damage, Fluff, Proxy, ShieldOverload, SpellForceRemove, HealShields
+- `Warrior Defense Grid` | tracker: `2` | issue anchor: #57 (open) | closed anchor: `no` | effects: VitalModifier, Damage, UnitPropertyModifier, Proc, Fluff, Proxy, HealShields
+- `Warrior Emergency Reserves` | tracker: `2` | issue anchor: #58 (open) | closed anchor: `no` | effects: VitalModifier, UnitPropertyModifier, Fluff, Proxy, HealShields
+- `Warrior Flash Bang` | tracker: `2` | issue anchor: #59 (open) | closed anchor: `no` | effects: CCStateSet, Damage, Fluff, Proxy
+- `Warrior Grapple` | tracker: `2` | issue anchor: #60 (open) | closed anchor: `no` | effects: CCStateSet, Damage, Proc, Fluff, Proxy
+- `Warrior Kick` | tracker: `2` | issue anchor: #61 (open) | closed anchor: `no` | effects: CCStateSet, Damage, Proxy
+- `Warrior Plasma Blast` | tracker: `2` | issue anchor: #62 (open) | closed anchor: `no` | effects: CCStateSet, Damage, Fluff, HealShields
+- `Warrior Power Link` | tracker: `2` | issue anchor: #63 (open) | closed anchor: `no` | effects: VitalModifier, Damage, UnitPropertyModifier, Proc, Fluff, Proxy, ModifySpellCooldown, SpellForceRemove
+- `Warrior Sentinel` | tracker: `1` | issue anchor: #64 (open) | closed anchor: `no` | effects: Damage, UnitPropertyModifier, Proc, Fluff, ForcedAction, Proxy, SpellForceRemove
+- `Warrior Tether Bolt` | tracker: `2` | issue anchor: #65 (open) | closed anchor: `no` | effects: CCStateSet, Damage
+- `Warrior Unstoppable Force` | tracker: `1` | issue anchor: #66 (open) | closed anchor: `no` | effects: UnitPropertyModifier, CCStateBreak, SpellEffectImmunity
+- `Warrior Stance: Onslaught` | tracker: `1` | issue anchor: #67 (open) | closed anchor: `no` | effects: VitalModifier, UnitPropertyModifier, Fluff, Proxy, ModifySpellCooldown, SpellForceRemove, ModifyAbilityCharges, HealShields
+## Engineer
+
+- `Engineer Artillerybot` | tracker: `[x]` | issue anchor: #2 (closed), #16 (open) | closed anchor: `yes`
+- `Engineer Bio Shell` | tracker: `[x]` | issue anchor: #3 (closed), #21 (open) | closed anchor: `yes`
+- `Engineer Bolt Caster` | tracker: `[x]` | issue anchor: #5 (closed) | closed anchor: `yes`
+- `Engineer Electrocute` | tracker: `2` | issue anchor: #68 (open) | closed anchor: `no` | effects: Damage, Proxy, SpellForceRemove
+- `Engineer Energy Auger` | tracker: `2` | issue anchor: #4 (open) | closed anchor: `no` | effects: CCStateSet, Damage, UnitPropertyModifier, Fluff, Proxy
+- `Engineer Mortar Strike` | tracker: `2` | issue anchor: #6 (open) | closed anchor: `no` | effects: Damage, Fluff, Proxy, ModifySpellCooldown, SpellForceRemove
+- `Engineer Pulse Blast` | tracker: `2` | issue anchor: #69 (open) | closed anchor: `no` | effects: Damage, UnitPropertyModifier, Fluff, Proxy
+- `Engineer Quick Burst` | tracker: `2` | issue anchor: #24 (open) | closed anchor: `no` | effects: Damage, UnitPropertyModifier, Fluff, Proxy
+- `Engineer Target Acquisition` | tracker: `2` | issue anchor: #70 (open) | closed anchor: `no` | effects: VitalModifier, Damage, UnitPropertyModifier, Fluff, Proxy, ModifySpellCooldown
+- `Engineer Unstable Anomaly` | tracker: `1` | issue anchor: #71 (open) | closed anchor: `no` | effects: Damage, UnitPropertyModifier, Fluff, Proxy, ShieldOverload
+- `Engineer Bruiserbot` | tracker: `[x]` | issue anchor: #10 (closed), #15 (open) | closed anchor: `yes`
+- `Engineer Disruptive Module` | tracker: `2` | issue anchor: #72 (open) | closed anchor: `no` | effects: Damage, UnitPropertyModifier, Fluff, Proxy, HealShields
+- `Engineer Feedback` | tracker: `2` | issue anchor: #73 (open) | closed anchor: `no` | effects: Damage, UnitPropertyModifier, Proc, Fluff, Proxy, ModifySpellCooldown, SpellForceRemove
+- `Engineer Flak Cannon` | tracker: `2` | issue anchor: #74 (open) | closed anchor: `no` | effects: Damage, UnitPropertyModifier, Fluff, Proxy, SpellForceRemove
+- `Engineer Hyper Wave` | tracker: `2` | issue anchor: #75 (open) | closed anchor: `no` | effects: CCStateSet, Damage, UnitPropertyModifier, Proxy
+- `Engineer Particle Ejector` | tracker: `2` | issue anchor: #76 (open) | closed anchor: `no` | effects: Damage, UnitPropertyModifier, Proxy
+- `Engineer Ricochet` | tracker: `2` | issue anchor: #11 (closed) | closed anchor: `yes` | effects: VitalModifier, CCStateSet, Damage, UnitPropertyModifier, Fluff, Proxy, ModifySpell, ModifySpellCooldown
+- `Engineer Shock Pulse` | tracker: `1` | issue anchor: #9 (open) | closed anchor: `no` | effects: CCStateSet, Damage, Proc, Proxy, ModifySpellEffect, ModifySpellCooldown
+- `Engineer Thresher` | tracker: `1` | issue anchor: #77 (open) | closed anchor: `no` | effects: Transference, Damage, Fluff, Proxy, ModifySpell
+- `Engineer Unsteady Miasma` | tracker: `[x]` | issue anchor: #8 (closed), #22 (open) | closed anchor: `yes`
+- `Engineer Code Red` | tracker: `1` | issue anchor: #78 (open) | closed anchor: `no` | effects: CCStateSet, Damage, Proxy, ThreatTransfer
+- `Engineer Diminisherbot` | tracker: `[x]` | issue anchor: #13 (closed), #14 (open) | closed anchor: `yes`
+- `Engineer Obstruct Vision` | tracker: `2` | issue anchor: #79 (open) | closed anchor: `no` | effects: CCStateSet, Damage, Proxy
+- `Engineer Personal Defense Unit` | tracker: `1` | issue anchor: #19 (open) | closed anchor: `no` | effects: Heal, UnitPropertyModifier, Fluff, Proxy, Absorption, SummonTrap
+- `Engineer Recursive Matrix` | tracker: `1` | issue anchor: #80 (open) | closed anchor: `no` | effects: Damage, UnitPropertyModifier, Proc, Fluff, Proxy, Absorption
+- `Engineer Repairbot` | tracker: `2` | issue anchor: #81 (open) | closed anchor: `no` | effects: UnitPropertyModifier, Fluff, Proxy, FacilityModification, SummonPet
+- `Engineer Shatter Impairment` | tracker: `1` | issue anchor: #18 (open) | closed anchor: `no` | effects: UnitPropertyModifier, CCStateBreak, Absorption, SpellDispel
+- `Engineer Urgent Withdrawal` | tracker: `1` | issue anchor: #17 (open) | closed anchor: `no` | effects: ForcedMove, CCStateSet, Damage, Proxy, CCStateBreak, SpellEffectImmunity
+- `Engineer Volatile Injection` | tracker: `[x]` | issue anchor: #12 (closed) | closed anchor: `yes`
+- `Engineer Zap` | tracker: `2` | issue anchor: #82 (open) | closed anchor: `no` | effects: CCStateSet, Damage, UnitPropertyModifier, SapVital
+- `Engineer Mode: Eradicate` | tracker: `1` | issue anchor: #83 (open) | closed anchor: `no` | effects: UnitPropertyModifier, Fluff, Proxy, UnitPropertyConversion
+- `Engineer Mode: Provoke` | tracker: `1` | issue anchor: #84 (open) | closed anchor: `no` | effects: UnitPropertyModifier, Fluff, Proxy
+## Esper
+
+- `Esper Blade Dance` | tracker: `2` | issue anchor: #85 (open) | closed anchor: `no` | effects: Damage, UnitPropertyModifier, Fluff, Proxy, FacilityModification, ModifySpellCooldown, DespawnUnit
+- `Esper Concentrated Blade` | tracker: `2` | issue anchor: #86 (open) | closed anchor: `no` | effects: Damage, Fluff, Proxy
+- `Esper Haunt` | tracker: `2` | issue anchor: #87 (open) | closed anchor: `no` | effects: CCStateSet, Damage, UnitPropertyModifier, Proc, Proxy, ModifySpell, ModifySpellCooldown, SpellForceRemove
+- `Esper Illusionary Blades` | tracker: `2` | issue anchor: #88 (open) | closed anchor: `no` | effects: Damage, Proc, Fluff, Proxy
+- `Esper Mind Burst` | tracker: `1` | issue anchor: #89 (open) | closed anchor: `no` | effects: Damage, UnitPropertyModifier, Fluff, Proxy, ModifySpellEffect, SpellForceRemove
+- `Esper Psychic Frenzy` | tracker: `1` | issue anchor: #90 (open) | closed anchor: `no` | effects: Transference, Damage, Proxy, SpellForceRemove
+- `Esper Reap` | tracker: `2` | issue anchor: #91 (open) | closed anchor: `no` | effects: VitalModifier, CCStateSet, Damage, Fluff, Proxy
+- `Esper Spectral Swarm` | tracker: `1` | issue anchor: #92 (open) | closed anchor: `no` | effects: Fluff, Proxy, FacilityModification, SummonPet
+- `Esper Telekinetic Storm` | tracker: `2` | issue anchor: #29 (open) | closed anchor: `no` | effects: CCStateSet, Damage, UnitPropertyModifier, Fluff, SummonCreature, Proxy
+- `Esper Telekinetic Strike` | tracker: `2` | issue anchor: #93 (open) | closed anchor: `no` | effects: VitalModifier, CCStateSet, Damage, Fluff, Proxy, SpellForceRemove
+- `Esper Bolster` | tracker: `1` | issue anchor: #94 (open) | closed anchor: `no` | effects: VitalModifier, Heal, Proxy, Absorption
+- `Esper Mending Banner` | tracker: `1` | issue anchor: #95 (open) | closed anchor: `no` | effects: Heal, UnitPropertyModifier, Proxy
+- `Esper Mental Boon` | tracker: `1` | issue anchor: #96 (open) | closed anchor: `no` | effects: VitalModifier, Heal, UnitPropertyModifier, Proxy
+- `Esper Mind Over Body` | tracker: `2` | issue anchor: #97 (open) | closed anchor: `no` | effects: VitalModifier, Heal, UnitPropertyModifier, Fluff, Proxy, SpellForceRemove
+- `Esper Mirage` | tracker: `1` | issue anchor: #98 (open) | closed anchor: `no` | effects: Heal, Fluff, Proxy, SummonTrap
+- `Esper Phantasmal Armor` | tracker: `1` | issue anchor: #99 (open) | closed anchor: `no` | effects: VitalModifier, UnitPropertyModifier, Proxy, Absorption, DisguiseOutfit
+- `Esper Pyrokinetic Flame` | tracker: `2` | issue anchor: #100 (open) | closed anchor: `no` | effects: Damage, Heal, UnitPropertyModifier, Proc, Fluff, Proxy, ModifySpell
+- `Esper Reverie` | tracker: `1` | issue anchor: #101 (open) | closed anchor: `no` | effects: Heal, UnitPropertyModifier, Proxy
+- `Esper Soothe` | tracker: `2` | issue anchor: #102 (open) | closed anchor: `no` | effects: VitalModifier, Heal, Fluff, Proxy
+- `Esper Warden` | tracker: `1` | issue anchor: #103 (open) | closed anchor: `no` | effects: Heal, UnitPropertyModifier, Fluff, Proxy, Absorption
+- `Esper Catharsis` | tracker: `2` | issue anchor: #31 (open) | closed anchor: `no` | effects: Heal, Proxy, SpellDispel
+- `Esper Crush` | tracker: `2` | issue anchor: #104 (open) | closed anchor: `no` | effects: CCStateSet, Damage, UnitPropertyModifier, Proxy
+- `Esper Fade Out` | tracker: `1` | issue anchor: #105 (open) | closed anchor: `no` | effects: ForcedMove, CCStateSet, Heal, UnitPropertyModifier, ForcedAction, CCStateBreak, FacilityModification, SummonPet
+- `Esper Fixation` | tracker: `2` | issue anchor: #106 (open) | closed anchor: `no` | effects: VitalModifier, Proxy, ModifySpellCooldown
+- `Esper Geist` | tracker: `1` | issue anchor: #107 (open) | closed anchor: `no` | effects: Proxy, FacilityModification, SummonPet
+- `Esper Incapacitate` | tracker: `2` | issue anchor: #108 (open) | closed anchor: `no` | effects: CCStateSet, Damage, UnitPropertyModifier, Proc, Proxy
+- `Esper Meditate` | tracker: `2` | issue anchor: #109 (open) | closed anchor: `no` | effects: VitalModifier, Heal, UnitPropertyModifier
+- `Esper Projected Spirit` | tracker: `2` | issue anchor: #110 (open) | closed anchor: `no` | effects: ForcedMove, Heal, Proxy, CCStateBreak, ModifySpellCooldown
+- `Esper Restraint` | tracker: `2` | issue anchor: #111 (open) | closed anchor: `no` | effects: VitalModifier, CCStateSet, Damage, Fluff, Proxy
+- `Esper Shockwave` | tracker: `2` | issue anchor: #112 (open) | closed anchor: `no` | effects: ForcedMove, CCStateSet, Damage, CCStateBreak
+- `Esper Spectral Form` | tracker: `1` | issue anchor: #113 (open) | closed anchor: `no` | effects: Proxy, Absorption
+## Medic
+
+- `Medic Annihilation` | tracker: `2` | issue anchor: #114 (open) | closed anchor: `no` | effects: Damage, Proc, Fluff, Proxy, ModifySpellCooldown
+- `Medic Atomize` | tracker: `2` | issue anchor: #115 (open) | closed anchor: `no` | effects: Damage, Fluff, Proxy, ModifySpellCooldown, SpellForceRemove
+- `Medic Collider` | tracker: `2` | issue anchor: #116 (open) | closed anchor: `no` | effects: Damage, Proxy, ModifySpellCooldown
+- `Medic Dematerialize` | tracker: `1` | issue anchor: #117 (open) | closed anchor: `no` | effects: VitalModifier, Damage, Proc, Proxy, SpellDispel, ShieldOverload
+- `Medic Devastator Probes` | tracker: `2` | issue anchor: #118 (open) | closed anchor: `no` | effects: Damage, Proxy, ModifySpellCooldown, SpellForceRemove
+- `Medic Discharge` | tracker: `2` | issue anchor: #119 (open) | closed anchor: `no` | effects: Damage, Fluff, Proxy, ModifySpellCooldown, SpellForceRemove
+- `Medic Fissure` | tracker: `2` | issue anchor: #120 (open) | closed anchor: `no` | effects: Damage, UnitPropertyModifier, Proc, Fluff, Proxy, SpellForceRemove
+- `Medic Gamma Rays` | tracker: `2` | issue anchor: #121 (open) | closed anchor: `no` | effects: VitalModifier, Damage, Fluff, Proxy, SpellForceRemove
+- `Medic Nullifier` | tracker: `2` | issue anchor: #122 (open) | closed anchor: `no` | effects: Damage, Fluff, Proxy
+- `Medic Quantum Cascade` | tracker: `2` | issue anchor: #123 (open) | closed anchor: `no` | effects: Damage, UnitPropertyModifier, Proc, Fluff, Proxy, SpellForceRemoveChanneled, ModifySpellCooldown, SpellForceRemove
+- `Medic Barrier` | tracker: `1` | issue anchor: #124 (open) | closed anchor: `no` | effects: UnitPropertyModifier, Proc, Fluff, Proxy, ModifySpell, SpellForceRemove, HealShields, SharedHealthPool
+- `Medic Crisis Wave` | tracker: `2` | issue anchor: #125 (open) | closed anchor: `no` | effects: VitalModifier, Heal, UnitPropertyModifier, Proc, Proxy, ModifySpell, ModifySpellCooldown, SpellForceRemove
+- `Medic Dual Shock` | tracker: `1` | issue anchor: #126 (open) | closed anchor: `no` | effects: Transference, Damage, Heal, Fluff, Proxy, SpellForceRemove
+- `Medic Emission` | tracker: `2` | issue anchor: #127 (open) | closed anchor: `no` | effects: Heal, Fluff, Proxy, ModifySpell, ModifySpellCooldown, SpellForceRemove
+- `Medic Extricate` | tracker: `2` | issue anchor: #128 (open) | closed anchor: `no` | effects: ForcedMove, Heal, UnitPropertyModifier, CCStateBreak, HealShields
+- `Medic Flash` | tracker: `2` | issue anchor: #129 (open) | closed anchor: `no` | effects: Heal, Proxy, HealShields
+- `Medic Mending Probes` | tracker: `1` | issue anchor: #130 (open) | closed anchor: `no` | effects: Heal, Fluff, Proxy, ModifySpellCooldown, SpellForceRemove, DelayDeath
+- `Medic Rejuvenator` | tracker: `1` | issue anchor: #131 (open) | closed anchor: `no` | effects: Heal, Fluff, Proxy, SummonTrap
+- `Medic Shield Surge` | tracker: `2` | issue anchor: #132 (open) | closed anchor: `no` | effects: Damage, UnitPropertyModifier, Fluff, Proxy, HealShields
+- `Medic Triage` | tracker: `2` | issue anchor: #133 (open) | closed anchor: `no` | effects: Heal, UnitPropertyModifier, HealShields
+- `Medic Antidote` | tracker: `2` | issue anchor: #33 (open) | closed anchor: `no` | effects: VitalModifier, Heal, Proxy, SpellDispel
+- `Medic Calm` | tracker: `1` | issue anchor: #134 (open) | closed anchor: `no` | effects: CCStateSet, Heal, UnitPropertyModifier, Proxy, CCStateBreak, ThreatModification, HealShields
+- `Medic Empowering Probes` | tracker: `2` | issue anchor: #135 (open) | closed anchor: `no` | effects: Damage, Heal, UnitPropertyModifier, Proc, Fluff, Proxy
+- `Medic Field Probes` | tracker: `2` | issue anchor: #136 (open) | closed anchor: `no` | effects: Damage, Heal, UnitPropertyModifier, Proc, Fluff, Proxy, SpellForceRemove
+- `Medic Magnetic Lockdown` | tracker: `2` | issue anchor: #137 (open) | closed anchor: `no` | effects: VitalModifier, CCStateSet, Damage, Proxy, ModifySpell
+- `Medic Paralytic Surge` | tracker: `2` | issue anchor: #138 (open) | closed anchor: `no` | effects: CCStateSet, Damage
+- `Medic Protection Probes` | tracker: `2` | issue anchor: #139 (open) | closed anchor: `no` | effects: UnitPropertyModifier, Fluff, Proxy, HealShields
+- `Medic Recharge` | tracker: `2` | issue anchor: #140 (open) | closed anchor: `no` | effects: VitalModifier, ModifySpellCooldown
+- `Medic Restrictor` | tracker: `2` | issue anchor: #141 (open) | closed anchor: `no` | effects: ForcedMove, CCStateSet, UnitPropertyModifier, Fluff, Proxy
+- `Medic Urgency` | tracker: `2` | issue anchor: #142 (open) | closed anchor: `no` | effects: ForcedMove, CCStateSet, Damage, Heal, UnitPropertyModifier, Proxy, CCStateBreak, SpellForceRemove
+- `Medic Energize` | tracker: `1` | issue anchor: #143 (open) | closed anchor: `no` | effects: VitalModifier, UnitPropertyModifier, Proxy, HealShields
+## Stalker
+
+- `Stalker Analyze Weakness` | tracker: `1` | issue anchor: #144 (open) | closed anchor: `no` | effects: VitalModifier, Damage, Heal, Proc, Proxy, ModifySpellCooldown, SpellForceRemove, HealShields, PersonalDmgHealMod
+- `Stalker Clone` | tracker: `1` | issue anchor: #145 (open) | closed anchor: `no` | effects: ForcedMove, Proxy, FacilityModification, SpellForceRemove, RavelSignal, Stealth, SummonPet, MimicDisplayName, MimicDisguise
+- `Stalker Concussive Kicks` | tracker: `2` | issue anchor: #146 (open) | closed anchor: `no` | effects: ForcedMove, CCStateSet, Damage, ModifySpellCooldown
+- `Stalker Cripple` | tracker: `2` | issue anchor: #147 (open) | closed anchor: `no` | effects: CCStateSet, Damage, UnitPropertyModifier, Proxy, SpellForceRemove
+- `Stalker Impale` | tracker: `2` | issue anchor: #148 (open) | closed anchor: `no` | effects: Damage, Proxy
+- `Stalker Neutralize` | tracker: `2` | issue anchor: #149 (open) | closed anchor: `no` | effects: Damage, Proc, Fluff, Proxy, ModifySpell, ModifySpellCooldown, SpellForceRemove
+- `Stalker Phlebotomize` | tracker: `1` | issue anchor: #150 (open) | closed anchor: `no` | effects: VitalModifier, Damage, UnitPropertyModifier, Proxy, ShieldOverload, SpellForceRemove
+- `Stalker Punish` | tracker: `2` | issue anchor: #151 (open) | closed anchor: `no` | effects: VitalModifier, Damage, UnitPropertyModifier, Proxy, ModifySpellCooldown, SpellForceRemove
+- `Stalker Ruin` | tracker: `1` | issue anchor: #152 (open) | closed anchor: `no` | effects: VitalModifier, Damage, UnitPropertyModifier, Fluff, Proxy, SpellForceRemove, PersonalDmgHealMod
+- `Stalker Shred` | tracker: `2` | issue anchor: #26 (open) | closed anchor: `no` | effects: Damage, Proxy, DistributedDamage
+- `Stalker Amplification Spike` | tracker: `2` | issue anchor: #38 (open) | closed anchor: `no` | effects: VitalModifier, UnitPropertyModifier, Fluff, Scale, Proxy
+- `Stalker Decimate` | tracker: `2` | issue anchor: #153 (open) | closed anchor: `no` | effects: VitalModifier, Damage, UnitPropertyModifier, Fluff, Proxy, ModifySpellCooldown
+- `Stalker Frenzy` | tracker: `1` | issue anchor: #154 (open) | closed anchor: `no` | effects: Damage, UnitPropertyModifier, Fluff, Proxy, SpellForceRemove
+- `Stalker Nano Dart` | tracker: `1` | issue anchor: #155 (open) | closed anchor: `no` | effects: Transference, ModifySpellCooldown, SpellForceRemove
+- `Stalker Nano Field` | tracker: `1` | issue anchor: #156 (open) | closed anchor: `no` | effects: Transference, Damage, UnitPropertyModifier, Fluff, Proxy, SpellForceRemove
+- `Stalker Nano Virus` | tracker: `1` | issue anchor: #157 (open) | closed anchor: `no` | effects: VitalModifier, Transference, UnitPropertyModifier, Proc, Fluff, Proxy
+- `Stalker Razor Disk` | tracker: `2` | issue anchor: #158 (open) | closed anchor: `no` | effects: Damage, UnitPropertyModifier, Proxy
+- `Stalker Razor Storm` | tracker: `2` | issue anchor: #159 (open) | closed anchor: `no` | effects: VitalModifier, CCStateSet, Damage, UnitPropertyModifier, Proxy, SpellForceRemove
+- `Stalker Steadfast` | tracker: `2` | issue anchor: #160 (open) | closed anchor: `no` | effects: UnitPropertyModifier, Proxy
+- `Stalker Whiplash` | tracker: `2` | issue anchor: #161 (open) | closed anchor: `no` | effects: VitalModifier, Damage, UnitPropertyModifier, Proxy, SpellForceRemove
+- `Stalker Bloodthirst` | tracker: `1` | issue anchor: #162 (open) | closed anchor: `no` | effects: Transference, Damage, UnitPropertyModifier, Proc, Fluff, Proxy, SpellForceRemove
+- `Stalker Collapse` | tracker: `2` | issue anchor: #163 (open) | closed anchor: `no` | effects: VitalModifier, CCStateSet, Damage, Proxy, SpellForceRemove
+- `Stalker False Retreat` | tracker: `2` | issue anchor: #40 (open) | closed anchor: `no`
+- `Stalker Pounce` | tracker: `2` | issue anchor: #28 (open) | closed anchor: `no` | effects: VitalModifier, ForcedMove, CCStateSet, Transference, Damage, UnitPropertyModifier, Fluff, Proxy, SpellForceRemove
+- `Stalker Preparation` | tracker: `2` | issue anchor: #164 (open) | closed anchor: `no` | effects: VitalModifier, Heal, UnitPropertyModifier, ForcedAction, Proxy, SpellForceRemove
+- `Stalker Reaver` | tracker: `2` | issue anchor: #165 (open) | closed anchor: `no` | effects: CCStateSet, Damage, UnitPropertyModifier, Proxy, SpellForceRemove
+- `Stalker Stagger` | tracker: `2` | issue anchor: #166 (open) | closed anchor: `no` | effects: CCStateSet, Damage, Proxy, ModifySpellCooldown, SpellForceRemove
+- `Stalker Stim Drone` | tracker: `2` | issue anchor: #34 (open) | closed anchor: `no` | effects: Heal, UnitPropertyModifier, Proxy, CCStateBreak, SpellDispel
+- `Stalker Tactical Retreat` | tracker: `2` | issue anchor: #35 (open) | closed anchor: `no` | effects: ForcedMove, Proxy, CCStateBreak, SpellDispel, SpellForceRemove, Stealth
+- `Stalker Tether Mine` | tracker: `1` | issue anchor: #167 (open) | closed anchor: `no` | effects: CCStateSet, Fluff, Proxy, SummonTrap
+- `Stalker Nano Skin: Agile` | tracker: `1` | issue anchor: #168 (open) | closed anchor: `no` | effects: VitalModifier, UnitPropertyModifier, Proc, Proxy, SpellForceRemove
+- `Stalker Nano Skin: Evasive` | tracker: `1` | issue anchor: #169 (open) | closed anchor: `no` | effects: VitalModifier, UnitPropertyModifier, Proc, Proxy, SpellForceRemove
+- `Stalker Nano Skin: Lethal` | tracker: `1` | issue anchor: #170 (open) | closed anchor: `no` | effects: VitalModifier, UnitPropertyModifier, Proc, ForcedAction, Proxy, SpellForceRemove
+## Spellslinger
+
+- `Spellslinger Arcane Missiles` | tracker: `2` | issue anchor: #27 (open) | closed anchor: `no` | effects: VitalModifier, Damage, UnitPropertyModifier, Proc, Fluff, Proxy, DistributedDamage
+- `Spellslinger Assassinate` | tracker: `2` | issue anchor: #171 (open) | closed anchor: `no` | effects: Damage, Fluff, Proxy, ModifyAbilityCharges
+- `Spellslinger Charged Shot` | tracker: `2` | issue anchor: #172 (open) | closed anchor: `no` | effects: CCStateSet, Damage, Fluff, Proxy, ModifySpellCooldown
+- `Spellslinger Chill` | tracker: `2` | issue anchor: #173 (open) | closed anchor: `no` | effects: CCStateSet, Damage, Proxy
+- `Spellslinger Flame Burst` | tracker: `2` | issue anchor: #174 (open) | closed anchor: `no` | effects: Damage, UnitPropertyModifier, Proc, Fluff, Proxy, ModifySpellCooldown, SpellForceRemove
+- `Spellslinger Ignite` | tracker: `2` | issue anchor: #175 (open) | closed anchor: `no` | effects: Damage, Proxy
+- `Spellslinger Quick Draw` | tracker: `2` | issue anchor: #176 (open) | closed anchor: `no` | effects: VitalModifier, Damage, UnitPropertyModifier, Fluff, Proxy, SpellForceRemove
+- `Spellslinger Rapid Fire` | tracker: `2` | issue anchor: #177 (open) | closed anchor: `no` | effects: VitalModifier, Damage, UnitPropertyModifier, Proc, Fluff, Proxy, ModifySpellCooldown, SpellForceRemove, ProxyChannelVariableTime
+- `Spellslinger True Shot` | tracker: `2` | issue anchor: #178 (open) | closed anchor: `no` | effects: Damage, Proc, ModifySpell
+- `Spellslinger Wild Barrage` | tracker: `2` | issue anchor: #179 (open) | closed anchor: `no` | effects: CCStateSet, Damage, Proxy
+- `Spellslinger Astral Infusion` | tracker: `1` | issue anchor: #180 (open) | closed anchor: `no` | effects: Heal, UnitPropertyModifier, Fluff, Proxy, Absorption, DelayDeath
+- `Spellslinger Dual Fire` | tracker: `2` | issue anchor: #181 (open) | closed anchor: `no` | effects: VitalModifier, Damage, Heal, Proxy
+- `Spellslinger Healing Salve` | tracker: `2` | issue anchor: #182 (open) | closed anchor: `no` | effects: Heal, UnitPropertyModifier, Proc, Proxy
+- `Spellslinger Healing Torrent` | tracker: `1` | issue anchor: #183 (open) | closed anchor: `no` | effects: Heal, Fluff, Proxy, Absorption, ModifySpell
+- `Spellslinger Regenerative Pulse` | tracker: `2` | issue anchor: #184 (open) | closed anchor: `no` | effects: VitalModifier, Heal, Fluff, Proxy, ModifySpellCooldown, SpellForceRemove, DelayDeath
+- `Spellslinger Runes of Protection` | tracker: `1` | issue anchor: #185 (open) | closed anchor: `no` | effects: UnitPropertyModifier, Proxy, Absorption, ModifySpellCooldown
+- `Spellslinger Runic Healing` | tracker: `2` | issue anchor: #186 (open) | closed anchor: `no` | effects: Heal, UnitPropertyModifier, Proxy, ModifySpell, ModifySpellEffect
+- `Spellslinger Sustain` | tracker: `2` | issue anchor: #187 (open) | closed anchor: `no` | effects: Heal, Fluff, ModifySpellCooldown
+- `Spellslinger Vitality Burst` | tracker: `2` | issue anchor: #188 (open) | closed anchor: `no` | effects: Heal, UnitPropertyModifier, Fluff, Proxy, ModifySpellCooldown
+- `Spellslinger Voidspring` | tracker: `2` | issue anchor: #189 (open) | closed anchor: `no` | effects: Heal, UnitPropertyModifier, Fluff, Proxy
+- `Spellslinger Affinity` | tracker: `2` | issue anchor: #190 (open) | closed anchor: `no` | effects: Heal, Proc, Fluff, Proxy, ModifySpellCooldown, SpellForceRemove
+- `Spellslinger Arcane Shock` | tracker: `2` | issue anchor: #36 (open) | closed anchor: `no` | effects: CCStateSet, Damage, Fluff, SpellDispel, ModifySpellCooldown
+- `Spellslinger Flash Freeze` | tracker: `2` | issue anchor: #191 (open) | closed anchor: `no` | effects: CCStateSet, Damage, Proxy
+- `Spellslinger Gate` | tracker: `2` | issue anchor: #30 (open) | closed anchor: `no` | effects: VitalModifier, ForcedMove, CCStateSet, UnitPropertyModifier, Fluff, SummonCreature, Proxy, ModifySpellCooldown
+- `Spellslinger Gather Focus` | tracker: `2` | issue anchor: #192 (open) | closed anchor: `no` | effects: UnitPropertyModifier
+- `Spellslinger Phase Shift` | tracker: `2` | issue anchor: #193 (open) | closed anchor: `no` | effects: CCStateSet, Heal, UnitPropertyModifier, Proc, CCStateBreak, ModifyInterruptArmour, ModifySpellCooldown
+- `Spellslinger Purify` | tracker: `2` | issue anchor: #37 (open) | closed anchor: `no` | effects: Heal, CCStateBreak, SpellDispel
+- `Spellslinger Spatial Shift` | tracker: `1` | issue anchor: #194 (open) | closed anchor: `no` | effects: CCStateSet, Fluff, Proxy, SpellEffectImmunity, SpellForceRemove
+- `Spellslinger Void Pact` | tracker: `2` | issue anchor: #195 (open) | closed anchor: `no` | effects: UnitPropertyModifier, Proc, Fluff, Proxy, ModifySpellCooldown
+- `Spellslinger Void Slip` | tracker: `1` | issue anchor: #196 (open) | closed anchor: `no` | effects: VitalModifier, Heal, Fluff, Proxy, CCStateBreak, ChangePhase, SpellDispel, SpellEffectImmunity, SpellForceRemove, ChangePlane
+- `Spellslinger Spell Surge` | tracker: `2` | issue anchor: #197 (open) | closed anchor: `no` | effects: Fluff, Proxy, SpellForceRemoveChanneled, SpellForceRemove
+
