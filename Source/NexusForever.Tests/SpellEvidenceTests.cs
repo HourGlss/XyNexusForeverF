@@ -1,11 +1,17 @@
 using System.Reflection;
+using System.Numerics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Effect;
 using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Game.Abstract.Spell.Info.Patch;
 using NexusForever.Game.Abstract.Spell.Target;
+using NexusForever.Game.Spell;
 using NexusForever.Game.Spell.Effect;
+using NexusForever.Game.Spell.Effect.Data;
+using NexusForever.Game.Spell.Effect.Handler;
 using NexusForever.Game.Spell.Info.Patch;
 using NexusForever.Game.Spell.Type;
 using NexusForever.Game.Static.Spell;
@@ -118,6 +124,32 @@ public class SpellEvidenceTests
         Assert.Equal(expected, (bool)method.Invoke(null, [phase, phaseFlags]));
     }
 
+    [Fact]
+    public void ProxyEffectWithZeroMaxExecutionsCanApplyToMultipleTargets()
+    {
+        var effect = new Spell4EffectsEntry
+        {
+            Id = 123u,
+            DataBits00 = 42590u,
+            DataBits04 = 0u
+        };
+
+        var data = new SpellEffectProxyData();
+        data.Populate(effect);
+
+        var executionContext = new SpellExecutionContext();
+        executionContext.Initialise(TestProxy.Create<ISpell>(("get_Parameters", new SpellParameters())));
+
+        var handler = new SpellEffectProxyHandler();
+        ISpellTargetEffectInfo info = TestProxy.Create<ISpellTargetEffectInfo>(("get_Entry", effect));
+
+        Assert.Equal(SpellEffectExecutionResult.Ok, handler.Apply(executionContext, CreateUnit(1u), info, data));
+        executionContext.IncrementEffectTriggerCount(effect.Id);
+
+        Assert.Equal(SpellEffectExecutionResult.Ok, handler.Apply(executionContext, CreateUnit(2u), info, data));
+        Assert.Equal(2, executionContext.GetProxies().Count());
+    }
+
     [Theory]
     [InlineData(typeof(BioShellVolatilitySpellInfoPatch), 35967u)]
     [InlineData(typeof(RicochetVolatilitySpellInfoPatch), 35741u)]
@@ -164,5 +196,12 @@ public class SpellEvidenceTests
     {
         ISpellInfoPatchManager patchManager = TestProxy.Create<ISpellInfoPatchManager>(("get_NextSpellEffectId", 10_000_000u));
         return (ISpellInfoPatch)Activator.CreateInstance(patchType, patchManager);
+    }
+
+    private static IUnitEntity CreateUnit(uint guid)
+    {
+        return TestProxy.Create<IUnitEntity>(
+            ("get_Guid", guid),
+            ("get_Position", new Vector3(guid, 0f, 0f)));
     }
 }

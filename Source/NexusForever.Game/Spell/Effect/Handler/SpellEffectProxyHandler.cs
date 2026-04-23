@@ -20,8 +20,8 @@ namespace NexusForever.Game.Spell.Effect.Handler
             // This checks that value to ensure we've not exceeded the unique number of times this can fire.
             // A good example of this is for the Esper Ability Telekinetic Strike, it has a Proxy that grants Psi point when it hits an enemy.
             // However, Esper's can only generate a maximum of 1 Psi Point per cast. This tracks that value that seems to indicate it's a 1-time effect per cast.
-            if (executionContext.GetEffectTriggerCount(info.Entry.Id, out uint count))
-                if (count >= info.Entry.DataBits04)
+            if (data.MaxExecutions > 0u && executionContext.GetEffectTriggerCount(info.Entry.Id, out uint count))
+                if (count >= data.MaxExecutions)
                     return SpellEffectExecutionResult.Ok;
 
             executionContext.AddProxy(new Proxy(target, data, executionContext.Spell, executionContext.Spell.Parameters));
