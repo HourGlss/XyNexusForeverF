@@ -18,7 +18,8 @@ organized by runtime layer rather than by feature.
 | [README.md](README.md) | This developer orientation file. |
 | [todo.md](todo.md) | Branch-local spell audit backlog, ordered so easier spell fixes can be knocked out first. |
 | [CODEQUALITY.md](CODEQUALITY.md) | Notes for the local C# quality tooling and how to interpret its output. |
-| [update-db.sh](update-db.sh) | Root-level helper for applying all EF database migrations on a deployed server. |
+| [update-db.sh](update-db.sh) | Root-level helper for applying all EF database migrations on Linux, WSL, or Git Bash. |
+| [update-db.ps1](update-db.ps1) | Root-level helper for applying the same EF database migrations from Windows PowerShell. |
 | [eng/](eng/) | Engineering support files. Currently includes coverage runsettings. |
 | [scripts/](scripts/) | Developer scripts, including quality report wrappers for Bash and PowerShell. |
 | `artifacts/` | Generated local build/test/quality output. It is ignored by git. |
@@ -189,6 +190,29 @@ to each update, so after a successful build you can run:
 
 ```bash
 ./update-db.sh --no-build
+```
+
+Run the same migration flow from Windows PowerShell:
+
+```powershell
+.\update-db.ps1
+```
+
+The PowerShell helper mirrors the Windows installation guide's command-line EF
+migration flow, keeps the same host-project ordering as `update-db.sh`, and
+targets the same `WorldServer.json`, `ChatServer.json`, and `GroupServer.json`
+files that the current design-time factories load. If those config files have
+not been copied from their `*.example.json` counterparts yet, you can let the
+script create them first:
+
+```powershell
+.\update-db.ps1 -CopyExampleConfigs
+```
+
+To match a release build or reuse a prior build on Windows:
+
+```powershell
+.\update-db.ps1 -Configuration Release -NoBuild
 ```
 
 Generate the quality report only:
