@@ -12,7 +12,7 @@
 - [ ] Warrior Atomic Surge - 2
 - [ ] Warrior Bolstering Strike - 2
 - [ ] Warrior Bum Rush - 2
-- [ ] Warrior Expulsion - 1
+- [x] Warrior Expulsion
 - [ ] Warrior Jolt - 2
 - [ ] Warrior Menacing Strike - 2
 - [ ] Warrior Plasma Wall - 2
@@ -81,7 +81,7 @@
 - [ ] Esper Reverie - 1
 - [ ] Esper Soothe - 2
 - [ ] Esper Warden - 1
-- [ ] Esper Catharsis - 1
+- [x] Esper Catharsis
 - [ ] Esper Crush - 2
 - [ ] Esper Fade Out - 1
 - [ ] Esper Fixation - 2
@@ -112,7 +112,7 @@
 - [ ] Medic Rejuvenator - 1
 - [ ] Medic Shield Surge - 2
 - [ ] Medic Triage - 2
-- [ ] Medic Antidote - 1
+- [x] Medic Antidote
 - [ ] Medic Calm - 1
 - [ ] Medic Empowering Probes - 2
 - [ ] Medic Field Probes - 2
@@ -133,7 +133,7 @@
 - [ ] Stalker Punish - 2
 - [ ] Stalker Ruin - 1
 - [x] Stalker Shred
-- [ ] Stalker Amplification Spike - 1
+- [x] Stalker Amplification Spike
 - [ ] Stalker Decimate - 2
 - [ ] Stalker Frenzy - 1
 - [ ] Stalker Nano Dart - 1
@@ -150,8 +150,8 @@
 - [ ] Stalker Preparation - 2
 - [ ] Stalker Reaver - 2
 - [ ] Stalker Stagger - 2
-- [ ] Stalker Stim Drone - 1
-- [ ] Stalker Tactical Retreat - 1
+- [x] Stalker Stim Drone
+- [x] Stalker Tactical Retreat
 - [ ] Stalker Tether Mine - 1
 - [ ] Stalker Nano Skin: Agile - 1
 - [ ] Stalker Nano Skin: Evasive - 1
@@ -177,12 +177,12 @@
 - [ ] Spellslinger Vitality Burst - 2
 - [ ] Spellslinger Voidspring - 2
 - [ ] Spellslinger Affinity - 2
-- [ ] Spellslinger Arcane Shock - 1
+- [x] Spellslinger Arcane Shock
 - [ ] Spellslinger Flash Freeze - 2
 - [x] Spellslinger Gate
 - [ ] Spellslinger Gather Focus - 2
 - [ ] Spellslinger Phase Shift - 2
-- [ ] Spellslinger Purify - 1
+- [x] Spellslinger Purify
 - [ ] Spellslinger Spatial Shift - 1
 - [ ] Spellslinger Void Pact - 2
 - [ ] Spellslinger Void Slip - 1

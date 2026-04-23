@@ -94,6 +94,11 @@ namespace NexusForever.Game.Abstract.Entity
         bool HasSpell(Func<ISpell, bool> predicate, out ISpell spell);
 
         /// <summary>
+        /// Return active spells matching the provided <see cref="Func"/> predicate.
+        /// </summary>
+        IEnumerable<ISpell> GetSpells(Func<ISpell, bool> predicate);
+
+        /// <summary>
         /// Count active spells matching the provided <see cref="Func"/> predicate.
         /// </summary>
         uint CountSpells(Func<ISpell, bool> predicate);

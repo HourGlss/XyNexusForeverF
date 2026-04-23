@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Creature;
+using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Search;
 using NexusForever.Game.Abstract.Spell;
@@ -26,6 +27,7 @@ using NexusForever.Game.Static.Spell;
 using NexusForever.Game.Static.Spell.Effect;
 using NexusForever.Game.Static.Spell.Target;
 using NexusForever.GameTable.Model;
+using NexusForever.Network.World.Combat;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Shared;
@@ -134,6 +136,25 @@ public class SpellEvidenceTests
             Assert.True(
                 hasApplyHandler || knownMissingHandler,
                 $"{className} {skillName} depends on {spellEffectType}, but no apply handler is registered and it is not documented as a known score-2 gap.");
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(ClassScoreOneSkillEffectTypes))]
+    public void ClassScoreOneSkillEffectTypesHaveExpectedApplyCoverage(string className, string skillName, SpellEffectType[] spellEffectTypes)
+    {
+        var manager = new GlobalSpellEffectManager();
+        manager.Initialise();
+
+        Assert.NotEmpty(spellEffectTypes);
+        foreach (SpellEffectType spellEffectType in spellEffectTypes)
+        {
+            bool hasApplyHandler = manager.GetSpellEffectApplyDelegate(spellEffectType) != null;
+            bool knownMissingHandler = ClassScoreOneKnownMissingApplyHandlers.Contains(spellEffectType);
+
+            Assert.True(
+                hasApplyHandler || knownMissingHandler,
+                $"{className} {skillName} depends on {spellEffectType}, but no apply handler is registered and it is not documented as a known score-1 gap.");
         }
     }
 
@@ -437,6 +458,73 @@ public class SpellEvidenceTests
         Assert.Equal(2f, data.MaxDistance);
     }
 
+    [Fact]
+    public void SpellDispelFinishesMatchingSpellClassUpToLimit()
+    {
+        int firstDebuffFinishCount = 0;
+        int secondDebuffFinishCount = 0;
+        int buffFinishCount = 0;
+
+        ISpell firstDebuff = CreateDispelTargetSpell(101u, SpellClass.DebuffDispellable, () => firstDebuffFinishCount++);
+        ISpell secondDebuff = CreateDispelTargetSpell(102u, SpellClass.DebuffDispellable, () => secondDebuffFinishCount++);
+        ISpell buff = CreateDispelTargetSpell(103u, SpellClass.BuffDispellable, () => buffFinishCount++);
+        ISpell[] activeSpells = [firstDebuff, secondDebuff, buff];
+
+        IUnitEntity target = TestProxy.Create<IUnitEntity>(
+            ("GetSpells", (Func<Func<ISpell, bool>, IEnumerable<ISpell>>)(predicate => activeSpells.Where(predicate))));
+
+        var context = new SpellExecutionContext();
+        context.Initialise(TestProxy.Create<ISpell>());
+
+        var entry = new Spell4EffectsEntry
+        {
+            EffectType  = SpellEffectType.SpellDispel,
+            DataBits00  = 1u,
+            DataBits01  = 1u,
+            DataBits03  = (uint)SpellClass.DebuffDispellable,
+            DataBits04  = 1u,
+            TargetFlags = SpellEffectTargetFlags.Caster
+        };
+
+        var data = new SpellEffectDefaultData();
+        data.Populate(entry);
+
+        var handler = new SpellEffectSpellDispelHandler();
+
+        Assert.Equal(SpellEffectExecutionResult.Ok, handler.Apply(context, target, TestProxy.Create<ISpellTargetEffectInfo>(("get_Entry", entry)), data));
+        Assert.Equal(1, firstDebuffFinishCount);
+        Assert.Equal(0, secondDebuffFinishCount);
+        Assert.Equal(0, buffFinishCount);
+
+        CombatLogDispel combatLog = Assert.IsType<CombatLogDispel>(Assert.Single(context.GetCombatLogs()));
+        Assert.True(combatLog.BRemovesSingleInstance);
+        Assert.Equal(1u, combatLog.InstancesRemoved);
+        Assert.Equal(101u, combatLog.SpellRemovedId);
+    }
+
+    [Fact]
+    public void ScaleEffectAppliesFloatBitScaleAndRestoresDefault()
+    {
+        var appliedScales = new List<float>();
+        IUnitEntity target = TestProxy.Create<IUnitEntity>(
+            ("get_MovementManager", TestProxy.Create<IMovementManager>(("SetScale", (Action<float>)appliedScales.Add))));
+
+        var entry = new Spell4EffectsEntry
+        {
+            EffectType = SpellEffectType.Scale,
+            DataBits00 = BitConverter.SingleToUInt32Bits(1.1f)
+        };
+        var data = new SpellEffectDefaultData();
+        data.Populate(entry);
+
+        var handler = new SpellEffectScaleHandler();
+
+        Assert.Equal(SpellEffectExecutionResult.Ok, handler.Apply(TestProxy.Create<ISpellExecutionContext>(), target, TestProxy.Create<ISpellTargetEffectInfo>(), data));
+        handler.Remove(TestProxy.Create<ISpell>(), target, TestProxy.Create<ISpellTargetEffectInfo>(), data);
+
+        Assert.Equal(new[] { 1.1f, 1f }, appliedScales);
+    }
+
     [Theory]
     [InlineData(typeof(BioShellVolatilitySpellInfoPatch), 35967u, uint.MaxValue)]
     [InlineData(typeof(PulseBlastSpellInfoPatch), 42148u, 2u)]
@@ -498,9 +586,43 @@ public class SpellEvidenceTests
         SpellEffectType.ShieldOverload,
     ];
 
+    private static readonly HashSet<SpellEffectType> ClassScoreOneKnownMissingApplyHandlers =
+    [
+        SpellEffectType.Absorption,
+        SpellEffectType.ChangePhase,
+        SpellEffectType.ChangePlane,
+        SpellEffectType.DelayDeath,
+        SpellEffectType.DisguiseOutfit,
+        SpellEffectType.FacilityModification,
+        SpellEffectType.ForcedAction,
+        SpellEffectType.MimicDisplayName,
+        SpellEffectType.MimicDisguise,
+        SpellEffectType.ModifyAbilityCharges,
+        SpellEffectType.ModifySpell,
+        SpellEffectType.ModifySpellEffect,
+        SpellEffectType.PersonalDmgHealMod,
+        SpellEffectType.RavelSignal,
+        SpellEffectType.SharedHealthPool,
+        SpellEffectType.ShieldOverload,
+        SpellEffectType.SpellEffectImmunity,
+        SpellEffectType.ThreatModification,
+        SpellEffectType.ThreatTransfer,
+        SpellEffectType.UnitPropertyConversion,
+    ];
+
     public static IEnumerable<object[]> ClassScoreTwoSkillEffectTypes()
     {
-        foreach (string row in ClassScoreTwoSkillEffectTypeData.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        return ParseClassSkillEffectRows(ClassScoreTwoSkillEffectTypeData);
+    }
+
+    public static IEnumerable<object[]> ClassScoreOneSkillEffectTypes()
+    {
+        return ParseClassSkillEffectRows(ClassScoreOneSkillEffectTypeData);
+    }
+
+    private static IEnumerable<object[]> ParseClassSkillEffectRows(string data)
+    {
+        foreach (string row in data.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
             string[] columns = row.Split('|', StringSplitOptions.TrimEntries);
             if (columns.Length != 3)
@@ -514,6 +636,70 @@ public class SpellEvidenceTests
             yield return [columns[0], columns[1], spellEffectTypes];
         }
     }
+
+    private const string ClassScoreOneSkillEffectTypeData = """
+Warrior|Ripsaw|ForcedMove,CCStateSet,Damage,UnitPropertyModifier,Proc,Fluff,Proxy,ShieldOverload,SpellForceRemove
+Warrior|Smackdown|Damage,UnitPropertyModifier,Fluff,Proxy,ModifySpellEffect,ModifySpellCooldown,SpellForceRemove,ModifyAbilityCharges
+Warrior|Expulsion|Damage,Proxy,SpellDispel
+Warrior|Sentinel|Damage,UnitPropertyModifier,Proc,Fluff,ForcedAction,Proxy,SpellForceRemove
+Warrior|Unstoppable Force|UnitPropertyModifier,CCStateBreak,SpellEffectImmunity
+Warrior|Stance: Onslaught|VitalModifier,UnitPropertyModifier,Fluff,Proxy,ModifySpellCooldown,SpellForceRemove,ModifyAbilityCharges,HealShields
+Engineer|Unstable Anomaly|Damage,UnitPropertyModifier,Fluff,Proxy,ShieldOverload
+Engineer|Shock Pulse|CCStateSet,Damage,Proc,Proxy,ModifySpellEffect,ModifySpellCooldown
+Engineer|Thresher|Transference,Damage,Fluff,Proxy,ModifySpell
+Engineer|Code Red|CCStateSet,Damage,Proxy,ThreatTransfer
+Engineer|Personal Defense Unit|Heal,UnitPropertyModifier,Fluff,Proxy,Absorption,SummonTrap
+Engineer|Recursive Matrix|Damage,UnitPropertyModifier,Proc,Fluff,Proxy,Absorption
+Engineer|Shatter Impairment|UnitPropertyModifier,CCStateBreak,Absorption,SpellDispel
+Engineer|Urgent Withdrawal|ForcedMove,CCStateSet,Damage,Proxy,CCStateBreak,SpellEffectImmunity
+Engineer|Mode: Eradicate|UnitPropertyModifier,Fluff,Proxy,UnitPropertyConversion
+Engineer|Mode: Provoke|UnitPropertyModifier,Fluff,Proxy
+Esper|Mind Burst|Damage,UnitPropertyModifier,Fluff,Proxy,ModifySpellEffect,SpellForceRemove
+Esper|Psychic Frenzy|Transference,Damage,Proxy,SpellForceRemove
+Esper|Spectral Swarm|Fluff,Proxy,FacilityModification,SummonPet
+Esper|Bolster|VitalModifier,Heal,Proxy,Absorption
+Esper|Mending Banner|Heal,UnitPropertyModifier,Proxy
+Esper|Mental Boon|VitalModifier,Heal,UnitPropertyModifier,Proxy
+Esper|Mirage|Heal,Fluff,Proxy,SummonTrap
+Esper|Phantasmal Armor|VitalModifier,UnitPropertyModifier,Proxy,Absorption,DisguiseOutfit
+Esper|Reverie|Heal,UnitPropertyModifier,Proxy
+Esper|Warden|Heal,UnitPropertyModifier,Fluff,Proxy,Absorption
+Esper|Catharsis|Heal,Proxy,SpellDispel
+Esper|Fade Out|ForcedMove,CCStateSet,Heal,UnitPropertyModifier,ForcedAction,CCStateBreak,FacilityModification,SummonPet
+Esper|Geist|Proxy,FacilityModification,SummonPet
+Esper|Spectral Form|Proxy,Absorption
+Medic|Dematerialize|VitalModifier,Damage,Proc,Proxy,SpellDispel,ShieldOverload
+Medic|Barrier|UnitPropertyModifier,Proc,Fluff,Proxy,ModifySpell,SpellForceRemove,HealShields,SharedHealthPool
+Medic|Dual Shock|Transference,Damage,Heal,Fluff,Proxy,SpellForceRemove
+Medic|Mending Probes|Heal,Fluff,Proxy,ModifySpellCooldown,SpellForceRemove,DelayDeath
+Medic|Rejuvenator|Heal,Fluff,Proxy,SummonTrap
+Medic|Antidote|VitalModifier,Heal,Proxy,SpellDispel
+Medic|Calm|CCStateSet,Heal,UnitPropertyModifier,Proxy,CCStateBreak,ThreatModification,HealShields
+Medic|Energize|VitalModifier,UnitPropertyModifier,Proxy,HealShields
+Stalker|Analyze Weakness|VitalModifier,Damage,Heal,Proc,Proxy,ModifySpellCooldown,SpellForceRemove,HealShields,PersonalDmgHealMod
+Stalker|Clone|ForcedMove,Proxy,FacilityModification,SpellForceRemove,RavelSignal,Stealth,SummonPet,MimicDisplayName,MimicDisguise
+Stalker|Phlebotomize|VitalModifier,Damage,UnitPropertyModifier,Proxy,ShieldOverload,SpellForceRemove
+Stalker|Ruin|VitalModifier,Damage,UnitPropertyModifier,Fluff,Proxy,SpellForceRemove,PersonalDmgHealMod
+Stalker|Amplification Spike|VitalModifier,UnitPropertyModifier,Fluff,Scale,Proxy
+Stalker|Frenzy|Damage,UnitPropertyModifier,Fluff,Proxy,SpellForceRemove
+Stalker|Nano Dart|Transference,ModifySpellCooldown,SpellForceRemove
+Stalker|Nano Field|Transference,Damage,UnitPropertyModifier,Fluff,Proxy,SpellForceRemove
+Stalker|Nano Virus|VitalModifier,Transference,UnitPropertyModifier,Proc,Fluff,Proxy
+Stalker|Bloodthirst|Transference,Damage,UnitPropertyModifier,Proc,Fluff,Proxy,SpellForceRemove
+Stalker|Stim Drone|Heal,UnitPropertyModifier,Proxy,CCStateBreak,SpellDispel
+Stalker|Tactical Retreat|ForcedMove,Proxy,CCStateBreak,SpellDispel,SpellForceRemove,Stealth
+Stalker|Tether Mine|CCStateSet,Fluff,Proxy,SummonTrap
+Stalker|Nano Skin: Agile|VitalModifier,UnitPropertyModifier,Proc,Proxy,SpellForceRemove
+Stalker|Nano Skin: Evasive|VitalModifier,UnitPropertyModifier,Proc,Proxy,SpellForceRemove
+Stalker|Nano Skin: Lethal|VitalModifier,UnitPropertyModifier,Proc,ForcedAction,Proxy,SpellForceRemove
+Spellslinger|Astral Infusion|Heal,UnitPropertyModifier,Fluff,Proxy,Absorption,DelayDeath
+Spellslinger|Healing Torrent|Heal,Fluff,Proxy,Absorption,ModifySpell
+Spellslinger|Runes of Protection|UnitPropertyModifier,Proxy,Absorption,ModifySpellCooldown
+Spellslinger|Arcane Shock|CCStateSet,Damage,Fluff,SpellDispel,ModifySpellCooldown
+Spellslinger|Purify|Heal,CCStateBreak,SpellDispel
+Spellslinger|Spatial Shift|CCStateSet,Fluff,Proxy,SpellEffectImmunity,SpellForceRemove
+Spellslinger|Void Slip|VitalModifier,Heal,Fluff,Proxy,CCStateBreak,ChangePhase,SpellDispel,SpellEffectImmunity,SpellForceRemove,ChangePlane
+""";
 
     private const string ClassScoreTwoSkillEffectTypeData = """
 Warrior|Augmented Blade|VitalModifier,Damage,UnitPropertyModifier,Proc,Fluff,Proxy,ModifySpellCooldown,SpellForceRemove
@@ -649,6 +835,24 @@ Spellslinger|Spell Surge|Fluff,Proxy,SpellForceRemoveChanneled,SpellForceRemove
         return TestProxy.Create<IUnitEntity>(
             ("get_Guid", guid),
             ("get_Position", new Vector3(guid, 0f, 0f)));
+    }
+
+    private static ISpell CreateDispelTargetSpell(uint spell4Id, SpellClass spellClass, Action finish)
+    {
+        ISpellBaseInfo baseInfo = TestProxy.Create<ISpellBaseInfo>(("get_Entry", new Spell4BaseEntry
+        {
+            SpellClass = spellClass
+        }));
+        ISpellInfo spellInfo = TestProxy.Create<ISpellInfo>(("get_BaseInfo", baseInfo));
+
+        return TestProxy.Create<ISpell>(
+            ("get_Spell4Id", spell4Id),
+            ("get_Parameters", new SpellParameters
+            {
+                SpellInfo = spellInfo
+            }),
+            ("get_IsFinished", false),
+            ("Finish", finish));
     }
 
     private sealed class FakeTelegraphSearchCheckFactory : IFactory<ISearchCheckTelegraph>

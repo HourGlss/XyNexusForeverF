@@ -364,6 +364,14 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// Return active spells matching the provided <see cref="Func"/> predicate.
+        /// </summary>
+        public IEnumerable<ISpell> GetSpells(Func<ISpell, bool> predicate)
+        {
+            return spells.Values.Where(i => !i.IsFinished && predicate(i));
+        }
+
+        /// <summary>
         /// Count active spells matching the provided <see cref="Func"/> predicate.
         /// </summary>
         public uint CountSpells(Func<ISpell, bool> predicate)
