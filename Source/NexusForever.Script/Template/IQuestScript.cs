@@ -26,5 +26,19 @@ namespace NexusForever.Script.Template
         void OnObjectiveUpdate(IQuestObjective objective)
         {
         }
+
+        /// <summary>
+        /// Invoked when an item is added to the owning player's inventory while this quest is active.
+        /// </summary>
+        void OnItemAdded(uint itemId)
+        {
+        }
+
+        /// <summary>
+        /// Invoked when the owning player gains a title while this quest is active.
+        /// </summary>
+        void OnTitleAdded(ushort titleId)
+        {
+        }
     }
 }

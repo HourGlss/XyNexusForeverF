@@ -277,6 +277,8 @@ namespace NexusForever.Game.Entity
             if (bag == null)
                 throw new ArgumentException();
 
+            bool addedItem = false;
+
             // update any existing stacks before creating new items
             if (info.IsStackable())
             {
@@ -291,6 +293,7 @@ namespace NexusForever.Game.Entity
                     uint newStackCount = Math.Min(item.StackCount + count, info.Entry.MaxStackCount);
                     count -= newStackCount - item.StackCount;
                     ItemStackCountUpdate(item, newStackCount, reason);
+                    addedItem = true;
                 }
             }
 
@@ -311,11 +314,15 @@ namespace NexusForever.Game.Entity
                         });
                     }
 
+                    if (addedItem)
+                        player?.QuestManager?.NotifyItemAdded(info.Id);
+
                     return;
                 }
 
                 var item = new Item(characterId, info, Math.Min(count, info.IsStackable() ? info.Entry.MaxStackCount : 1), charges);
                 AddItem(item, location, bagIndex.Value);
+                addedItem = true;
 
                 if (!player?.IsLoading ?? false)
                 {
@@ -331,6 +338,9 @@ namespace NexusForever.Game.Entity
 
                 count -= item.StackCount;
             }
+
+            if (addedItem)
+                player?.QuestManager?.NotifyItemAdded(info.Id);
         }
 
         /// <summary>

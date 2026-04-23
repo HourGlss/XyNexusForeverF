@@ -29,6 +29,7 @@
     <ProjectReference Include="..\NexusForever.Network.Internal\NexusForever.Network.Internal.csproj" />
     <ProjectReference Include="..\NexusForever.Network.Sts\NexusForever.Network.Sts.csproj" />
     <ProjectReference Include="..\NexusForever.Network.World\NexusForever.Network.World.csproj" />
+    <ProjectReference Include="..\NexusForever.Script.Main\NexusForever.Script.Main.csproj" />
     <ProjectReference Include="..\NexusForever.StsServer\NexusForever.StsServer.csproj" />
     <ProjectReference Include="..\NexusForever.WorldServer\NexusForever.WorldServer.csproj" />
   </ItemGroup>

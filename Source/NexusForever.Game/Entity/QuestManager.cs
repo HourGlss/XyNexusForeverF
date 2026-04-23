@@ -725,5 +725,17 @@ namespace NexusForever.Game.Entity
             foreach (IQuest quest in activeQuests.Values.ToList())
                 quest.ObjectiveUpdate(id, progress);
         }
+
+        public void NotifyItemAdded(uint itemId)
+        {
+            foreach (IQuest quest in activeQuests.Values.ToList())
+                quest.NotifyItemAdded(itemId);
+        }
+
+        public void NotifyTitleAdded(ushort titleId)
+        {
+            foreach (IQuest quest in activeQuests.Values.ToList())
+                quest.NotifyTitleAdded(titleId);
+        }
     }
 }

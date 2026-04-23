@@ -582,6 +582,7 @@ namespace NexusForever.Game.Entity
             ThreatManager.ClearThreatList();
             MovementManager.Finalise();
 
+            scriptCollection?.Invoke<IUnitScript>(s => s.OnDeath(killer));
             scriptCollection?.Invoke<IUnitScript>(s => s.OnDeath());
 
             deathState = EntityDeathState.Dead;

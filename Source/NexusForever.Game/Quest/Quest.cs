@@ -525,6 +525,16 @@ namespace NexusForever.Game.Quest
                 State = QuestState.Achieved;
         }
 
+        public void NotifyItemAdded(uint itemId)
+        {
+            scriptCollection?.Invoke<IQuestScript>(s => s.OnItemAdded(itemId));
+        }
+
+        public void NotifyTitleAdded(ushort titleId)
+        {
+            scriptCollection?.Invoke<IQuestScript>(s => s.OnTitleAdded(titleId));
+        }
+
         private bool CanUpdateObjective(IQuestObjective objective)
         {
             if (objective.ObjectiveInfo.IsSequential())

@@ -4,6 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
+    <SolutionDir Condition="'$(SolutionDir)' == ''">$(MSBuildThisFileDirectory)..\</SolutionDir>
     <OutputPath>$(SolutionDir)\NexusForever.WorldServer\bin\$(Configuration)</OutputPath>
   </PropertyGroup>
 

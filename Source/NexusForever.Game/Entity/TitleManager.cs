@@ -119,6 +119,8 @@ namespace NexusForever.Game.Entity
                     TitleId = titleId
                 });
             }
+
+            player?.QuestManager?.NotifyTitleAdded(titleId);
         }
 
         /// <summary>

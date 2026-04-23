@@ -134,5 +134,15 @@ namespace NexusForever.Game.Abstract.Entity
         /// Update any active quest <see cref="IQuestObjective"/>'s with supplied ID with progress.
         /// </summary>
         void ObjectiveUpdate(uint id, uint progress);
+
+        /// <summary>
+        /// Notify all active quests that an item was added to the player's inventory.
+        /// </summary>
+        void NotifyItemAdded(uint itemId);
+
+        /// <summary>
+        /// Notify all active quests that the player gained a title.
+        /// </summary>
+        void NotifyTitleAdded(ushort titleId);
     }
 }
