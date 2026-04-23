@@ -233,3 +233,4 @@ small, evidence-backed changes over broad cleanup sweeps.
 - Run the full solution build before committing functional changes.
 - Use [todo.md](todo.md) for spell triage so easy fixes and dangerous rewrites
   stay separated.
+- Update the milestone when all features of that milestone are complete. 

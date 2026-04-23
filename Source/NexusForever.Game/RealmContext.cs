@@ -11,7 +11,13 @@ namespace NexusForever.Game
     {
         public ushort RealmId { get; private set; }
         public string RealmName { get; private set; }
-        public string Motd { get; set; }
+        public string Motd
+        {
+            get => motd;
+            set => motd = BuildInfo.WithMilestone(value);
+        }
+
+        private string motd = BuildInfo.Milestone;
 
         private readonly TimeSpan serverTimeOffset = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow);
 
