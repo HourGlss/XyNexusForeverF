@@ -1,0 +1,59 @@
+name: "Crash Report"
+description: Report a server or client crash
+title: "[CRASH] <Class> - <Spell> - <Short description>"
+labels: ["bug", "crash"]
+body:
+  - type: input
+    id: class_name
+    attributes:
+      label: Class Name
+      placeholder: e.g. Spellslinger
+    validations:
+      required: true
+
+  - type: input
+    id: spell_name
+    attributes:
+      label: Spell Name
+      placeholder: e.g. Charged Shot
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the crash
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      placeholder: |
+        1. Use spell X
+        2. Target Y
+        3. Crash occurs
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / Stacktrace
+      description: Paste crash logs here
+      render: shell
+
+  - type: input
+    id: commit
+    attributes:
+      label: Commit / Version
+      placeholder: git commit hash
+
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: Frequency
+      options:
+        - Always
+        - Sometimes
+        - Rare
