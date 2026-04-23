@@ -3,6 +3,7 @@ using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Target;
+using NexusForever.Game.Spell;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
@@ -106,6 +107,108 @@ namespace NexusForever.Game.Combat
         {
             uint amount = CalculateBaseDamage(executionContext.Spell.Caster, target, info.Entry);
             return CalculateBaseDamageVariance(amount);
+        }
+
+        public bool TryCalculateMultiHitDamage(ISpellExecutionContext executionContext, IUnitEntity victim, ISpellTargetEffectInfo info, IDamageDescription sourceDamage, out IDamageDescription multiHitDamage)
+        {
+            multiHitDamage = null;
+
+            if (sourceDamage == null || sourceDamage.CombatResult == CombatResult.Avoid || sourceDamage.RawDamage == 0u)
+                return false;
+
+            IUnitEntity attacker = executionContext.Spell.Caster;
+            if (!TryRollMultiHit(attacker, out float multiHitAmount))
+                return false;
+
+            uint rawDamage = (uint)MathF.Ceiling(sourceDamage.RawDamage * multiHitAmount);
+            uint adjustedDamage = (uint)MathF.Ceiling(sourceDamage.AdjustedDamage * multiHitAmount);
+            uint overkill = adjustedDamage > victim.Health ? adjustedDamage - victim.Health : 0u;
+            bool killed = adjustedDamage >= victim.Health;
+
+            multiHitDamage = new DamageDescription
+            {
+                RawDamage       = rawDamage,
+                RawScaledDamage = rawDamage,
+                AdjustedDamage  = adjustedDamage,
+                OverkillAmount  = overkill,
+                KilledTarget    = killed,
+                CombatResult    = CombatResult.Hit,
+                DamageType      = sourceDamage.DamageType
+            };
+
+            executionContext.AddCombatLog(new CombatLogMultiHit
+            {
+                MitigatedDamage  = adjustedDamage,
+                RawDamage        = rawDamage,
+                Overkill         = overkill,
+                BKilled          = killed,
+                BPeriodic        = info.Entry.TickTime > 0u,
+                DamageType       = sourceDamage.DamageType,
+                EffectType       = info.Entry.EffectType,
+                CastData         = new CombatLogCastData
+                {
+                    CasterId     = attacker.Guid,
+                    TargetId     = victim.Guid,
+                    SpellId      = executionContext.Spell.Parameters.SpellInfo.Entry.Id,
+                    CombatResult = CombatResult.Hit
+                }
+            });
+
+            return true;
+        }
+
+        public bool TryCalculateMultiHitHeal(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, IDamageDescription sourceHeal, out IDamageDescription multiHitHeal)
+        {
+            multiHitHeal = null;
+
+            if (sourceHeal == null || sourceHeal.RawDamage == 0u)
+                return false;
+
+            IUnitEntity caster = executionContext.Spell.Caster;
+            if (!TryRollMultiHit(caster, out float multiHitAmount))
+                return false;
+
+            uint rawHeal = (uint)MathF.Ceiling(sourceHeal.RawDamage * multiHitAmount);
+            uint missing = target.MaxHealth - target.Health;
+            uint healAmount = Math.Min(rawHeal, missing);
+            uint overheal = rawHeal - healAmount;
+
+            multiHitHeal = new DamageDescription
+            {
+                RawDamage       = rawHeal,
+                RawScaledDamage = rawHeal,
+                AdjustedDamage  = healAmount,
+                CombatResult    = CombatResult.Hit,
+                DamageType      = DamageType.Heal
+            };
+
+            executionContext.AddCombatLog(new CombatLogMultiHeal
+            {
+                HealAmount = healAmount,
+                Overheal   = overheal,
+                EffectType = info.Entry.EffectType,
+                CastData   = new CombatLogCastData
+                {
+                    CasterId     = caster.Guid,
+                    TargetId     = target.Guid,
+                    SpellId      = executionContext.Spell.Parameters.SpellInfo.Entry.Id,
+                    CombatResult = CombatResult.Hit
+                }
+            });
+
+            return true;
+        }
+
+        private bool TryRollMultiHit(IUnitEntity attacker, out float multiHitAmount)
+        {
+            multiHitAmount = 0f;
+
+            float multiHitChance = GetRatingPercentMod(Property.RatingMultiHitChance, attacker);
+            if (multiHitChance <= 0f || !IsSuccessfulChance(multiHitChance))
+                return false;
+
+            multiHitAmount = GetRatingPercentMod(Property.RatingMultiHitAmount, attacker);
+            return multiHitAmount > 0f;
         }
 
         /// <summary>

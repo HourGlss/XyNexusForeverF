@@ -38,7 +38,8 @@ namespace NexusForever.Game.Spell.Effect.Handler
             if (!executionContext.Spell.Caster.IsAlive || !target.IsAlive)
                 return SpellEffectExecutionResult.PreventEffect;
 
-            uint amount     = damageCalculatorFactory.Resolve().CalculateBaseEffectAmount(executionContext, target, info);
+            IDamageCalculator damageCalculator = damageCalculatorFactory.Resolve();
+            uint amount     = damageCalculator.CalculateBaseEffectAmount(executionContext, target, info);
             uint missing    = target.MaxHealth - target.Health;
             uint healAmount = Math.Min(amount, missing);
             uint overheal   = amount - healAmount;
@@ -55,6 +56,12 @@ namespace NexusForever.Game.Spell.Effect.Handler
                 CastData   = BuildCastData(executionContext.Spell, target)
             });
 
+            if (damageCalculator.TryCalculateMultiHitHeal(executionContext, target, info, info.Damage, out IDamageDescription multiHitHeal))
+            {
+                if (multiHitHeal.AdjustedDamage > 0u)
+                    target.ModifyHealth(multiHitHeal.AdjustedDamage, DamageType.Heal, executionContext.Spell.Caster);
+            }
+
             if (executionContext.Spell.Caster is IPlayer player)
             {
                 player.Map.PublicEventManager.UpdateStat(player, PublicEventStat.Healed, healAmount);
@@ -63,6 +70,19 @@ namespace NexusForever.Game.Spell.Effect.Handler
 
             if (target is IPlayer targetPlayer && overheal > 0u)
                 targetPlayer.Map.PublicEventManager.UpdateStat(targetPlayer, PublicEventStat.OverhealingReceived, overheal);
+
+            if (multiHitHeal != null)
+            {
+                uint multiHitOverheal = multiHitHeal.RawDamage - multiHitHeal.AdjustedDamage;
+                if (executionContext.Spell.Caster is IPlayer multiHitPlayer)
+                {
+                    multiHitPlayer.Map.PublicEventManager.UpdateStat(multiHitPlayer, PublicEventStat.Healed, multiHitHeal.AdjustedDamage);
+                    multiHitPlayer.Map.PublicEventManager.UpdateStat(multiHitPlayer, PublicEventStat.Overhealed, multiHitOverheal);
+                }
+
+                if (target is IPlayer multiHitTargetPlayer && multiHitOverheal > 0u)
+                    multiHitTargetPlayer.Map.PublicEventManager.UpdateStat(multiHitTargetPlayer, PublicEventStat.OverhealingReceived, multiHitOverheal);
+            }
 
             return SpellEffectExecutionResult.Ok;
         }

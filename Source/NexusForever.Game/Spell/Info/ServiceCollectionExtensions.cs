@@ -16,7 +16,10 @@ namespace NexusForever.Game.Spell.Info
             sc.AddSingleton<ISpellInfoManager, SpellInfoManager>();
             sc.AddSingleton<ISpellInfoPatchManager, SpellInfoPatchManager>();
 
+            sc.AddTransient<BioShellVolatilitySpellInfoPatch>();
             sc.AddTransient<PulseBlastSpellInfoPatch>();
+            sc.AddTransient<RicochetVolatilitySpellInfoPatch>();
+            sc.AddTransient<VolatileInjectionVolatilitySpellInfoPatch>();
         }
     }
 }

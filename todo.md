@@ -1,6 +1,6 @@
 # NexusTogether Milestone TODO
 
-Current milestone: `XYF-1.1`
+Current milestone: `XYF-1.2`
 
 Goal: build the server to the behavior expected by the analyzed WildStar client.
 The `xywikif` SQLite database and Ghidra evidence are authoritative when they
@@ -29,7 +29,7 @@ less speculative.
 
 ## Milestone Tag Rule
 
-- `XYF-1.1` is the active milestone tag.
+- `XYF-1.2` is the active milestone tag.
 - The active tag must appear in the hard-coded server MOTD path and console
   logging output.
 - Warnings, errors, and fatal logs must include the active tag without relying on
@@ -66,6 +66,8 @@ Collect these as soon as possible because they unlock multiple milestones:
 ## XYF-1.x Spell Milestones
 
 ### XYF-1.1 Spell Evidence Baseline
+
+Status: completed 2026-04-23. The active milestone has advanced to `XYF-1.2`.
 
 Purpose: turn the spell theory pile into a ranked implementation map.
 
@@ -105,6 +107,73 @@ Exit criteria:
 - A ranked spell gap list exists in the DB or this file.
 - Each top gap has evidence refs and a server target.
 - Tests cover all behavior changed during the milestone.
+
+Completion evidence:
+
+- DB facts: `Fact/Spell/EffectHandlerGapRanking`,
+  `Fact/Spell/CastResultEnumParity`,
+  `Fact/Spell/ClientSpellEventNextQuestions`, and
+  `Fact/Milestone/XYF-1.1`.
+- Tests: `SpellEvidenceTests` verifies the current client `Spell4CastResult`
+  envelope, key cast-result ids used by spell-failure paths, spell effect
+  delegate construction, and no-throw/no-handler behavior for high-frequency
+  missing handlers.
+- Ghidra anchors traced: `AddSpellShortcut`, `ClearSpellThreshold`,
+  `SpellCastFailed`, `DashCastSuccess`, `CombatLogDamage`,
+  `CombatLogHeal`, and `CombatLogHealingAbsorption`.
+
+Top missing spell effect handler gaps by current `Spell4Effects` rows:
+
+| Rank | Effect | Rows | Server target | Next milestone |
+| --- | --- | ---: | --- | --- |
+| 1 | `RavelSignal` | 5262 | `NexusForever.Game/Spell/Effect/Handler` | `XYF-1.3`/capture |
+| 2 | `NpcExecutionDelay` | 3288 | spell timing/script bridge | `XYF-1.5` |
+| 3 | `SummonCreature` | 1951 | summon/entity ownership | `XYF-1.6` |
+| 4 | `ItemVisualSwap` | 1542 | visuals/equipment packets | `XYF-1.3` |
+| 5 | `GiveSchematic` | 1171 | reward/account/character unlocks | `XYF-1.3` |
+| 6 | `DespawnUnit` | 855 | spell-created entity cleanup | `XYF-1.6` |
+| 7 | `FacilityModification` | 771 | housing/warplot facility state | later queue |
+| 8 | `UnitStateSet` | 752 | unit state/aura lifecycle | `XYF-1.5` |
+| 9 | `Absorption` | 581 | shields/combat logs | `XYF-1.4` |
+| 10 | `SetBusy` | 571 | unit state/UI state | `XYF-1.5` |
+
+Top implemented-but-partial spell areas by current `Spell4Effects` rows:
+
+| Area | Rows | Why it remains capture-required |
+| --- | ---: | --- |
+| `Damage` | 29445 | formula branches and `CombatLogDamage` fields need combat-log traces. |
+| `UnitPropertyModifier` | 20105 | 11385 duration rows and 472 persistence rows need lifetime validation. |
+| `Proxy` | 16929 | child spell timing, tick selection, and cancellation are not fully proven. |
+| `Fluff` | 10790 | current handler is a no-op; client-visible side effects need proof. |
+| `CCStateSet` | 7185 | CC packet/result parity belongs with combat and proc validation. |
+| `Proc` | 3498 | trigger source, reset, and expiration semantics need runtime traces. |
+| `Heal` | 3098 | formula branches and `CombatLogHeal` fields need combat-log traces. |
+
+Cast-result baseline:
+
+- Wiki `Spell4CastResult` has 327 rows, id range 0 through 331.
+- Server `CastResult` has the same 327 wire ids and writes them as 9-bit
+  packet values in `ServerSpellCastResult`.
+- The five absent ids in both sources are `61`, `62`, `110`, `111`, and `324`.
+- Name spelling differs in places, but no current client id is unmapped.
+
+Next concrete packet/model questions:
+
+- `AddSpellShortcut` and `RemoveSpellShortcut` include shortcut type, object id,
+  and contract/path update side effects; keep action-set packet work tied to
+  this path.
+- `ClearSpellThreshold` is suppressed for spells whose client spell flags include
+  the observed `0x40` mask; validate `ServerSpellThresholdClear.Unknown0` and
+  threshold flag naming before changing behavior.
+- `SpellCastFailed` looks up `Spell4CastResult`, formats
+  `SpellCastFailed("iiUUSS", ...)`, treats `Queued` (`317`) specially, and still
+  needs packet captures for the two unknown integer/string fields.
+- `DashCastSuccess` also emits `DashCastFail`; dash validation belongs in
+  `XYF-1.2` alongside cast result packets.
+- `CombatLogDamage`, `CombatLogHeal`, and `CombatLogHealingAbsorption` expose
+  client field names such as `nDamageAmount`, `nHealAmount`, `nAmount`,
+  `bTargetVulnerable`, `bTargetKilled`, and `bPeriodic`; full field parity moves
+  to `XYF-1.4`.
 
 ### XYF-1.2 Cast Validation And Result Packets
 

@@ -18,5 +18,15 @@ namespace NexusForever.Game.Abstract.Combat
         /// Calculate the base amount for a spell effect that uses damage-style effect formula fields.
         /// </summary>
         uint CalculateBaseEffectAmount(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info);
+
+        /// <summary>
+        /// Try to calculate a secondary Multi-Hit from a successful direct damage effect.
+        /// </summary>
+        bool TryCalculateMultiHitDamage(ISpellExecutionContext executionContext, IUnitEntity victim, ISpellTargetEffectInfo info, IDamageDescription sourceDamage, out IDamageDescription multiHitDamage);
+
+        /// <summary>
+        /// Try to calculate a secondary Multi-Hit from a successful direct heal effect.
+        /// </summary>
+        bool TryCalculateMultiHitHeal(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info, IDamageDescription sourceHeal, out IDamageDescription multiHitHeal);
     }
 }

@@ -53,9 +53,15 @@ namespace NexusForever.Game.Spell.Effect.Handler
             }
 
             target.TakeDamage(executionContext.Spell.Caster, info.Damage);
+            uint totalDamage = info.Damage.AdjustedDamage;
+            if (target.IsAlive && damageCalculator.TryCalculateMultiHitDamage(executionContext, target, info, info.Damage, out IDamageDescription multiHitDamage))
+            {
+                target.TakeDamage(executionContext.Spell.Caster, multiHitDamage);
+                totalDamage += multiHitDamage.AdjustedDamage;
+            }
 
             if (executionContext.Spell.Caster is IPlayer player)
-                player.Map.PublicEventManager.UpdateStat(player, PublicEventStat.Damage, info.Damage.AdjustedDamage);
+                player.Map.PublicEventManager.UpdateStat(player, PublicEventStat.Damage, totalDamage);
 
             return SpellEffectExecutionResult.Ok;
         }

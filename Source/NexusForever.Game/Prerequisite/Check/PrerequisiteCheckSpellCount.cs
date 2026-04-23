@@ -33,7 +33,7 @@ namespace NexusForever.Game.Prerequisite.Check
                 return activeSpellCount;
 
             uint combatPetCount = (uint)player.SummonFactory.GetSummons<IPetEntity>().Count(p => p.IsCombatPet);
-            uint currentCount = Math.Max(activeSpellCount, combatPetCount);
+            uint currentCount = combatPetCount;
 
             return CurrentSpellSummonsPet(parameters) ? currentCount + 1u : currentCount;
         }
