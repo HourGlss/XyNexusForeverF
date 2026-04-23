@@ -1,0 +1,40 @@
+name: "Missing Feature"
+description: Feature or spell not implemented
+title: "[MISSING] <Class> - <Spell> - <Short description>"
+labels: ["enhancement", "missing"]
+body:
+  - type: input
+    id: class_name
+    attributes:
+      label: Class Name
+    validations:
+      required: true
+
+  - type: input
+    id: spell_name
+    attributes:
+      label: Spell Name
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What is missing?
+
+  - type: textarea
+    id: reference
+    attributes:
+      label: Reference Material
+      description: Videos, wiki, retail behavior, etc.
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - Low
+        - Medium
+        - High
+        - Critical
