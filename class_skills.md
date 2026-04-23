@@ -1,7 +1,7 @@
 - [ ] Warrior Augmented Blade - 2
 - [ ] Warrior Breaching Strikes - 2
 - [ ] Warrior Leap - 2
-- [ ] Warrior Power Strike - 0
+- [ ] Warrior Power Strike - 2
 - [ ] Warrior Relentless Strikes - 2
 - [ ] Warrior Ripsaw - 1
 - [ ] Warrior Savage Strike - 2
@@ -145,7 +145,7 @@
 - [ ] Stalker Whiplash - 2
 - [ ] Stalker Bloodthirst - 1
 - [ ] Stalker Collapse - 2
-- [ ] Stalker False Retreat - 0
+- [ ] Stalker False Retreat - 2
 - [x] Stalker Pounce
 - [ ] Stalker Preparation - 2
 - [ ] Stalker Reaver - 2

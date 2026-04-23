@@ -101,8 +101,8 @@ namespace NexusForever.Game.Spell.Type
 
         protected virtual void Execute()
         {
-
-            if ((currentPhase == 0 || currentPhase == 255) && !HasThresholdToCast && CastMethod != CastMethod.ChargeRelease)
+            if ((currentPhase == 0 || currentPhase == 255)
+                && (CastMethod == CastMethod.RapidTap || (!HasThresholdToCast && CastMethod != CastMethod.ChargeRelease)))
             {
                 CostSpell();
                 SetCooldown();

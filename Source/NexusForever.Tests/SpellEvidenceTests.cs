@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Numerics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Entity.Movement;
@@ -15,6 +16,7 @@ using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Game.Abstract.Spell.Info.Patch;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Abstract.Spell.Target.Implicit;
+using NexusForever.Game.Abstract.Spell.Validator;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Spell.Effect;
 using NexusForever.Game.Spell.Effect.Data;
@@ -30,6 +32,8 @@ using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Combat;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Static;
+using NexusForever.Script;
+using NexusForever.Script.Template.Collection;
 using NexusForever.Shared;
 
 namespace NexusForever.Tests;
@@ -525,6 +529,71 @@ public class SpellEvidenceTests
         Assert.Equal(new[] { 1.1f, 1f }, appliedScales);
     }
 
+    [Fact]
+    public void RapidTapThresholdSpellsApplyBaseCooldownOnInitialExecute()
+    {
+        ISpellInfo spellInfo = CreateRapidTapThresholdSpellInfo(66986u, 6000u);
+
+        ISpellInfo cooldownSpellInfo = null;
+        double cooldownSeconds = 0d;
+        bool emitCooldown = false;
+
+        ISpellManager spellManager = TestProxy.Create<ISpellManager>(
+            ("SetSpellCooldown", (Action<ISpellInfo, double, bool>)((info, cooldown, emit) =>
+            {
+                cooldownSpellInfo = info;
+                cooldownSeconds = cooldown;
+                emitCooldown = emit;
+            })));
+
+        IPlayer caster = TestProxy.Create<IPlayer>(("get_SpellManager", spellManager));
+
+        IServiceProvider previousProvider = LegacyServiceProvider.Provider;
+        IScriptCollection scriptCollection = TestProxy.Create<IScriptCollection>();
+        LegacyServiceProvider.Provider = new ServiceCollection()
+            .AddSingleton<IScriptManager>(TestProxy.Create<IScriptManager>(
+                ("InitialiseOwnedCollection", (Func<object, IScriptCollection>)(_ => scriptCollection)),
+                ("InitialiseOwnedScripts", (Action<IScriptCollection, uint>)((_, _) => { }))))
+            .BuildServiceProvider();
+
+        try
+        {
+            var spell = new TestRapidTapThresholdSpell(
+                TestProxy.Create<ISpellTargetInfoCollection>(("Initialise", (Action<ISpell>)(_ => { }))),
+                TestProxy.Create<IGlobalSpellManager>(("get_NextCastingId", 1u)),
+                TestProxy.Create<ICastResultValidatorManager>(("GetCastResult", (Func<ISpell, CastResult>)(_ => CastResult.Ok))),
+                TestProxy.Create<IDisableManager>(),
+                TestProxy.Create<ISpellFactory>());
+
+            spell.Initialise(caster, new SpellParameters
+            {
+                SpellInfo = spellInfo,
+                RootSpellInfo = spellInfo
+            });
+
+            spell.ExecuteForTest();
+        }
+        finally
+        {
+            LegacyServiceProvider.Provider = previousProvider;
+        }
+
+        Assert.Same(spellInfo, cooldownSpellInfo);
+        Assert.Equal(6d, cooldownSeconds);
+        Assert.True(emitCooldown);
+    }
+
+    [Fact]
+    public void FacilityModificationNowHasDefaultApplyCoverage()
+    {
+        var manager = new GlobalSpellEffectManager();
+        manager.Initialise();
+
+        Assert.Equal(typeof(ISpellEffectApplyHandler<ISpellEffectDefaultData>), manager.GetSpellEffectApplyHandlerType(SpellEffectType.FacilityModification));
+        Assert.Equal(typeof(ISpellEffectDefaultData), manager.GetSpellEffectDataType(SpellEffectType.FacilityModification));
+        Assert.NotNull(manager.GetSpellEffectApplyDelegate(SpellEffectType.FacilityModification));
+    }
+
     [Theory]
     [InlineData(typeof(BioShellVolatilitySpellInfoPatch), 35967u, uint.MaxValue)]
     [InlineData(typeof(PulseBlastSpellInfoPatch), 42148u, 2u)]
@@ -574,7 +643,6 @@ public class SpellEvidenceTests
         SpellEffectType.Absorption,
         SpellEffectType.DelayDeath,
         SpellEffectType.DespawnUnit,
-        SpellEffectType.FacilityModification,
         SpellEffectType.ForceFacing,
         SpellEffectType.ForcedAction,
         SpellEffectType.ModifyAbilityCharges,
@@ -593,7 +661,6 @@ public class SpellEvidenceTests
         SpellEffectType.ChangePlane,
         SpellEffectType.DelayDeath,
         SpellEffectType.DisguiseOutfit,
-        SpellEffectType.FacilityModification,
         SpellEffectType.ForcedAction,
         SpellEffectType.MimicDisplayName,
         SpellEffectType.MimicDisguise,
@@ -830,6 +897,33 @@ Spellslinger|Spell Surge|Fluff,Proxy,SpellForceRemoveChanneled,SpellForceRemove
         return (ISpellInfoPatch)Activator.CreateInstance(patchType, patchManager);
     }
 
+    private static ISpellInfo CreateRapidTapThresholdSpellInfo(uint spell4Id, uint spellCooldownMs)
+    {
+        return TestProxy.Create<ISpellInfo>(
+            ("get_Entry", new Spell4Entry
+            {
+                Id = spell4Id,
+                SpellCoolDown = spellCooldownMs,
+                ThresholdTime = 0u,
+                CasterInnateRequirements = [0u, 0u],
+                CasterInnateRequirementValues = [0u, 0u],
+                CasterInnateRequirementEval = [0u, 0u],
+                InnateCostTypes = [0u, 0u],
+                InnateCosts = [0u, 0u],
+                InnateCostEMMIds = [0u, 0u],
+                PrerequisiteIdRunners = [0u, 0u],
+                SpellCoolDownIds = [0u, 0u, 0u]
+            }),
+            ("get_Effects", new List<Spell4EffectsEntry>()),
+            ("get_Thresholds", new List<Spell4ThresholdsEntry>
+            {
+                new()
+                {
+                    OrderIndex = 0
+                }
+            }));
+    }
+
     private static IUnitEntity CreateUnit(uint guid)
     {
         return TestProxy.Create<IUnitEntity>(
@@ -910,6 +1004,32 @@ Spellslinger|Spell Surge|Fluff,Proxy,SpellForceRemoveChanneled,SpellForceRemove
         public bool CheckEntity(IUnitEntity entity)
         {
             return true;
+        }
+    }
+
+    private sealed class TestRapidTapThresholdSpell : SpellThreshold
+    {
+        public override CastMethod CastMethod => CastMethod.RapidTap;
+
+        public TestRapidTapThresholdSpell(
+            ISpellTargetInfoCollection spellTargetInfoCollection,
+            IGlobalSpellManager globalSpellManager,
+            ICastResultValidatorManager castResultValidatorManager,
+            IDisableManager disableManager,
+            ISpellFactory spellFactory)
+            : base(
+                NullLogger<TestRapidTapThresholdSpell>.Instance,
+                spellTargetInfoCollection,
+                globalSpellManager,
+                castResultValidatorManager,
+                disableManager,
+                spellFactory)
+        {
+        }
+
+        public void ExecuteForTest()
+        {
+            Execute();
         }
     }
 }
