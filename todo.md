@@ -1,511 +1,246 @@
-# NexusTogether Milestone TODO
+# NexusTogether Gameplay TODO
 
 Current milestone: `XYF-1.2`
 
-Goal: build the server to the behavior expected by the analyzed WildStar client.
-The `xywikif` SQLite database and Ghidra evidence are authoritative when they
-conflict with the current C# server. The C# server remains the implementation
-target.
+## Goal
 
-This file keeps the old theory map, but converts it into bite-size milestones.
-Spells are first because they touch combat, rewards, action sets, cooldowns,
-movement, entities, and PvP. PvP follows after spell packet/result behavior is
-less speculative.
+Make WildStar class kits usable in game.
 
-## Evidence Rules
+Progress is measured by player capability, not internal plumbing. A skill or AMP
+is healthier only when a player can actually:
 
-- Record useful discoveries in `/home/xyf/NCSOFT/tooling/xywikif/wiki/wiki.sqlite`.
-- Link facts to their evidence: asset row, table schema, localized text, UI
-  document, Ghidra string/function, packet capture, server code, or runtime
-  snapshot.
-- Confidence levels are `low`, `medium`, `high`, and `confirmed`.
-- Implement behavior when confidence is high enough for the blast radius.
-- Use packet captures or runtime before/after snapshots for client-visible
-  result values, state transitions, rewards, combat math, and persistence.
-- Keep code aligned with `README.md`: gameplay rules in `NexusForever.Game`,
-  packet models in `NexusForever.Network.World`, handlers in
-  `NexusForever.WorldServer`, and shared constants in `NexusForever.Game.Static`
-  or relevant network static folders.
+- slot or select it,
+- commit/save it,
+- use it without obvious server failure,
+- see the primary gameplay result happen,
+- reopen the builder or relog without losing expected state.
 
-## Milestone Tag Rule
+## Working Rules
 
-- `XYF-1.2` is the active milestone tag.
-- The active tag must appear in the hard-coded server MOTD path and console
-  logging output.
-- Warnings, errors, and fatal logs must include the active tag without relying on
-  operator configuration.
-- When the active milestone advances, update the C# milestone constant, the
-  NLog console layouts, and this file together.
-
-## Source Data Backlog
-
-Collect these as soon as possible because they unlock multiple milestones:
-
-- Packet captures for login, map transfer, chat, combat, spell casts, duel
-  invite/accept/decline/forfeit, battleground queue/match, housing visits, path
-  missions, vendors, store purchases, resurrection, movement splines, and common
-  client error cases.
-- Full game-table extracts for the touched systems, especially `Spell4*`,
-  prerequisites, target mechanics, `Spell4CastResult`, `Spell4Thresholds`,
-  `GameFormula`, `Creature2`, `Item2`, `ItemDisplay`, `WorldSocket`, path
-  mission tables, housing plug/decor tables, reward tracks, storefront tables,
-  achievement/objective tables, `Spline2`, and `Spline2Node`.
-- Known-good database rows from working branches/servers for world entities,
-  public event entities, path mission persistence, account rewards, store
-  purchases, housing, guild/community residences, PvP state, and character
-  spell/action-set state.
-- Before/after snapshots for player inventory, currencies, reputation, titles,
-  achievements, quest objectives, path missions, path XP, account unlocks,
-  spell cooldowns, duel state, PvP ratings, and battleground rewards.
-- Combat logs and packet traces for damage, healing, shields, CC, interrupts,
-  procs, channel ticks, proxy spells, forced movement, death, resurrection,
-  threat, pets, summons, vehicles, stealth, and PvP kills.
-- Branch references with exact commit/branch names and test notes from Krakal,
-  kirmmin, derdotte, Googletone, and other known working forks.
-
-## XYF-1.x Spell Milestones
-
-### XYF-1.1 Spell Evidence Baseline
-
-Status: completed 2026-04-23. The active milestone has advanced to `XYF-1.2`.
-
-Purpose: turn the spell theory pile into a ranked implementation map.
-
-Inputs already available:
-
-- Wiki tables: `Spell4` 66383 rows, `Spell4Effects` 131010 rows,
-  `Spell4CastResult` 327 rows, `Spell4Thresholds` 622 rows,
-  `Spell4TargetMechanics` 61 rows, `Spell4Prerequisites` 11 rows, and
-  `GameFormula` 1217 rows.
-- Existing facts: `Fact/Spell/ActionSetPacketValidation`,
-  `Fact/Spell/GlobalCooldownEnumRange`, and
-  `Fact/Spell/ClientSpellAnchorBaseline`.
-- Ghidra anchors: `SpellCastFailed`, `AddSpellShortcut`,
-  `ClearSpellThreshold`, `CombatLogDamage`, `CombatLogDamageShields`, and the
-  broader handoff anchors for combat logs and resurrection.
-- Server targets: `Source/NexusForever.Game/Spell/`,
-  `Source/NexusForever.WorldServer/Network/Message/Handler/Spell/`, and
-  `Source/NexusForever.Network.World/Combat/`.
-
-Deliverables:
-
-- List missing or partial `SpellEffectType` handlers by table frequency, player
-  impact, and testability.
-- Map cast-result rows to existing `CastResult` values and flag unknown or
-  mismatched values.
-- Trace `SpellCastFailed`, `AddSpellShortcut`, and `ClearSpellThreshold` xrefs
-  far enough to identify the next concrete packet/model questions.
-- Add DB facts for any verified cast-result, threshold, action-set, or GCD
-  behavior.
-- Add or extend smoke tests for spell handler registration, action-set packet
-  validation, and safe no-crash dispatch paths.
-- Keep unknown target mechanics, effect data bits, proxy behavior, and combat
-  formulas as capture-required unless client flow and assets agree.
-
-Exit criteria:
-
-- A ranked spell gap list exists in the DB or this file.
-- Each top gap has evidence refs and a server target.
-- Tests cover all behavior changed during the milestone.
-
-Completion evidence:
-
-- DB facts: `Fact/Spell/EffectHandlerGapRanking`,
-  `Fact/Spell/CastResultEnumParity`,
-  `Fact/Spell/ClientSpellEventNextQuestions`, and
-  `Fact/Milestone/XYF-1.1`.
-- Tests: `SpellEvidenceTests` verifies the current client `Spell4CastResult`
-  envelope, key cast-result ids used by spell-failure paths, spell effect
-  delegate construction, and no-throw/no-handler behavior for high-frequency
-  missing handlers.
-- Ghidra anchors traced: `AddSpellShortcut`, `ClearSpellThreshold`,
-  `SpellCastFailed`, `DashCastSuccess`, `CombatLogDamage`,
-  `CombatLogHeal`, and `CombatLogHealingAbsorption`.
-
-Top missing spell effect handler gaps by current `Spell4Effects` rows:
-
-| Rank | Effect | Rows | Server target | Next milestone |
-| --- | --- | ---: | --- | --- |
-| 1 | `RavelSignal` | 5262 | `NexusForever.Game/Spell/Effect/Handler` | `XYF-1.3`/capture |
-| 2 | `NpcExecutionDelay` | 3288 | spell timing/script bridge | `XYF-1.5` |
-| 3 | `SummonCreature` | 1951 | summon/entity ownership | `XYF-1.6` |
-| 4 | `ItemVisualSwap` | 1542 | visuals/equipment packets | `XYF-1.3` |
-| 5 | `GiveSchematic` | 1171 | reward/account/character unlocks | `XYF-1.3` |
-| 6 | `DespawnUnit` | 855 | spell-created entity cleanup | `XYF-1.6` |
-| 7 | `FacilityModification` | 771 | housing/warplot facility state | later queue |
-| 8 | `UnitStateSet` | 752 | unit state/aura lifecycle | `XYF-1.5` |
-| 9 | `Absorption` | 581 | shields/combat logs | `XYF-1.4` |
-| 10 | `SetBusy` | 571 | unit state/UI state | `XYF-1.5` |
-
-Top implemented-but-partial spell areas by current `Spell4Effects` rows:
-
-| Area | Rows | Why it remains capture-required |
-| --- | ---: | --- |
-| `Damage` | 29445 | formula branches and `CombatLogDamage` fields need combat-log traces. |
-| `UnitPropertyModifier` | 20105 | 11385 duration rows and 472 persistence rows need lifetime validation. |
-| `Proxy` | 16929 | child spell timing, tick selection, and cancellation are not fully proven. |
-| `Fluff` | 10790 | current handler is a no-op; client-visible side effects need proof. |
-| `CCStateSet` | 7185 | CC packet/result parity belongs with combat and proc validation. |
-| `Proc` | 3498 | trigger source, reset, and expiration semantics need runtime traces. |
-| `Heal` | 3098 | formula branches and `CombatLogHeal` fields need combat-log traces. |
-
-Cast-result baseline:
-
-- Wiki `Spell4CastResult` has 327 rows, id range 0 through 331.
-- Server `CastResult` has the same 327 wire ids and writes them as 9-bit
-  packet values in `ServerSpellCastResult`.
-- The five absent ids in both sources are `61`, `62`, `110`, `111`, and `324`.
-- Name spelling differs in places, but no current client id is unmapped.
-
-Next concrete packet/model questions:
-
-- `AddSpellShortcut` and `RemoveSpellShortcut` include shortcut type, object id,
-  and contract/path update side effects; keep action-set packet work tied to
-  this path.
-- `ClearSpellThreshold` is suppressed for spells whose client spell flags include
-  the observed `0x40` mask; validate `ServerSpellThresholdClear.Unknown0` and
-  threshold flag naming before changing behavior.
-- `SpellCastFailed` looks up `Spell4CastResult`, formats
-  `SpellCastFailed("iiUUSS", ...)`, treats `Queued` (`317`) specially, and still
-  needs packet captures for the two unknown integer/string fields.
-- `DashCastSuccess` also emits `DashCastFail`; dash validation belongs in
-  `XYF-1.2` alongside cast result packets.
-- `CombatLogDamage`, `CombatLogHeal`, and `CombatLogHealingAbsorption` expose
-  client field names such as `nDamageAmount`, `nHealAmount`, `nAmount`,
-  `bTargetVulnerable`, `bTargetKilled`, and `bPeriodic`; full field parity moves
-  to `XYF-1.4`.
-
-### XYF-1.2 Cast Validation And Result Packets
-
-Purpose: make cast start/failure behavior client-shaped before expanding
-effects.
-
-Deliverables:
-
-- Compare `Spell4TargetMechanics`, `Spell4Prerequisites`, explicit/implicit
-  target types, telegraph type, cast method, and `Spell4CastResult` rows against
-  current validators.
-- Verify result values for invalid target, target out of range, failed
-  prerequisite, movement/rotation during telegraph, dead caster, non-player
-  caster, vehicle caster, and unknown spell id.
-- Implement only confirmed or high-confidence result paths.
-- Add handler/model tests for malformed spell packets and failed cast responses.
-
-Capture required:
-
-- Cast success, cast failure, target failure, target moving out of range,
-  caster movement during telegraph, and non-player caster examples.
-
-### XYF-1.3 Reward, Cooldown, And Ownership Effects
-
-Purpose: finish lower-risk player-state effects with before/after snapshots.
-
-Deliverables:
-
-- Implement or correct reward effects for inventory, currency, reputation,
-  title, achievement, objective, path mission, path XP, and account unlocks.
-- Validate full-bag handling, currency caps, reputation limits, duplicate
-  ownership, duplicate unlocks, and partial reward failure.
-- Verify cooldown groups, global cooldown groups, ability charges, reset
-  behavior, and active recharge timers.
-- Add tests with fake managers and representative table rows for every changed
-  effect.
-
-Capture required:
-
-- Before/after snapshots for rewards, cooldowns, action sets, inventory,
-  achievements, objectives, currencies, reputation, account unlocks, and titles.
-
-### XYF-1.4 Combat Formulas, Combat Logs, Shields, And CC
-
-Purpose: bring combat output closer to client assets and combat-log packets.
-
-Deliverables:
-
-- Map `GameFormula` rows to current damage, heal, shield, crit, deflect,
-  strikethrough, armor pierce, lifesteal, reflect, vulnerability, and mitigation
-  code.
-- Trace `CombatLogDamage`, `CombatLogHeal`, `CombatLogInterrupted`,
-  `CombatLogLifeSteal`, `CombatLogResurrect`, and `CombatLogVitalModifier`
-  anchors for packet expectations.
-- Fix combat-log packet fields only when Ghidra, assets, and server models line
-  up.
-- Add replay-style tests for representative damage, heal, shield, interrupt, CC,
-  and death/resurrection flows.
-
-Capture required:
-
-- Combat logs and packet traces for every formula branch changed.
-
-### XYF-1.5 Procs, Auras, Proxy Spells, And Persistence
-
-Purpose: make ongoing spell behavior stable instead of cast-start-only.
-
-Deliverables:
-
-- Validate proc triggers for damage dealt, damage taken, heal, shield,
-  interrupt, CC, movement, kill, death, periodic tick, and aura expiration.
-- Map aura lifetime, stack, refresh, dispel, stealth, and expiration behavior to
-  packet/model changes.
-- Validate proxy spell placement, child spell timing, tick schedule, target
-  selection, cancellation, and cleanup.
-- Persist any spell state that the client expects to survive relog, transfer, or
-  death.
-
-Capture required:
-
-- Proxy ticks, aura expiry, channel ticks, stealth changes, proc triggers, and
-  relog/transfer snapshots.
-
-### XYF-1.6 Summons, Pets, Vehicles, And Cleanup
-
-Purpose: resolve spell-created entity ownership and lifetime rules.
-
-Deliverables:
-
-- Map summon, pet, vehicle, and temporary entity effects to `Creature2`, visuals,
-  ownership, seats/passengers, despawn rules, auras, and cleanup packets.
-- Confirm player death, logout, map transfer, owner despawn, and effect removal
-  cleanup behavior.
-- Add tests for owner tracking, despawn safety, and packet emission where
-  evidence is strong.
-
-Capture required:
-
-- Summon/pet/vehicle creation, ownership, seat entry/exit, death, logout,
-  transfer, and cleanup traces.
-
-### XYF-1.7 Spell Regression Gate
-
-Purpose: prevent spell fixes from breaking packet and gameplay basics.
-
-Deliverables:
-
-- Add a repeatable spell smoke suite that loads representative table rows and
-  exercises cast validation, effect dispatch, cooldown state, combat logs, and
-  persistence-safe no-op behavior.
-- Add DB fact links from confirmed spell behavior to the tests that protect it.
-- Mark remaining spell unknowns as `XYF-3.x+` backlog only after PvP has the
-  spell foundation it needs.
-
-Exit criteria:
-
-- Spell milestones have a passing regression gate.
-- PvP work can depend on cast result, combat log, cooldown, and death behavior
-  without reopening basic spell questions first.
-
-## XYF-2.x PvP Milestones
-
-### XYF-2.1 PvP Evidence Baseline
-
-Purpose: build PvP from client state and asset rows instead of server guesses.
-
-Inputs already available:
-
-- Existing fact: `Fact/Pvp/ClientDuelAndMatchAnchors`.
-- Ghidra anchors: `DuelAccepted`, `DuelStateChanged`, `DuelLeftArea`,
-  `PVPMatchTeamInfoUpdated`, `PVPMatchStateUpdated`, `PVPMatchFinished`,
-  `PvpRatingUpdated`, `PvpKillNotification`, `CombatLogKillPVP`, and
-  battleground public event names.
-- Wiki rows: PvP chat channel, PvP achievement/title categories, battleground
-  public event names, PvP capture creatures, powerups, cannon targets,
-  satellites/uplinks, shields, and other `Creature2` rows.
-- Server targets: `Source/NexusForever.Game/Pvp/`,
-  `Source/NexusForever.WorldServer/Network/Message/Handler/Pvp/`,
-  `Source/NexusForever.Network.World/Message/Model/Pvp/`, and
-  `Source/NexusForever.Script.Instance/Battleground/`.
-
-Deliverables:
-
-- Rank duel, match queue, battleground objective, rating, reward, and stat gaps.
-- Link every top PvP gap to Ghidra string/function refs, wiki rows, and server
-  files.
-- Identify which PvP behavior depends on unfinished spell/combat milestones.
-
-Exit criteria:
-
-- PvP has an evidence-backed gap list.
-- Duel packet/state questions are separated from battleground objective and
-  reward questions.
-
-### XYF-2.2 Duel State And Result Packets
-
-Purpose: make duels match client-visible packet state.
-
-Deliverables:
-
-- Validate duel invite, accept, decline, timeout, cancel, forfeit, out-of-area
-  warning, cancel-warning, start countdown, death finish, and result reason
-  values.
-- Compare current `Duel`, `DuelManager`, and PvP packet models with
-  `DuelAccepted`, `DuelStateChanged`, and `DuelLeftArea` client anchors.
-- Confirm faction, combat, dead-player, distance, phase, ignore-duels, and
-  already-dueling failure results.
-- Add tests for duel state transitions and result packet selection.
-
-Capture required:
-
-- Client traces for invite/accept/decline/timeout/forfeit/out-of-area/death
-  duel flows.
-
-### XYF-2.3 Queue And Match Lifecycle
-
-Purpose: align matchmaking and match-state packets with the client.
-
-Deliverables:
-
-- Trace and map `PVPMatchTeamInfoUpdated`, `PVPMatchStateUpdated`, and
-  `PVPMatchFinished`.
-- Validate queue join/leave, ready check, team assignment, match start, match
-  end, deserter/cooldown, and reconnect behavior.
-- Compare rating category models with `PvpRatingUpdated`, `GetPvpRatings`, and
-  `GetMyPvpRatings` anchors.
-- Add tests for queue/match state packets once field order and enum meanings are
+- `xywikif` sqlite data and targeted Ghidra work are source truth when the
+  current C# disagrees.
+- `class_skills.md` and `class_amps.md` are the live gameplay backlogs.
+- `[x]` means human-confirmed in game or confirmed by a closed GitHub issue.
+- `2` means "probably works" from code, tests, and evidence, but not yet human
   confirmed.
+- `1` means "partially working or suspicious"; a bug likely remains.
+- `0` means "no believable working path" or "data is too incomplete to claim it
+  works".
+- Every reusable bug family should get a regression test.
+- Every reverse-engineered answer that helps future fixes should be recorded in
+  `/home/xyf/NCSOFT/tooling/xywikif/wiki/wiki.sqlite`.
+- Only comment on GitHub issues after implementation lands. Humans close issues.
 
-Capture required:
+## What Recent Spell Fixes Actually Taught Us
 
-- Queue, ready-check, match start/end, rating update, and reconnect traces.
+The last round of work was useful because it improved real player behavior:
 
-### XYF-2.4 Battleground Objectives And Map Scripts
+- Engineer bots and several Engineer spell paths were fixed as gameplay bugs,
+  not as abstract engine chores.
+- Targeting, telegraph, facing, and positional execution bugs blocked more
+  skills than raw effect-handler counts suggested.
+- Shared effect handlers fixed many score-2 skills at once.
+- Rapid-tap, threshold, and cooldown problems were cross-skill bugs, not
+  one-off spell bugs.
+- AMP save/sync was a real gameplay blocker and needed its own fix and tests.
+- Regression tests help most when they protect a reusable bug family instead of
+  one isolated skill.
 
-Purpose: make battleground map scripts use asset-backed objectives and entities.
+That is the model to keep following.
 
-Deliverables:
+## Current Baseline (2026-04-23)
 
-- Map battleground public event types to server scripts for Walatiki Temple,
-  Daggerstone Pass, Halls of the Bloodsworn, and Cannon.
-- Link PvP `Creature2` rows for flags, capture points, control panels, uplinks,
-  time bombs, cannons, shields, resource indicators, and powerups.
-- Validate objective update packets, scoring state, phase transitions, despawn
-  rules, and capture ownership.
-- Add script tests or smoke checks for objective registration and entity spawn
-  safety.
+### Class Skills
 
-Capture required:
+Source: `class_skills.md`
 
-- Objective state packets, scoring changes, entity spawn/despawn, capture
-  transitions, and powerup interaction traces.
+| State | Count |
+| --- | ---: |
+| `[x]` human-confirmed | 21 |
+| `2` probably works | 115 |
+| `1` partial/suspicious | 53 |
+| `0` no believable path | 0 |
+| Total | 189 |
 
-### XYF-2.5 PvP Rewards, Ratings, Stats, And Achievements
+Score-1 skill counts by class:
 
-Purpose: make match outcomes persist and display correctly.
+- `Esper`: 13
+- `Stalker`: 13
+- `Engineer`: 10
+- `Medic`: 7
+- `Warrior`: 5
+- `Spellslinger`: 5
 
-Deliverables:
+Important reading of this baseline:
 
-- Validate rating category ids, rating deltas, match stats, kill notifications,
-  PvP achievements, PvP titles, rewards, contracts, currencies, and deserter
-  penalties.
-- Link match reward behavior to account/character DB state and relevant table
-  rows.
-- Add persistence tests for reward/stat/rating updates once packet and table
-  semantics are confirmed.
+- We no longer have score-0 class skills in the tracker.
+- The real skill backlog is now the score-1 bucket, not generic "spell system"
+  theory work.
+- The next gains should come from burning down shared score-1 bug families and
+  converting score-2 skills into `[x]` through human verification.
 
-Capture required:
+### AMPs
 
-- Match finish, reward claim, rating update, PvP kill notification, achievement,
-  title, contract, and currency snapshots.
+Source: `class_amps.md`
 
-### XYF-2.6 PvP Regression Gate
+| State | Count |
+| --- | ---: |
+| `[x]` human-confirmed | 0 |
+| `2` probably works | 741 |
+| `1` partial/suspicious | 28 |
+| `0` no believable path / data gap | 129 |
+| Total | 898 |
 
-Purpose: protect duel and battleground behavior before returning to broader
-systems.
+Important reading of this baseline:
 
-Deliverables:
+- Class-specific AMPs are mostly in `2`, with a smaller real bug bucket in `1`.
+- All current score-0 AMPs are in the shared tree.
+- Many shared AMP names are blank in the current wiki extraction, so
+  `class_amps.md` sometimes has fallback names from linked `Spell4` titles or
+  AMP ids.
 
-- Add repeatable PvP smoke tests for duel lifecycle, queue/match packet models,
-  battleground script registration, objective state, and reward persistence.
-- Link confirmed PvP facts to tests.
-- Move unresolved PvP questions into later milestones with explicit capture
-  requirements.
+That means the AMP backlog is two different problems:
 
-## Later Milestone Queues
+1. real gameplay bugs around AMP behavior and persistence,
+2. data-quality cleanup for shared AMP naming and classification.
 
-### XYF-3.x Movement, Maps, Splines, And Return Locations
+## Active TODOs
 
-- Finish multi-spline movement, rotation splines, forced movement, platform
-  movement, graveyard/holocrypt return behavior, instance transfers, and map
-  load correctness.
-- Existing facts: movement spline schema, loader functions, type distribution,
-  packet serialization, and runtime gaps.
-- Keep multi-spline runtime semantics capture-required until taxi/platform
-  traces prove timing, flags, continuation, offsets, and height fields.
+### 1. Burn Down Score-1 Class Skills
 
-### XYF-4.x Entities, Public Events, Quests, And Path Missions
+This is the main gameplay backlog.
 
-- Replace conservative entity models with asset-backed packet fields for every
-  `EntityType`.
-- Finish trigger bounds, traps, scanner units, esper pets, pinata loot, lockbox,
-  structured plug, housing harvest plug, housing plant, tutorial hologram, path
-  mission, and public event state.
-- Keep unsupported path mission types and settler tiers capture-required.
+Work this queue by class skill tracker first, not by abstract subsystem.
 
-### XYF-5.x Housing, Guild, And Community
+What counts as a real fix:
 
-- Validate residence privacy result packets, visit failures, plug/decor
-  placement, roommate/neighbour permissions, crate/uncrate, remodel, vendor
-  lists, and community donations.
-- Link `WorldSocket`, active prop, decor, plug, structure tier, guild, and
-  community rows to packet fields and persistence.
+- the skill can be slotted and cast,
+- the primary result happens in a believable way,
+- cooldown/threshold/telegraph/position behavior is at least plausible,
+- any save/reopen/relog behavior the client expects still works,
+- a reusable test is added when the bug pattern is broader than one skill.
 
-### XYF-6.x Storefront, Rewards, And Account
+Priority order right now:
 
-- Validate catalog, entitlement, reward-track, purchase, refund, grant, rotation,
-  service-token spending, account items, and duplicate claim behavior.
-- Record before/after account transaction rows for success and failure cases.
+1. `Esper` score-1 skills
+2. `Stalker` score-1 skills
+3. `Engineer` score-1 skills
+4. everything else
 
-### XYF-7.x Chat, Social, And UI
+Use shared fixes before bespoke fixes whenever possible.
 
-- Finish chat packet samples for every `ChatFormatType`, including item id, item
-  guid, item full, quest, archive article, nav point, loot, alien, profanity,
-  roleplay, and unknown format values.
-- Validate channels, whispers, ignore/block checks, guild/community chat,
-  cross-world relay, and chat persistence.
+Exit criteria for this lane:
 
-### XYF-8.x Auth, STS, And Launcher
+- `class_skills.md` score-1 count drops from `53` to `20` or lower,
+- no class has more than `5` score-1 skills left,
+- `[x]` count rises from `21` to `40` or higher through human verification.
 
-- Continue STS/auth facts only when gameplay work needs account/session/client
-  handoff behavior.
-- Existing facts cover STS connect shape, fragmented body assembly, and method
-  id names.
+### 2. Re-check Score-2 Skills With Reusable Tests
 
-## Completed Baseline Work
+`2` means "probably works", not "done".
 
-Completed in the 2026-04-22 pass:
+The goal is to use testable bug families to convert score-2 items into either:
 
-- Registered the existing chat formatter implementations instead of only the
-  item/quest subset.
-- Added item-guid chat round-trip support and fixed the internal item-guid
-  format type.
-- Made missing chat formatter registrations drop unsupported formatting instead
-  of crashing chat conversion.
-- Converted several packet-facing unsupported values to invalid-packet handling.
-- Added conservative entity models for several entity classes that already had
-  packet models but threw during creation.
-- Corrected `PinataLootEntity.Type`.
-- Hardened unfinished movement spline/rotation entry points so they fall back
-  safely instead of throwing.
-- Fixed the rotation command resynchronization typo from position multi-spline
-  to rotation multi-spline.
-- Replaced a housing privacy default throw with public fallback.
-- Replaced a costume mannequin save throw with `InvalidMannequinIndex`.
-- Made item display fallback return the table display id instead of throwing.
-- Stopped the Exile tutorial combat hologram script from throwing for
-  unsupported factions.
+- `[x]` because humans verified them, or
+- `1` because a reusable flaw was found.
 
-## Do Not Guess
+Shared bug families to keep applying across all classes:
 
-These remain high-risk until evidence improves:
+- targeting, telegraph, facing, and positional execution,
+- threshold, rapid-tap, cooldown, and charge behavior,
+- proxy and child-spell behavior,
+- summon, bot, trap, and cleanup behavior,
+- dispel, cleanse, shield, absorb, and scale behavior,
+- action-set, stance, mode, and builder state behavior.
 
-- Deep spell target persistence, proxy behavior, summon/vehicle effects,
-  threat/proc completeness, and combat formula parity.
-- Full multi-spline movement and spline rotation runtime commands.
-- Duel/match result values, PvP rating categories, battleground objective state,
-  and match reward persistence.
-- Settler improvement tiers beyond tier 0.
-- Unsupported path mission types.
-- Housing plug/plant/structured plug packet field correctness beyond
-  conservative ids.
-- Trigger bounds and trigger entity model details.
-- Holocrypt resurrection behavior and tutorial/content return locations.
-- Marketplace auction filters and Who query parameter semantics.
+When one of these families is fixed for one class, re-score every affected skill
+or AMP the same day.
+
+### 3. Finish AMP Gameplay, Not Just AMP Data
+
+AMP work is only useful if it improves actual player behavior.
+
+AMP capability checklist:
+
+- AMP selection can be committed,
+- reopening the AMP window shows the same picks,
+- relog preserves the same picks,
+- AMP-granted spells or stat effects appear when enabled,
+- AMP-granted spells or stat effects disappear when respeced away,
+- AMP-gated prerequisites react correctly to current AMP state.
+
+Current hotspots:
+
+- score-1 AMPs: `28`
+- score-0 shared AMPs: `129`
+- shared AMP titles and classification are still noisy in the current wiki build
+
+Exit criteria for this lane:
+
+- AMP save/reopen/relog is human-checked on all six classes,
+- score-1 AMPs drop from `28` to `10` or lower,
+- shared score-0 AMPs are explicitly split into "real gameplay blocker" versus
+  "data naming/classification gap".
+
+### 4. Keep Evidence And Tests Tied To Gameplay Fixes
+
+This is a quality gate for spell and AMP work.
+
+For each real bug fix:
+
+- update `class_skills.md` or `class_amps.md`,
+- add or extend a focused regression test,
+- add a sqlite fact if source-truth research answered a real question,
+- comment on the matching GitHub issue after implementation,
+- leave issue closure to humans.
+
+Current regression anchors:
+
+- `SpellEvidenceTests`
+- `AmpHandlerTests`
+
+Those should keep growing around reusable gameplay bug families.
+
+### 5. Do Not Let Abstract System Work Crowd Out Kit Usability
+
+These still matter, but they are not the main backlog until class kits and AMPs
+are in better shape:
+
+- combat formula parity,
+- combat-log field-perfectness,
+- full proc/aura lifetime truth,
+- PvP queue and battleground scripting,
+- movement spline parity,
+- housing/storefront breadth work.
+
+If a task does not clearly improve a player-facing skill or AMP outcome, it is
+probably not `XYF-1.2` work.
+
+## XYF-1.2 Exit Criteria
+
+This milestone is complete when all of the following are true:
+
+- `class_skills.md` has no score-0 items and `20` or fewer score-1 items,
+- every class has `5` or fewer score-1 skills,
+- at least `40` skills are `[x]`,
+- AMP save/reopen/relog is confirmed on all six classes,
+- `class_amps.md` score-1 count is `10` or lower,
+- the current spell/AMP regression suite passes cleanly.
+
+## After XYF-1.2
+
+### XYF-1.3 Combat Truth
+
+Once kits are broadly usable, focus on:
+
+- combat formulas,
+- combat logs,
+- proc truth,
+- aura lifetime truth,
+- shield and absorb correctness.
+
+### XYF-2.x PvP
+
+PvP becomes the next real milestone only after class kit behavior is stable
+enough that duel, battleground, and match bugs are not just spell bugs in
+disguise.
