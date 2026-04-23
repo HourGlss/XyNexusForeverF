@@ -47,7 +47,12 @@ internal class TestProxy : DispatchProxy
     protected override object Invoke(MethodInfo targetMethod, object[] args)
     {
         if (targetMethod != null && values.TryGetValue(targetMethod.Name, out object value))
+        {
+            if (value is Delegate handler)
+                return handler.DynamicInvoke(args);
+
             return value;
+        }
 
         Type returnType = targetMethod?.ReturnType ?? typeof(void);
         if (returnType == typeof(void))
