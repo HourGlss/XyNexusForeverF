@@ -4,7 +4,7 @@ namespace NexusForever.Shared
 {
     public static class BuildInfo
     {
-        public const string Milestone = "XYF-1.2";
+        public const string Milestone = "XYF-1.3";
 
         public static string WithMilestone(string message)
         {

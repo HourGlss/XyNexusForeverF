@@ -1,6 +1,6 @@
 # NexusTogether Gameplay TODO
 
-Current milestone: `XYF-1.2`
+Current milestone: `XYF-1.3`
 
 ## Goal
 
@@ -104,9 +104,34 @@ That means the AMP backlog is two different problems:
 1. real gameplay bugs around AMP behavior and persistence,
 2. data-quality cleanup for shared AMP naming and classification.
 
-## Active TODOs
+## XYF-1.x Gameplay Milestones
 
-### 1. Burn Down Score-1 Class Skills
+### XYF-1.2 Capability Baseline And Shared Bug Families
+
+Status: completed 2026-04-23.
+
+Purpose:
+
+Turn spell and AMP work into a gameplay-first backlog instead of a notional
+engine roadmap.
+
+Completion evidence:
+
+- `class_skills.md` exists and is scored.
+- `class_amps.md` exists and is scored.
+- score-0 class skills have already been burned down to `0`.
+- shared spell bug families have already landed for:
+  - shared score-2 effect handlers,
+  - ranked-one dispel and scale effects,
+  - ranked-zero rapid-tap threshold handling,
+  - AMP save/sync persistence.
+- regression anchors now exist in:
+  - `SpellEvidenceTests`
+  - `AmpHandlerTests`
+
+This milestone is what made the current tracker-based plan possible.
+
+### XYF-1.3 Class Kit Reliability
 
 This is the main gameplay backlog.
 
@@ -135,7 +160,7 @@ Exit criteria for this lane:
 - no class has more than `5` score-1 skills left,
 - `[x]` count rises from `21` to `40` or higher through human verification.
 
-### 2. Re-check Score-2 Skills With Reusable Tests
+### XYF-1.4 Score-2 Verification And Promotion
 
 `2` means "probably works", not "done".
 
@@ -156,7 +181,13 @@ Shared bug families to keep applying across all classes:
 When one of these families is fixed for one class, re-score every affected skill
 or AMP the same day.
 
-### 3. Finish AMP Gameplay, Not Just AMP Data
+Exit criteria:
+
+- at least `25` current score-2 skills become `[x]`,
+- any score-2 skill that fails reusable tests is downgraded the same day,
+- the score-2 bucket becomes meaningfully trustworthy for human testing.
+
+### XYF-1.5 AMP Reliability And Shared AMP Cleanup
 
 AMP work is only useful if it improves actual player behavior.
 
@@ -182,7 +213,7 @@ Exit criteria for this lane:
 - shared score-0 AMPs are explicitly split into "real gameplay blocker" versus
   "data naming/classification gap".
 
-### 4. Keep Evidence And Tests Tied To Gameplay Fixes
+### XYF-1.6 Gameplay Regression Gate And Evidence Hygiene
 
 This is a quality gate for spell and AMP work.
 
@@ -201,7 +232,14 @@ Current regression anchors:
 
 Those should keep growing around reusable gameplay bug families.
 
-### 5. Do Not Let Abstract System Work Crowd Out Kit Usability
+Exit criteria:
+
+- every new gameplay bug family fix adds or extends a focused regression test,
+- tracker updates, sqlite facts, and issue comments happen as part of the same
+  workflow,
+- spell and AMP fixes stop depending on memory of prior reverse-engineering work.
+
+## Scope Guard
 
 These still matter, but they are not the main backlog until class kits and AMPs
 are in better shape:
@@ -214,9 +252,9 @@ are in better shape:
 - housing/storefront breadth work.
 
 If a task does not clearly improve a player-facing skill or AMP outcome, it is
-probably not `XYF-1.2` work.
+probably not `XYF-1.3` work.
 
-## XYF-1.2 Exit Criteria
+## XYF-1.3 Exit Criteria
 
 This milestone is complete when all of the following are true:
 
@@ -227,9 +265,9 @@ This milestone is complete when all of the following are true:
 - `class_amps.md` score-1 count is `10` or lower,
 - the current spell/AMP regression suite passes cleanly.
 
-## After XYF-1.2
+## After XYF-1.3
 
-### XYF-1.3 Combat Truth
+### XYF-1.7 Combat Truth
 
 Once kits are broadly usable, focus on:
 
