@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Spell;
@@ -122,7 +123,8 @@ namespace NexusForever.Game.Spell.Type
                 if (creatureInfo == null)
                     return false;
 
-                Caster.SummonFactory.Summon(creatureInfo, Caster.Position, Caster.Rotation, (IBaseMap map, uint guid, Vector3 vector) =>
+                Vector3 summonPosition = GetPositionalAoePosition();
+                Caster.SummonFactory.Summon(creatureInfo, summonPosition, Caster.Rotation, (IBaseMap map, uint guid, Vector3 vector) =>
                 {
                     Parameters.PositionalUnitId = guid;
 
@@ -136,6 +138,21 @@ namespace NexusForever.Game.Spell.Type
                 log.LogTrace($"Spell {Parameters.SpellInfo.Entry.Id} has started casting.");
             }
             return true;
+        }
+
+        private Vector3 GetPositionalAoePosition()
+        {
+            if (Parameters.TargetPosition != null && Parameters.TargetPosition.Vector != Vector3.Zero)
+                return Parameters.TargetPosition.Vector;
+
+            if (Parameters.PrimaryTargetId > 0)
+            {
+                IWorldEntity target = Caster.GetVisible<IWorldEntity>(Parameters.PrimaryTargetId);
+                if (target != null)
+                    return target.Position;
+            }
+
+            return Caster.Position;
         }
 
         protected override bool _IsCasting()

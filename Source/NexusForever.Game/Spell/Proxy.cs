@@ -5,6 +5,7 @@ using NexusForever.Game.Abstract.Spell.Event;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Spell.Event;
 using NexusForever.Game.Static.Spell;
+using NexusForever.Network.World.Entity;
 
 namespace NexusForever.Game.Spell
 {
@@ -28,6 +29,7 @@ namespace NexusForever.Game.Spell
                 ParentSpellInfo = parameters.SpellInfo,
                 RootSpellInfo = parameters.RootSpellInfo,
                 PrimaryTargetId = Target.Guid,
+                TargetPosition = new Position(Target.Position),
                 UserInitiatedSpellCast = parameters.UserInitiatedSpellCast,
                 IsProxy = true
             };

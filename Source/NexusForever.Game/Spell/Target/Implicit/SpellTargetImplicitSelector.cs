@@ -50,7 +50,7 @@ namespace NexusForever.Game.Spell.Target.Implicit
         {
             // TODO: Use Target Type to calculate positions
             foreach (IUnitEntity target in caster.Map.Search(initialPosition, info.Entry.TargetMaxRange, searchCheck))
-                implicitTargets.Add(new SpellTargetImplicit(target, Vector3.Distance(caster.Position, target.Position)));
+                implicitTargets.Add(new SpellTargetImplicit(target, Vector3.Distance(initialPosition, target.Position)));
         }
     }
 }

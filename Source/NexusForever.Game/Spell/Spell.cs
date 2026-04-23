@@ -436,7 +436,7 @@ namespace NexusForever.Game.Spell
 
             foreach (TelegraphDamageEntry telegraphDamageEntry in Parameters.SpellInfo.Telegraphs)
                 if (IsTelegraphValid(telegraphDamageEntry))
-                    telegraphs.Add(new Telegraph(telegraphDamageEntry, Caster, Caster.Position, Caster.Rotation));
+                    telegraphs.Add(new Telegraph(telegraphDamageEntry, Caster, position, rotation));
         }
 
         protected virtual bool IsTelegraphValid(TelegraphDamageEntry telegraph)

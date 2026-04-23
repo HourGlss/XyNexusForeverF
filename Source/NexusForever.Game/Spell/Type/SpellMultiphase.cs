@@ -67,23 +67,35 @@ namespace NexusForever.Game.Spell.Type
         protected override bool IsTelegraphValid(TelegraphDamageEntry telegraph)
         {
             // Ensure only telegraphs that apply to this Execute phase are evaluated.
-            if (currentPhase >= 255)
-                return true;
-
-            int phaseMask = 1 << currentPhase;
-            return telegraph.PhaseFlags != 1 && (phaseMask & telegraph.PhaseFlags) != 0;
+            return IsPhaseFlagMatch(telegraph.PhaseFlags);
         }
 
         protected override bool CanExecuteEffect(Spell4EffectsEntry spell4EffectsEntry)
         {
-            if (currentPhase < 255)
-            {
-                int phaseMask = 1 << currentPhase;
-                if (spell4EffectsEntry.PhaseFlags != 1 && spell4EffectsEntry.PhaseFlags != uint.MaxValue && (phaseMask & spell4EffectsEntry.PhaseFlags) == 0)
-                    return false;
-            }
+            if (!IsPhaseFlagMatch(spell4EffectsEntry.PhaseFlags))
+                return false;
 
             return base.CanExecuteEffect(spell4EffectsEntry);
+        }
+
+        private bool IsPhaseFlagMatch(uint phaseFlags)
+        {
+            return IsPhaseFlagMatch(currentPhase, phaseFlags);
+        }
+
+        private static bool IsPhaseFlagMatch(byte phase, uint phaseFlags)
+        {
+            if (phase >= 255 || phaseFlags == uint.MaxValue)
+                return true;
+
+            if (phaseFlags == 0u)
+                return false;
+
+            if (phase >= 32)
+                return false;
+
+            uint phaseMask = 1u << phase;
+            return (phaseFlags & phaseMask) != 0u;
         }
     }
 }

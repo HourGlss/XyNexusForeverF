@@ -7,6 +7,7 @@ using NexusForever.Game.Abstract.Spell.Info.Patch;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Spell.Effect;
 using NexusForever.Game.Spell.Info.Patch;
+using NexusForever.Game.Spell.Type;
 using NexusForever.Game.Static.Spell;
 using NexusForever.Game.Static.Spell.Effect;
 using NexusForever.GameTable.Model;
@@ -96,6 +97,25 @@ public class SpellEvidenceTests
         }));
 
         Assert.Equal(SpellEffectExecutionResult.NoHandler, invoker.InvokeApplyHandler(null, null, info));
+    }
+
+    [Theory]
+    [InlineData(0, 1u, true)]
+    [InlineData(1, 1u, false)]
+    [InlineData(1, 2u, true)]
+    [InlineData(2, 6u, true)]
+    [InlineData(0, 0u, false)]
+    [InlineData(0, uint.MaxValue, true)]
+    [InlineData(255, 1u, true)]
+    public void MultiphasePhaseFlagsUseBitMaskSemantics(byte phase, uint phaseFlags, bool expected)
+    {
+        MethodInfo method = typeof(SpellMultiphase).GetMethod(
+            "IsPhaseFlagMatch",
+            BindingFlags.NonPublic | BindingFlags.Static,
+            [typeof(byte), typeof(uint)]);
+
+        Assert.NotNull(method);
+        Assert.Equal(expected, (bool)method.Invoke(null, [phase, phaseFlags]));
     }
 
     [Theory]
