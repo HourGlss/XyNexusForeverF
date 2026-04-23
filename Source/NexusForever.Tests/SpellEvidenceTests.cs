@@ -3,10 +3,13 @@ using System.Numerics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Creature;
+using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Search;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Event;
 using NexusForever.Game.Abstract.Spell.Effect;
+using NexusForever.Game.Abstract.Spell.Effect.Data;
 using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Game.Abstract.Spell.Info.Patch;
 using NexusForever.Game.Abstract.Spell.Target;
@@ -68,23 +71,26 @@ public class SpellEvidenceTests
 
         foreach (Type type in typeof(GlobalSpellEffectManager).Assembly.GetTypes())
         {
-            SpellEffectHandlerAttribute attribute = type.GetCustomAttribute<SpellEffectHandlerAttribute>();
-            if (attribute == null)
+            SpellEffectHandlerAttribute[] attributes = type.GetCustomAttributes<SpellEffectHandlerAttribute>().ToArray();
+            if (attributes.Length == 0)
                 continue;
 
-            foreach (Type interfaceType in type.GetInterfaces().Where(IsSpellEffectHandlerInterface))
+            foreach (SpellEffectHandlerAttribute attribute in attributes)
             {
-                Assert.NotNull(manager.GetSpellEffectDataType(attribute.SpellEffectType));
+                foreach (Type interfaceType in type.GetInterfaces().Where(IsSpellEffectHandlerInterface))
+                {
+                    Assert.NotNull(manager.GetSpellEffectDataType(attribute.SpellEffectType));
 
-                if (interfaceType.GetGenericTypeDefinition() == typeof(ISpellEffectApplyHandler<>))
-                {
-                    Assert.Equal(interfaceType, manager.GetSpellEffectApplyHandlerType(attribute.SpellEffectType));
-                    Assert.NotNull(manager.GetSpellEffectApplyDelegate(attribute.SpellEffectType));
-                }
-                else
-                {
-                    Assert.Equal(interfaceType, manager.GetSpellEffectRemoveHandlerType(attribute.SpellEffectType));
-                    Assert.NotNull(manager.GetSpellEffectRemoveDelegate(attribute.SpellEffectType));
+                    if (interfaceType.GetGenericTypeDefinition() == typeof(ISpellEffectApplyHandler<>))
+                    {
+                        Assert.Equal(interfaceType, manager.GetSpellEffectApplyHandlerType(attribute.SpellEffectType));
+                        Assert.NotNull(manager.GetSpellEffectApplyDelegate(attribute.SpellEffectType));
+                    }
+                    else
+                    {
+                        Assert.Equal(interfaceType, manager.GetSpellEffectRemoveHandlerType(attribute.SpellEffectType));
+                        Assert.NotNull(manager.GetSpellEffectRemoveDelegate(attribute.SpellEffectType));
+                    }
                 }
             }
         }
@@ -93,7 +99,6 @@ public class SpellEvidenceTests
     [Theory]
     [InlineData(SpellEffectType.RavelSignal)]
     [InlineData(SpellEffectType.NpcExecutionDelay)]
-    [InlineData(SpellEffectType.SummonCreature)]
     public void MissingHighFrequencySpellEffectsReturnNoHandler(SpellEffectType spellEffectType)
     {
         var manager = new GlobalSpellEffectManager();
@@ -356,6 +361,83 @@ public class SpellEvidenceTests
     }
 
     [Theory]
+    [InlineData(SpellEffectType.DistributedDamage)]
+    [InlineData(SpellEffectType.Transference)]
+    public void DamageLikeScoreTwoEffectsUseDamageHandler(SpellEffectType spellEffectType)
+    {
+        var manager = new GlobalSpellEffectManager();
+        manager.Initialise();
+
+        Assert.Equal(typeof(ISpellEffectApplyHandler<ISpellEffectDamageData>), manager.GetSpellEffectApplyHandlerType(spellEffectType));
+        Assert.Equal(typeof(ISpellEffectDamageData), manager.GetSpellEffectDataType(spellEffectType));
+        Assert.NotNull(manager.GetSpellEffectApplyDelegate(spellEffectType));
+    }
+
+    [Theory]
+    [InlineData(SpellEffectType.SummonCreature)]
+    [InlineData(SpellEffectType.SummonTrap)]
+    public void SummonScoreTwoEffectsCreateOwnedSummonsAtTargetPosition(SpellEffectType spellEffectType)
+    {
+        var position = new Vector3(12f, 13f, 14f);
+        var rotation = new Vector3(1f, 2f, 3f);
+        var creatureInfo = TestProxy.Create<ICreatureInfo>();
+
+        ICreatureInfo capturedCreatureInfo = null;
+        Vector3 capturedPosition = default;
+        Vector3 capturedRotation = default;
+
+        IEntitySummonFactory summonFactory = TestProxy.Create<IEntitySummonFactory>(
+            ("Summon", (Func<ICreatureInfo, Vector3, Vector3, OnAddDelegate, IWorldEntity>)((info, summonPosition, summonRotation, _) =>
+            {
+                capturedCreatureInfo = info;
+                capturedPosition = summonPosition;
+                capturedRotation = summonRotation;
+                return TestProxy.Create<IWorldEntity>();
+            })));
+
+        IUnitEntity caster = TestProxy.Create<IUnitEntity>(
+            ("get_Map", TestProxy.Create<IBaseMap>(("GetTerrainHeight", (Func<float, float, float?>)((_, _) => null)))),
+            ("get_Position", Vector3.Zero),
+            ("get_Rotation", rotation),
+            ("get_SummonFactory", summonFactory));
+        IUnitEntity target = TestProxy.Create<IUnitEntity>(("get_Position", position));
+
+        var context = new SpellExecutionContext();
+        context.Initialise(TestProxy.Create<ISpell>(("get_Caster", caster)));
+
+        var data = new SpellEffectSummonCreatureData();
+        var entry = new Spell4EffectsEntry
+        {
+            EffectType = spellEffectType,
+            DataBits00 = 40332u,
+            DataBits02 = 1u
+        };
+        data.Populate(entry);
+
+        var handler = new SpellEffectSummonCreatureHandler(
+            TestProxy.Create<ICreatureInfoManager>(("GetCreatureInfo", (Func<uint, ICreatureInfo>)(creatureId => creatureId == 40332u ? creatureInfo : null))));
+
+        Assert.Equal(SpellEffectExecutionResult.Ok, handler.Apply(context, target, TestProxy.Create<ISpellTargetEffectInfo>(("get_Entry", entry)), data));
+        Assert.Same(creatureInfo, capturedCreatureInfo);
+        Assert.Equal(position, capturedPosition);
+        Assert.Equal(rotation, capturedRotation);
+    }
+
+    [Fact]
+    public void SummonCreatureDataDecodesRawAndFloatBitDistances()
+    {
+        var data = new SpellEffectSummonCreatureData();
+        data.Populate(new Spell4EffectsEntry
+        {
+            DataBits03 = 20u,
+            DataBits04 = BitConverter.SingleToUInt32Bits(2f)
+        });
+
+        Assert.Equal(20f, data.MinDistance);
+        Assert.Equal(2f, data.MaxDistance);
+    }
+
+    [Theory]
     [InlineData(typeof(BioShellVolatilitySpellInfoPatch), 35967u, uint.MaxValue)]
     [InlineData(typeof(PulseBlastSpellInfoPatch), 42148u, 2u)]
     [InlineData(typeof(RicochetVolatilitySpellInfoPatch), 35741u, 2u)]
@@ -404,7 +486,6 @@ public class SpellEvidenceTests
         SpellEffectType.Absorption,
         SpellEffectType.DelayDeath,
         SpellEffectType.DespawnUnit,
-        SpellEffectType.DistributedDamage,
         SpellEffectType.FacilityModification,
         SpellEffectType.ForceFacing,
         SpellEffectType.ForcedAction,
@@ -415,9 +496,6 @@ public class SpellEvidenceTests
         SpellEffectType.RavelSignal,
         SpellEffectType.SapVital,
         SpellEffectType.ShieldOverload,
-        SpellEffectType.SummonCreature,
-        SpellEffectType.SummonTrap,
-        SpellEffectType.Transference,
     ];
 
     public static IEnumerable<object[]> ClassScoreTwoSkillEffectTypes()

@@ -14,6 +14,8 @@ using NexusForever.Shared;
 namespace NexusForever.Game.Spell.Effect.Handler
 {
     [SpellEffectHandler(SpellEffectType.Damage)]
+    [SpellEffectHandler(SpellEffectType.DistributedDamage)]
+    [SpellEffectHandler(SpellEffectType.Transference)]
     public class SpellEffectDamageHandler : ISpellEffectApplyHandler<ISpellEffectDamageData>
     {
         #region Dependency Injection

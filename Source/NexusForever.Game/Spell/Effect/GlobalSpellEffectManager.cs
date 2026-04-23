@@ -28,58 +28,61 @@ namespace NexusForever.Game.Spell.Effect
             // create delegates for each spell effect apply and remove handler that upcasts the handler and data object before invoke.
             foreach (System.Type type in Assembly.GetExecutingAssembly().GetTypes())
             {
-                var attribute = type.GetCustomAttribute<SpellEffectHandlerAttribute>();
-                if (attribute == null)
+                SpellEffectHandlerAttribute[] attributes = type.GetCustomAttributes<SpellEffectHandlerAttribute>().ToArray();
+                if (attributes.Length == 0)
                     continue;
 
-                foreach (System.Type interfaceType in type.GetInterfaces()
-                    .Where(i => i.IsGenericType))
+                foreach (SpellEffectHandlerAttribute attribute in attributes)
                 {
-                    if (interfaceType.GetGenericTypeDefinition() != typeof(ISpellEffectApplyHandler<>)
-                        && interfaceType.GetGenericTypeDefinition() != typeof(ISpellEffectRemoveHandler<>))
-                        continue;
-
-                    System.Type[] types = interfaceType.GetGenericArguments();
-                    System.Type dataType = types[0];
-                    spellEffectDataTypes.TryAdd(attribute.SpellEffectType, dataType);
-
-                    InterfaceMapping map = type.GetInterfaceMap(interfaceType);
-                    MethodInfo methodInfo = map.TargetMethods[0];
-
-                    ParameterExpression handlerParameter = Expression.Parameter(typeof(object));
-                    ParameterExpression entityParameter  = Expression.Parameter(typeof(IUnitEntity));
-                    ParameterExpression infoParameter    = Expression.Parameter(typeof(ISpellTargetEffectInfo));
-                    ParameterExpression dataParameter    = Expression.Parameter(typeof(ISpellEffectData));
-
-                    if (interfaceType.GetGenericTypeDefinition() == typeof(ISpellEffectApplyHandler<>))
+                    foreach (System.Type interfaceType in type.GetInterfaces()
+                        .Where(i => i.IsGenericType))
                     {
-                        ParameterExpression executionContextParameter = Expression.Parameter(typeof(ISpellExecutionContext));
+                        if (interfaceType.GetGenericTypeDefinition() != typeof(ISpellEffectApplyHandler<>)
+                            && interfaceType.GetGenericTypeDefinition() != typeof(ISpellEffectRemoveHandler<>))
+                            continue;
 
-                        MethodCallExpression call =
-                            Expression.Call(Expression.Convert(handlerParameter, type), methodInfo,
-                            executionContextParameter, entityParameter, infoParameter, Expression.Convert(dataParameter, dataType));
+                        System.Type[] types = interfaceType.GetGenericArguments();
+                        System.Type dataType = types[0];
+                        spellEffectDataTypes.TryAdd(attribute.SpellEffectType, dataType);
 
-                        Expression<SpellEffectHandlerApplyDelegate> lambda =
-                            Expression.Lambda<SpellEffectHandlerApplyDelegate>(call, handlerParameter,
-                            executionContextParameter, entityParameter, infoParameter, dataParameter);
+                        InterfaceMapping map = type.GetInterfaceMap(interfaceType);
+                        MethodInfo methodInfo = map.TargetMethods[0];
 
-                        spellEffectApplyDelegates.Add(attribute.SpellEffectType, lambda.Compile());
-                        spellEffectApplyTypes.Add(attribute.SpellEffectType, interfaceType);
-                    }
-                    else if (interfaceType.GetGenericTypeDefinition() == typeof(ISpellEffectRemoveHandler<>))
-                    {
-                        ParameterExpression spellParameter = Expression.Parameter(typeof(ISpell));
+                        ParameterExpression handlerParameter = Expression.Parameter(typeof(object));
+                        ParameterExpression entityParameter  = Expression.Parameter(typeof(IUnitEntity));
+                        ParameterExpression infoParameter    = Expression.Parameter(typeof(ISpellTargetEffectInfo));
+                        ParameterExpression dataParameter    = Expression.Parameter(typeof(ISpellEffectData));
 
-                        MethodCallExpression call =
-                            Expression.Call(Expression.Convert(handlerParameter, type), methodInfo,
-                            spellParameter, entityParameter, infoParameter, Expression.Convert(dataParameter, dataType));
+                        if (interfaceType.GetGenericTypeDefinition() == typeof(ISpellEffectApplyHandler<>))
+                        {
+                            ParameterExpression executionContextParameter = Expression.Parameter(typeof(ISpellExecutionContext));
 
-                        Expression<SpellEffectHandlerRemoveDelegate> lambda =
-                            Expression.Lambda<SpellEffectHandlerRemoveDelegate>(call, handlerParameter, 
-                            spellParameter, entityParameter, infoParameter, dataParameter);
+                            MethodCallExpression call =
+                                Expression.Call(Expression.Convert(handlerParameter, type), methodInfo,
+                                executionContextParameter, entityParameter, infoParameter, Expression.Convert(dataParameter, dataType));
 
-                        spellEffectRemoveDelegates.Add(attribute.SpellEffectType, lambda.Compile());
-                        spellEffectRemoveTypes.Add(attribute.SpellEffectType, interfaceType);
+                            Expression<SpellEffectHandlerApplyDelegate> lambda =
+                                Expression.Lambda<SpellEffectHandlerApplyDelegate>(call, handlerParameter,
+                                executionContextParameter, entityParameter, infoParameter, dataParameter);
+
+                            spellEffectApplyDelegates.Add(attribute.SpellEffectType, lambda.Compile());
+                            spellEffectApplyTypes.Add(attribute.SpellEffectType, interfaceType);
+                        }
+                        else if (interfaceType.GetGenericTypeDefinition() == typeof(ISpellEffectRemoveHandler<>))
+                        {
+                            ParameterExpression spellParameter = Expression.Parameter(typeof(ISpell));
+
+                            MethodCallExpression call =
+                                Expression.Call(Expression.Convert(handlerParameter, type), methodInfo,
+                                spellParameter, entityParameter, infoParameter, Expression.Convert(dataParameter, dataType));
+
+                            Expression<SpellEffectHandlerRemoveDelegate> lambda =
+                                Expression.Lambda<SpellEffectHandlerRemoveDelegate>(call, handlerParameter,
+                                spellParameter, entityParameter, infoParameter, dataParameter);
+
+                            spellEffectRemoveDelegates.Add(attribute.SpellEffectType, lambda.Compile());
+                            spellEffectRemoveTypes.Add(attribute.SpellEffectType, interfaceType);
+                        }
                     }
                 }
             }

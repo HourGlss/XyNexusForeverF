@@ -2,7 +2,7 @@
 
 namespace NexusForever.Game.Spell.Effect
 {
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class SpellEffectHandlerAttribute : Attribute
     {
         public SpellEffectType SpellEffectType { get; }

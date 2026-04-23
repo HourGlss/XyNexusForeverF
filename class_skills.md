@@ -8,7 +8,7 @@
 - [ ] Warrior Smackdown - 1
 - [ ] Warrior Tremor - 2
 - [ ] Warrior Whirlwind - 2
-- [ ] Warrior Atomic Spear - 2
+- [x] Warrior Atomic Spear
 - [ ] Warrior Atomic Surge - 2
 - [ ] Warrior Bolstering Strike - 2
 - [ ] Warrior Bum Rush - 2
@@ -52,7 +52,7 @@
 - [ ] Engineer Code Red - 1
 - [x] Engineer Diminisherbot
 - [ ] Engineer Obstruct Vision - 2
-- [ ] Engineer Personal Defense Unit - 2
+- [ ] Engineer Personal Defense Unit - 1
 - [ ] Engineer Recursive Matrix - 1
 - [ ] Engineer Repairbot - 2
 - [ ] Engineer Shatter Impairment - 1
@@ -69,7 +69,7 @@
 - [ ] Esper Psychic Frenzy - 1
 - [ ] Esper Reap - 2
 - [ ] Esper Spectral Swarm - 1
-- [ ] Esper Telekinetic Storm - 2
+- [x] Esper Telekinetic Storm
 - [ ] Esper Telekinetic Strike - 2
 - [ ] Esper Bolster - 1
 - [ ] Esper Mending Banner - 1
@@ -132,7 +132,7 @@
 - [ ] Stalker Phlebotomize - 1
 - [ ] Stalker Punish - 2
 - [ ] Stalker Ruin - 1
-- [ ] Stalker Shred - 2
+- [x] Stalker Shred
 - [ ] Stalker Amplification Spike - 1
 - [ ] Stalker Decimate - 2
 - [ ] Stalker Frenzy - 1
@@ -146,7 +146,7 @@
 - [ ] Stalker Bloodthirst - 1
 - [ ] Stalker Collapse - 2
 - [ ] Stalker False Retreat - 0
-- [ ] Stalker Pounce - 2
+- [x] Stalker Pounce
 - [ ] Stalker Preparation - 2
 - [ ] Stalker Reaver - 2
 - [ ] Stalker Stagger - 2
@@ -156,7 +156,7 @@
 - [ ] Stalker Nano Skin: Agile - 1
 - [ ] Stalker Nano Skin: Evasive - 1
 - [ ] Stalker Nano Skin: Lethal - 1
-- [ ] Spellslinger Arcane Missiles - 2
+- [x] Spellslinger Arcane Missiles
 - [ ] Spellslinger Assassinate - 2
 - [ ] Spellslinger Charged Shot - 2
 - [ ] Spellslinger Chill - 2
@@ -179,7 +179,7 @@
 - [ ] Spellslinger Affinity - 2
 - [ ] Spellslinger Arcane Shock - 1
 - [ ] Spellslinger Flash Freeze - 2
-- [ ] Spellslinger Gate - 2
+- [x] Spellslinger Gate
 - [ ] Spellslinger Gather Focus - 2
 - [ ] Spellslinger Phase Shift - 2
 - [ ] Spellslinger Purify - 1

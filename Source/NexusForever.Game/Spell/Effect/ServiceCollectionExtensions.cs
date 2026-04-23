@@ -25,6 +25,7 @@ namespace NexusForever.Game.Spell.Effect
             sc.AddTransient<ISpellEffectProcData, SpellEffectProcData>();
             sc.AddTransient<ISpellEffectProxyData, SpellEffectProxyData>();
             sc.AddTransient<ISpellEffectSpellForceRemoveData, SpellEffectSpellForceRemoveData>();
+            sc.AddTransient<ISpellEffectSummonCreatureData, SpellEffectSummonCreatureData>();
             sc.AddTransient<ISpellEffectSummonMountData, SpellEffectSummonMountData>();
             sc.AddTransient<ISpellEffectSummonPetData, SpellEffectSummonPetData>();
             sc.AddTransient<ISpellEffectSummonVanityPetData, SpellEffectSummonVanityPetData>();
@@ -38,17 +39,20 @@ namespace NexusForever.Game.Spell.Effect
 
             foreach (System.Type type in Assembly.GetExecutingAssembly().GetTypes())
             {
-                var attribute = type.GetCustomAttribute<SpellEffectHandlerAttribute>();
-                if (attribute == null)
+                SpellEffectHandlerAttribute[] attributes = type.GetCustomAttributes<SpellEffectHandlerAttribute>().ToArray();
+                if (attributes.Length == 0)
                     continue;
 
-                foreach (System.Type interfaceType in type.GetInterfaces()
-                    .Where(i => i.IsGenericType))
+                foreach (SpellEffectHandlerAttribute attribute in attributes)
                 {
-                    if (interfaceType.GetGenericTypeDefinition() == typeof(ISpellEffectApplyHandler<>))
-                        sc.AddKeyedTransient(interfaceType, attribute.SpellEffectType, type);
-                    else if (interfaceType.GetGenericTypeDefinition() == typeof(ISpellEffectRemoveHandler<>))
-                        sc.AddKeyedTransient(interfaceType, attribute.SpellEffectType, type);
+                    foreach (System.Type interfaceType in type.GetInterfaces()
+                        .Where(i => i.IsGenericType))
+                    {
+                        if (interfaceType.GetGenericTypeDefinition() == typeof(ISpellEffectApplyHandler<>))
+                            sc.AddKeyedTransient(interfaceType, attribute.SpellEffectType, type);
+                        else if (interfaceType.GetGenericTypeDefinition() == typeof(ISpellEffectRemoveHandler<>))
+                            sc.AddKeyedTransient(interfaceType, attribute.SpellEffectType, type);
+                    }
                 }
             }
         }

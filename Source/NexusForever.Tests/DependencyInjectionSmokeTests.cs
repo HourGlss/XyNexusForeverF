@@ -114,12 +114,13 @@ public class DependencyInjectionSmokeTests
 
         foreach (Type type in typeof(GlobalSpellEffectManager).Assembly.GetTypes())
         {
-            SpellEffectHandlerAttribute attribute = type.GetCustomAttribute<SpellEffectHandlerAttribute>();
-            if (attribute == null)
+            SpellEffectHandlerAttribute[] attributes = type.GetCustomAttributes<SpellEffectHandlerAttribute>().ToArray();
+            if (attributes.Length == 0)
                 continue;
 
-            foreach (Type interfaceType in type.GetInterfaces().Where(IsSpellEffectHandlerInterface))
-                AssertKeyedRegistration(services, interfaceType, type, attribute.SpellEffectType);
+            foreach (SpellEffectHandlerAttribute attribute in attributes)
+                foreach (Type interfaceType in type.GetInterfaces().Where(IsSpellEffectHandlerInterface))
+                    AssertKeyedRegistration(services, interfaceType, type, attribute.SpellEffectType);
         }
     }
 
