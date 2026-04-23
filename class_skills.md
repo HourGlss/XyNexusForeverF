@@ -1,189 +1,189 @@
-- [ ] Warrior Augmented Blade
-- [ ] Warrior Breaching Strikes
-- [ ] Warrior Leap
-- [ ] Warrior Power Strike
-- [ ] Warrior Relentless Strikes
-- [ ] Warrior Ripsaw
-- [ ] Warrior Savage Strike
-- [ ] Warrior Smackdown
-- [ ] Warrior Tremor
-- [ ] Warrior Whirlwind
-- [ ] Warrior Atomic Spear
-- [ ] Warrior Atomic Surge
-- [ ] Warrior Bolstering Strike
-- [ ] Warrior Bum Rush
-- [ ] Warrior Expulsion
-- [ ] Warrior Jolt
-- [ ] Warrior Menacing Strike
-- [ ] Warrior Plasma Wall
-- [ ] Warrior Polarity Field
-- [ ] Warrior Shield Burst
-- [ ] Warrior Defense Grid
-- [ ] Warrior Emergency Reserves
-- [ ] Warrior Flash Bang
-- [ ] Warrior Grapple
-- [ ] Warrior Kick
-- [ ] Warrior Plasma Blast
-- [ ] Warrior Power Link
-- [ ] Warrior Sentinel
-- [ ] Warrior Tether Bolt
-- [ ] Warrior Unstoppable Force
-- [ ] Warrior Stance: Onslaught
-- [ ] Engineer Artillerybot
-- [ ] Engineer Bio Shell
-- [ ] Engineer Bolt Caster
-- [ ] Engineer Electrocute
-- [ ] Engineer Energy Auger
-- [ ] Engineer Mortar Strike
-- [ ] Engineer Pulse Blast
-- [ ] Engineer Quick Burst
-- [ ] Engineer Target Acquisition
-- [ ] Engineer Unstable Anomaly
-- [ ] Engineer Bruiserbot
-- [ ] Engineer Disruptive Module
-- [ ] Engineer Feedback
-- [ ] Engineer Flak Cannon
-- [ ] Engineer Hyper Wave
-- [ ] Engineer Particle Ejector
-- [ ] Engineer Ricochet
-- [ ] Engineer Shock Pulse
-- [ ] Engineer Thresher
-- [ ] Engineer Unsteady Miasma
-- [ ] Engineer Code Red
-- [ ] Engineer Diminisherbot
-- [ ] Engineer Obstruct Vision
-- [ ] Engineer Personal Defense Unit
-- [ ] Engineer Recursive Matrix
-- [ ] Engineer Repairbot
-- [ ] Engineer Shatter Impairment
-- [ ] Engineer Urgent Withdrawal
-- [ ] Engineer Volatile Injection
-- [ ] Engineer Zap
-- [ ] Engineer Mode: Eradicate
-- [ ] Engineer Mode: Provoke
-- [ ] Esper Blade Dance
-- [ ] Esper Concentrated Blade
-- [ ] Esper Haunt
-- [ ] Esper Illusionary Blades
-- [ ] Esper Mind Burst
-- [ ] Esper Psychic Frenzy
-- [ ] Esper Reap
-- [ ] Esper Spectral Swarm
-- [ ] Esper Telekinetic Storm
-- [ ] Esper Telekinetic Strike
-- [ ] Esper Bolster
-- [ ] Esper Mending Banner
-- [ ] Esper Mental Boon
-- [ ] Esper Mind Over Body
-- [ ] Esper Mirage
-- [ ] Esper Phantasmal Armor
-- [ ] Esper Pyrokinetic Flame
-- [ ] Esper Reverie
-- [ ] Esper Soothe
-- [ ] Esper Warden
-- [ ] Esper Catharsis
-- [ ] Esper Crush
-- [ ] Esper Fade Out
-- [ ] Esper Fixation
-- [ ] Esper Geist
-- [ ] Esper Incapacitate
-- [ ] Esper Meditate
-- [ ] Esper Projected Spirit
-- [ ] Esper Restraint
-- [ ] Esper Shockwave
-- [ ] Esper Spectral Form
-- [ ] Medic Annihilation
-- [ ] Medic Atomize
-- [ ] Medic Collider
-- [ ] Medic Dematerialize
-- [ ] Medic Devastator Probes
-- [ ] Medic Discharge
-- [ ] Medic Fissure
-- [ ] Medic Gamma Rays
-- [ ] Medic Nullifier
-- [ ] Medic Quantum Cascade
-- [ ] Medic Barrier
-- [ ] Medic Crisis Wave
-- [ ] Medic Dual Shock
-- [ ] Medic Emission
-- [ ] Medic Extricate
-- [ ] Medic Flash
-- [ ] Medic Mending Probes
-- [ ] Medic Rejuvenator
-- [ ] Medic Shield Surge
-- [ ] Medic Triage
-- [ ] Medic Antidote
-- [ ] Medic Calm
-- [ ] Medic Empowering Probes
-- [ ] Medic Field Probes
-- [ ] Medic Magnetic Lockdown
-- [ ] Medic Paralytic Surge
-- [ ] Medic Protection Probes
-- [ ] Medic Recharge
-- [ ] Medic Restrictor
-- [ ] Medic Urgency
-- [ ] Medic Energize
-- [ ] Stalker Analyze Weakness
-- [ ] Stalker Clone
-- [ ] Stalker Concussive Kicks
-- [ ] Stalker Cripple
-- [ ] Stalker Impale
-- [ ] Stalker Neutralize
-- [ ] Stalker Phlebotomize
-- [ ] Stalker Punish
-- [ ] Stalker Ruin
-- [ ] Stalker Shred
-- [ ] Stalker Amplification Spike
-- [ ] Stalker Decimate
-- [ ] Stalker Frenzy
-- [ ] Stalker Nano Dart
-- [ ] Stalker Nano Field
-- [ ] Stalker Nano Virus
-- [ ] Stalker Razor Disk
-- [ ] Stalker Razor Storm
-- [ ] Stalker Steadfast
-- [ ] Stalker Whiplash
-- [ ] Stalker Bloodthirst
-- [ ] Stalker Collapse
-- [ ] Stalker False Retreat
-- [ ] Stalker Pounce
-- [ ] Stalker Preparation
-- [ ] Stalker Reaver
-- [ ] Stalker Stagger
-- [ ] Stalker Stim Drone
-- [ ] Stalker Tactical Retreat
-- [ ] Stalker Tether Mine
-- [ ] Stalker Nano Skin: Agile
-- [ ] Stalker Nano Skin: Evasive
-- [ ] Stalker Nano Skin: Lethal
-- [ ] Spellslinger Arcane Missiles
-- [ ] Spellslinger Assassinate
-- [ ] Spellslinger Charged Shot
-- [ ] Spellslinger Chill
-- [ ] Spellslinger Flame Burst
-- [ ] Spellslinger Ignite
-- [ ] Spellslinger Quick Draw
-- [ ] Spellslinger Rapid Fire
-- [ ] Spellslinger True Shot
-- [ ] Spellslinger Wild Barrage
-- [ ] Spellslinger Astral Infusion
-- [ ] Spellslinger Dual Fire
-- [ ] Spellslinger Healing Salve
-- [ ] Spellslinger Healing Torrent
-- [ ] Spellslinger Regenerative Pulse
-- [ ] Spellslinger Runes of Protection
-- [ ] Spellslinger Runic Healing
-- [ ] Spellslinger Sustain
-- [ ] Spellslinger Vitality Burst
-- [ ] Spellslinger Voidspring
-- [ ] Spellslinger Affinity
-- [ ] Spellslinger Arcane Shock
-- [ ] Spellslinger Flash Freeze
-- [ ] Spellslinger Gate
-- [ ] Spellslinger Gather Focus
-- [ ] Spellslinger Phase Shift
-- [ ] Spellslinger Purify
-- [ ] Spellslinger Spatial Shift
-- [ ] Spellslinger Void Pact
-- [ ] Spellslinger Void Slip
-- [ ] Spellslinger Spell Surge
+- [ ] Warrior Augmented Blade - 2
+- [ ] Warrior Breaching Strikes - 2
+- [ ] Warrior Leap - 2
+- [ ] Warrior Power Strike - 0
+- [ ] Warrior Relentless Strikes - 2
+- [ ] Warrior Ripsaw - 1
+- [ ] Warrior Savage Strike - 2
+- [ ] Warrior Smackdown - 1
+- [ ] Warrior Tremor - 2
+- [ ] Warrior Whirlwind - 2
+- [ ] Warrior Atomic Spear - 2
+- [ ] Warrior Atomic Surge - 2
+- [ ] Warrior Bolstering Strike - 2
+- [ ] Warrior Bum Rush - 2
+- [ ] Warrior Expulsion - 1
+- [ ] Warrior Jolt - 2
+- [ ] Warrior Menacing Strike - 2
+- [ ] Warrior Plasma Wall - 2
+- [ ] Warrior Polarity Field - 2
+- [ ] Warrior Shield Burst - 2
+- [ ] Warrior Defense Grid - 2
+- [ ] Warrior Emergency Reserves - 2
+- [ ] Warrior Flash Bang - 2
+- [ ] Warrior Grapple - 2
+- [ ] Warrior Kick - 2
+- [ ] Warrior Plasma Blast - 2
+- [ ] Warrior Power Link - 2
+- [ ] Warrior Sentinel - 1
+- [ ] Warrior Tether Bolt - 2
+- [ ] Warrior Unstoppable Force - 1
+- [ ] Warrior Stance: Onslaught - 1
+- [x] Engineer Artillerybot
+- [ ] Engineer Bio Shell - 2
+- [ ] Engineer Bolt Caster - 2
+- [ ] Engineer Electrocute - 2
+- [ ] Engineer Energy Auger - 2
+- [ ] Engineer Mortar Strike - 2
+- [ ] Engineer Pulse Blast - 2
+- [ ] Engineer Quick Burst - 2
+- [ ] Engineer Target Acquisition - 2
+- [ ] Engineer Unstable Anomaly - 1
+- [ ] Engineer Bruiserbot - 2
+- [ ] Engineer Disruptive Module - 2
+- [ ] Engineer Feedback - 2
+- [ ] Engineer Flak Cannon - 2
+- [ ] Engineer Hyper Wave - 2
+- [ ] Engineer Particle Ejector - 2
+- [ ] Engineer Ricochet - 2
+- [ ] Engineer Shock Pulse - 1
+- [ ] Engineer Thresher - 1
+- [ ] Engineer Unsteady Miasma - 1
+- [ ] Engineer Code Red - 1
+- [ ] Engineer Diminisherbot - 2
+- [ ] Engineer Obstruct Vision - 2
+- [ ] Engineer Personal Defense Unit - 2
+- [ ] Engineer Recursive Matrix - 1
+- [ ] Engineer Repairbot - 2
+- [ ] Engineer Shatter Impairment - 1
+- [ ] Engineer Urgent Withdrawal - 1
+- [ ] Engineer Volatile Injection - 2
+- [ ] Engineer Zap - 2
+- [ ] Engineer Mode: Eradicate - 1
+- [ ] Engineer Mode: Provoke - 1
+- [ ] Esper Blade Dance - 2
+- [ ] Esper Concentrated Blade - 2
+- [ ] Esper Haunt - 2
+- [ ] Esper Illusionary Blades - 2
+- [ ] Esper Mind Burst - 1
+- [ ] Esper Psychic Frenzy - 1
+- [ ] Esper Reap - 2
+- [ ] Esper Spectral Swarm - 1
+- [ ] Esper Telekinetic Storm - 2
+- [ ] Esper Telekinetic Strike - 2
+- [ ] Esper Bolster - 1
+- [ ] Esper Mending Banner - 1
+- [ ] Esper Mental Boon - 1
+- [ ] Esper Mind Over Body - 2
+- [ ] Esper Mirage - 1
+- [ ] Esper Phantasmal Armor - 1
+- [ ] Esper Pyrokinetic Flame - 2
+- [ ] Esper Reverie - 1
+- [ ] Esper Soothe - 2
+- [ ] Esper Warden - 1
+- [ ] Esper Catharsis - 1
+- [ ] Esper Crush - 2
+- [ ] Esper Fade Out - 1
+- [ ] Esper Fixation - 2
+- [ ] Esper Geist - 1
+- [ ] Esper Incapacitate - 2
+- [ ] Esper Meditate - 2
+- [ ] Esper Projected Spirit - 2
+- [ ] Esper Restraint - 2
+- [ ] Esper Shockwave - 2
+- [ ] Esper Spectral Form - 1
+- [ ] Medic Annihilation - 2
+- [ ] Medic Atomize - 2
+- [ ] Medic Collider - 2
+- [ ] Medic Dematerialize - 1
+- [ ] Medic Devastator Probes - 2
+- [ ] Medic Discharge - 2
+- [ ] Medic Fissure - 2
+- [ ] Medic Gamma Rays - 2
+- [ ] Medic Nullifier - 2
+- [ ] Medic Quantum Cascade - 2
+- [ ] Medic Barrier - 1
+- [ ] Medic Crisis Wave - 2
+- [ ] Medic Dual Shock - 1
+- [ ] Medic Emission - 2
+- [ ] Medic Extricate - 2
+- [ ] Medic Flash - 2
+- [ ] Medic Mending Probes - 1
+- [ ] Medic Rejuvenator - 1
+- [ ] Medic Shield Surge - 2
+- [ ] Medic Triage - 2
+- [ ] Medic Antidote - 1
+- [ ] Medic Calm - 1
+- [ ] Medic Empowering Probes - 2
+- [ ] Medic Field Probes - 2
+- [ ] Medic Magnetic Lockdown - 2
+- [ ] Medic Paralytic Surge - 2
+- [ ] Medic Protection Probes - 2
+- [ ] Medic Recharge - 2
+- [ ] Medic Restrictor - 2
+- [ ] Medic Urgency - 2
+- [ ] Medic Energize - 1
+- [ ] Stalker Analyze Weakness - 1
+- [ ] Stalker Clone - 1
+- [ ] Stalker Concussive Kicks - 2
+- [ ] Stalker Cripple - 2
+- [ ] Stalker Impale - 2
+- [ ] Stalker Neutralize - 2
+- [ ] Stalker Phlebotomize - 1
+- [ ] Stalker Punish - 2
+- [ ] Stalker Ruin - 1
+- [ ] Stalker Shred - 2
+- [ ] Stalker Amplification Spike - 1
+- [ ] Stalker Decimate - 2
+- [ ] Stalker Frenzy - 1
+- [ ] Stalker Nano Dart - 1
+- [ ] Stalker Nano Field - 1
+- [ ] Stalker Nano Virus - 1
+- [ ] Stalker Razor Disk - 2
+- [ ] Stalker Razor Storm - 2
+- [ ] Stalker Steadfast - 2
+- [ ] Stalker Whiplash - 2
+- [ ] Stalker Bloodthirst - 1
+- [ ] Stalker Collapse - 2
+- [ ] Stalker False Retreat - 0
+- [ ] Stalker Pounce - 2
+- [ ] Stalker Preparation - 2
+- [ ] Stalker Reaver - 2
+- [ ] Stalker Stagger - 2
+- [ ] Stalker Stim Drone - 1
+- [ ] Stalker Tactical Retreat - 1
+- [ ] Stalker Tether Mine - 1
+- [ ] Stalker Nano Skin: Agile - 1
+- [ ] Stalker Nano Skin: Evasive - 1
+- [ ] Stalker Nano Skin: Lethal - 1
+- [ ] Spellslinger Arcane Missiles - 2
+- [ ] Spellslinger Assassinate - 2
+- [ ] Spellslinger Charged Shot - 2
+- [ ] Spellslinger Chill - 2
+- [ ] Spellslinger Flame Burst - 2
+- [ ] Spellslinger Ignite - 2
+- [ ] Spellslinger Quick Draw - 2
+- [ ] Spellslinger Rapid Fire - 2
+- [ ] Spellslinger True Shot - 2
+- [ ] Spellslinger Wild Barrage - 2
+- [ ] Spellslinger Astral Infusion - 1
+- [ ] Spellslinger Dual Fire - 2
+- [ ] Spellslinger Healing Salve - 2
+- [ ] Spellslinger Healing Torrent - 1
+- [ ] Spellslinger Regenerative Pulse - 2
+- [ ] Spellslinger Runes of Protection - 1
+- [ ] Spellslinger Runic Healing - 2
+- [ ] Spellslinger Sustain - 2
+- [ ] Spellslinger Vitality Burst - 2
+- [ ] Spellslinger Voidspring - 2
+- [ ] Spellslinger Affinity - 2
+- [ ] Spellslinger Arcane Shock - 1
+- [ ] Spellslinger Flash Freeze - 2
+- [ ] Spellslinger Gate - 2
+- [ ] Spellslinger Gather Focus - 2
+- [ ] Spellslinger Phase Shift - 2
+- [ ] Spellslinger Purify - 1
+- [ ] Spellslinger Spatial Shift - 1
+- [ ] Spellslinger Void Pact - 2
+- [ ] Spellslinger Void Slip - 1
+- [ ] Spellslinger Spell Surge - 2
