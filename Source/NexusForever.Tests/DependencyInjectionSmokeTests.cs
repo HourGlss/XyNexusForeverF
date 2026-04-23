@@ -1,5 +1,6 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using NexusForever.Game.Abstract.Cinematic;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement.Command.Mode;
 using NexusForever.Game.Abstract.Entity.Movement.Command.Move;
@@ -12,6 +13,7 @@ using NexusForever.Game.Abstract.Entity.Movement.Command.Time;
 using NexusForever.Game.Abstract.Entity.Movement.Command.Velocity;
 using NexusForever.Game.Abstract.Prerequisite;
 using NexusForever.Game.Abstract.Spell.Effect;
+using NexusForever.Game.Cinematic;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Entity.Movement.Command;
 using NexusForever.Game.Entity.Movement.Command.Mode;
@@ -121,6 +123,29 @@ public class DependencyInjectionSmokeTests
             foreach (SpellEffectHandlerAttribute attribute in attributes)
                 foreach (Type interfaceType in type.GetInterfaces().Where(IsSpellEffectHandlerInterface))
                     AssertKeyedRegistration(services, interfaceType, type, attribute.SpellEffectType);
+        }
+    }
+
+    [Fact]
+    public void CinematicInterfacesHaveRegistrations()
+    {
+        var services = new ServiceCollection();
+        services.AddGameCinematic();
+
+        using ServiceProvider provider = services.BuildServiceProvider();
+
+        foreach (Type interfaceType in typeof(ICinematicBase).Assembly.GetTypes())
+        {
+            if (!interfaceType.IsInterface)
+                continue;
+
+            if (!interfaceType.IsAssignableTo(typeof(ICinematicBase)) || interfaceType == typeof(ICinematicBase))
+                continue;
+
+            if (interfaceType.Namespace != "NexusForever.Game.Abstract.Cinematic.Cinematics")
+                continue;
+
+            Assert.NotNull(provider.GetRequiredService(interfaceType));
         }
     }
 
