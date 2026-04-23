@@ -69,6 +69,11 @@ namespace NexusForever.Game.Abstract.Spell
         void AddAmp(CharacterActionSetAmpModel model);
 
         /// <summary>
+        /// Synchronise the enabled AMP ids in this action set with the supplied collection.
+        /// </summary>
+        bool SyncAmps(IEnumerable<ushort> amps);
+
+        /// <summary>
         /// Remove one or more AMP's from <see cref="IActionSet"/> depending on supplied <see cref="AmpRespecType"/>.
         /// </summary>
         void RemoveAmp(AmpRespecType type, uint value);

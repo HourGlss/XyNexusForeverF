@@ -1,0 +1,901 @@
+<!-- Generated from xywikif sqlite on 2026-04-23. -->
+<!-- AMP titles are blank for many rows in the current wiki build; those entries fall back to linked Spell4 titles or AMP row ids. -->
+
+- [ ] Shared AMP 14 - 0
+- [ ] Shared AMP 15 - 0
+- [ ] Shared War - Dmg - Assault Gear - C1 - R3 - Inlaid - 2
+- [ ] Shared AMP 31 - 0
+- [ ] Shared AMP 32 - 0
+- [ ] Shared AMP 33 - 0
+- [ ] Shared AMP 34 - 0
+- [ ] Shared AMP 41 - 0
+- [ ] Shared AMP 42 - 0
+- [ ] Shared AMP 43 - 0
+- [ ] Shared AMP 44 - 0
+- [ ] Shared AMP 46 - 0
+- [ ] Shared AMP 47 - 0
+- [ ] Shared AMP 48 - 0
+- [ ] Shared AMP 49 - 0
+- [ ] Shared AMP 51 - 0
+- [ ] Shared AMP 63 - 0
+- [ ] Shared AMP 64 - 0
+- [ ] Shared AMP 65 - 0
+- [ ] Shared AMP 67 - 0
+- [ ] Shared AMP 68 - 0
+- [ ] Shared AMP 69 - 0
+- [ ] Shared AMP 70 - 0
+- [ ] Shared AMP 74 - 0
+- [ ] Shared AMP 75 - 0
+- [ ] Shared AMP 76 - 0
+- [ ] Shared AMP 77 - 0
+- [ ] Shared AMP 78 - 0
+- [ ] Shared AMP 79 - 0
+- [ ] Shared AMP 80 - 0
+- [ ] Shared AMP 81 - 0
+- [ ] Shared AMP 82 - 0
+- [ ] Shared AMP 87 - 0
+- [ ] Shared AMP 88 - 0
+- [ ] Shared AMP 89 - 0
+- [ ] Shared AMP 90 - 0
+- [ ] Shared AMP 99 - 0
+- [ ] Shared AMP 100 - 0
+- [ ] Shared AMP 101 - 0
+- [ ] Shared AMP 110 - 0
+- [ ] Shared AMP 111 - 0
+- [ ] Shared AMP 112 - 0
+- [ ] Shared AMP 115 - 0
+- [ ] Shared AMP 116 - 0
+- [ ] Shared AMP 117 - 0
+- [ ] Shared AMP 119 - 0
+- [ ] Shared AMP 120 - 0
+- [ ] Shared [DELETE] War - Hybrid - Converter - C4 - R9 - Series - 3 - 0
+- [ ] Shared AMP 122 - 0
+- [ ] Shared AMP 124 - 0
+- [ ] Shared AMP 125 - 0
+- [ ] Shared AMP 149 - 0
+- [ ] Shared AMP 154 - 0
+- [ ] Shared AMP 155 - 0
+- [ ] Shared AMP 156 - 0
+- [ ] Shared AMP 166 - 0
+- [ ] Shared AMP 167 - 0
+- [ ] Shared AMP 168 - 0
+- [ ] Shared [DEP] Spellslinger - Damage - Series B2 - 2
+- [ ] Shared [DEP] Spellslinger - Damage - Series B3 - 2
+- [ ] Shared Spellslinger - Damage - Series C3 - 2
+- [ ] Shared Spellslinger - Damage - Series E1 - 2
+- [ ] Shared Spellslinger - Damage - Series E2 - 2
+- [ ] Shared Spellslinger - Damage - Series E3 - 2
+- [ ] Shared Spellslinger - Damage - Series F1 - 2
+- [ ] Shared Spellslinger - Damage - Series F2 - 2
+- [ ] Shared Spellslinger - Damage - Series F3 - 2
+- [ ] Shared Spellslinger - Damage - Series F5 - 2
+- [ ] Shared Spellslinger - Damage - Inlaid A - 2
+- [ ] Shared Spellslinger - Damage - Inlaid D - 2
+- [ ] Shared Spellslinger - Support - Series A4 - 2
+- [ ] Shared [DEP] Spellslinger - Support - Series B1 - 2
+- [ ] Shared [DEP] Spellslinger - Support - Series B2 - 2
+- [ ] Shared [DEP] Spellslinger - Support - Series B3 - 2
+- [ ] Shared Spellslinger - Support - Series C1 - 1
+- [ ] Shared Spellslinger - Support - Series C2 - 1
+- [ ] Shared Spellslinger - Support - Series C3 - 1
+- [ ] Shared [DEP] Spellslinger - Support - Series D2 - 2
+- [ ] Shared [DEP] Spellslinger - Support - Series D3 - 2
+- [ ] Shared Spellslinger - Support - Series E1 - 2
+- [ ] Shared Spellslinger - Support - Series E2 - 2
+- [ ] Shared Spellslinger - Support - Series E3 - 2
+- [ ] Shared Spellslinger - Support - Inlaid A - 2
+- [ ] Shared Spellslinger - Support - Inlaid E - 2
+- [ ] Shared Spellslinger - Utility - Series A1 - 2
+- [ ] Shared Spellslinger - Utility - Series A2 - 2
+- [ ] Shared Spellslinger - Utility - Series A3 - 2
+- [ ] Shared Spellslinger - Utility - Series B1 - 2
+- [ ] Shared Spellslinger - Utility - Series B2 - 2
+- [ ] Shared Spellslinger - Utility - Series B3 - 2
+- [ ] Shared Spellslinger - Utility - Series C1 - 2
+- [ ] Shared Spellslinger - Utility - Series C2 - 2
+- [ ] Shared Spellslinger - Utility - Series C3 - 2
+- [ ] Shared [DEP] Spellslinger - Utility - Series D1 - 2
+- [ ] Shared [DEP] Spellslinger - Utility - Series D2 - 2
+- [ ] Shared [DEP] Spellslinger - Utility - Series D3 - 2
+- [ ] Shared [DEP] Spellslinger - Utility - Series D4 - 2
+- [ ] Shared Spellslinger - Utility - Series G1 - 2
+- [ ] Shared Spellslinger - Utility - Series G2 - 2
+- [ ] Shared Spellslinger - Utility - Series G3 - 2
+- [ ] Shared Spellslinger - Utility - Inlaid C - 2
+- [ ] Shared Spellslinger - D+S - Series A1 - 2
+- [ ] Shared Spellslinger - D+S - Series A2 - 2
+- [ ] Shared Spellslinger - D+S - Series A3 - 2
+- [ ] Shared Spellslinger - D+S - Series B1 - 2
+- [ ] Shared Spellslinger - D+S - Series B2 - 2
+- [ ] Shared Spellslinger - D+S - Series B3 - 2
+- [ ] Shared Spellslinger - D+S - Series C1 - 2
+- [ ] Shared Spellslinger - D+S - Series C2 - 2
+- [ ] Shared Spellslinger - D+S - Series C3 - 2
+- [ ] Shared Spellslinger - D+S - Series C4 - 2
+- [ ] Shared Spellslinger - D+S - Inlaid A - 1
+- [ ] Shared [DEPRECATE] Spellslinger - D+U - Inlaid D - 2
+- [ ] Shared [DEP]Spellslinger - S+U - Series A1 - 2
+- [ ] Shared [DEP]Spellslinger - S+U - Series A2 - 2
+- [ ] Shared [DEP]Spellslinger - S+U - Series A3 - 2
+- [ ] Shared Spellslinger - S+U - Series A4 - 2
+- [ ] Shared [DEP]Spellslinger - S+U - Series B1 - 2
+- [ ] Shared [DEP]Spellslinger - S+U - Series B2 - 2
+- [ ] Shared [DEP]Spellslinger - S+U - Series B3 - 2
+- [ ] Shared Spellslinger - S+U - Series B4 - 2
+- [ ] Shared Spellslinger - S+U - Series C4 - 2
+- [ ] Shared Spellslinger - S+U - Inlaid A - 2
+- [ ] Shared [DEPRECATE] Spellslinger - S+U - Inlaid D - 2
+- [ ] Shared Esper - Damage - Series 1 - C1 T2 - 2
+- [ ] Shared Esper - Damage - Series 2 - C1 T2 - 2
+- [ ] Shared Esper - Damage - Series 3 - C1 T2 - 2
+- [ ] Shared [DEP] Esper - Damage - Inlaid - C2 T2 - 2
+- [ ] Shared Esper - Damage - Series 1 - C3 T2 - 2
+- [ ] Shared Esper - Damage - Series 2 - C3 T2 - 2
+- [ ] Shared Esper - Damage - Series Cap - C7 T3 - 2
+- [ ] Shared [DEP]Esper - Support - Series 1 - C1 T2 - 2
+- [ ] Shared [DEP]Esper - Support - Series 2 - C1 T2 - 2
+- [ ] Shared [DEP]Esper - Support - Series 3 - C1 T2 - 2
+- [ ] Shared [DEP]Esper - Support - Series 4 - C1 T2 - 2
+- [ ] Shared [DEP]Esper - Support - Series Cap - C2 T2 - 2
+- [ ] Shared Esper - Support - Series 1 - C3 T2 - 2
+- [ ] Shared Esper - Support - Series 2 - C3 T2 - 2
+- [ ] Shared [DEP]Esper - Support - Series 2 - C5 T1 - 2
+- [ ] Shared Esper - Support - Series Cap - C5 T2 - 2
+- [ ] Shared Esper - Utility - Series 1 -  C2 T1 - 2
+- [ ] Shared Esper - Utility - Series 2 -  C2 T1 - 2
+- [ ] Shared Esper - Utility - Series Cap -  C2 T1 - 2
+- [ ] Shared Esper - Utility - Inlaid - C2 T2 - 2
+- [ ] Shared Esper - Utility - Series 1 -  C3 T2 - 2
+- [ ] Shared Esper - Utility - Series 2 -  C3 T3 - 2
+- [ ] Shared Engineer - Damage - Physical Damage I - 2
+- [ ] Shared Engineer - Damage - Physical Damage II - 2
+- [ ] Shared Engineer - Damage - Physical Damage III - 2
+- [ ] Shared Engineer - Toughness I - 1
+- [ ] Shared Engineer - Toughness II - 1
+- [ ] Shared Engineer - Toughness III - 1
+- [ ] Shared Esper - Utility - Series 1 -  C4 T3 - 2
+- [ ] Shared Esper - Utility - Series 2 -  C4 T3 - 2
+- [ ] Shared Esper - Utility - Series 3 -  C4 T3 - 2
+- [ ] Shared Esper - Utility - Series 1 -  C5 T2 - 2
+- [ ] Shared Esper - Utility - Series 2 -  C5 T2 - 2
+- [ ] Shared Esper - Utility - Series 3 -  C5 T2 - 2
+- [ ] Shared Engineer - Damage - Technology Damage I - 2
+- [ ] Shared Engineer - Damage - Technology Damage II - 2
+- [ ] Shared Engineer - Damage - Technology Damage III - 2
+- [ ] Shared Esper - Damage/Support - Series 2 - C2 T2 - 2
+- [ ] Shared Esper - Damage/Support - Series 3 - C2 T3 - 2
+- [ ] Shared Esper - Damage/Support - Series Cap - C2 T3 - 2
+- [ ] Shared [DEP]Esper - Damage/Support - Series 1 - C6 T3 - 2
+- [ ] Shared Spellslinger - Support - Series D4 - 2
+- [ ] Shared [DEP]Esper - Damage/Support - Series 2 - C6 T3 - 2
+- [ ] Shared [DEP]Esper - Damage/Support - Series 3 - C6 T3 - 2
+- [ ] Shared [DEP]Esper - Damage/Support - Series Cap - C6 T3 - 2
+- [ ] Shared Spellslinger - Support - Series E4 - 2
+- [ ] Shared [DEP]Esper - Damage/Utility - C4 - T3 - Series - 4 - 2
+- [ ] Shared [DEP]Esper - Damage/Utility - C4 - T3 - Series - Cap - 2
+- [ ] Shared [DEPRECATE] Esper - Damage/Utility - Inlaid - C5 T2 - 2
+- [ ] Shared Esper - Damage/Utility - Series 1 - C7 T2 - 2
+- [ ] Shared Esper - Damage/Utility - Series 2 - C7 T2 - 2
+- [ ] Shared Esper - Damage/Utility - Series 3 - C7 T2 - 2
+- [ ] Shared [DEP]Esper - Support/Utility - Series 1 -  C1 T2 - 2
+- [ ] Shared [DEP]Esper - Support/Utility - Series 2 -  C1 T2 - 2
+- [ ] Shared [DEP]Esper - Support/Utility - Series 3 -  C1 T2 - 2
+- [ ] Shared Esper - Support/Utility - Series Cap -  C1 T3 - 2
+- [ ] Shared Esper - Support/Utility - Series 1 -  C2 T2 - 2
+- [ ] Shared Esper - Support/Utility - Series 2 -  C2 T2 - 2
+- [ ] Shared Esper - Support/Utility - Series 3 -  C2 T2 - 2
+- [ ] Shared [DEPRECATE] Esper - Support/Utility - Inlaid - C3 T3 - 2
+- [ ] Shared Esper - Support/Utility - Series 1 - C4 T3 - 2
+- [ ] Shared Esper - Support/Utility - Series 2 - C4 T3 - 2
+- [ ] Shared Esper - Support/Utility - Series 3 - C4 T3 - 2
+- [ ] Shared Spell Mastery - 2
+- [ ] Shared Engineer - Support - Bolstered Bots I - 2
+- [ ] Shared Engineer - Support - Bolstered Bots II - 2
+- [ ] Shared Engineer - Support - Bolstered Bots III - 2
+- [ ] Shared Engineer - Support - C1 - T1 - Cap - 2
+- [ ] Shared [DEPRECATE] Engineer - S/U - C1 - T3 - Inlaid - 2
+- [ ] Shared Engineer - Support - Incoming Healing I - 2
+- [ ] Shared Engineer - Support - Incoming Healing II - 2
+- [ ] Shared Engineer - Support - Incoming Healing III - 2
+- [ ] Shared Engineer - Support - C3 - T2 - Cap - 2
+- [ ] Shared [DEP] Engineer - Support - Dirty Tricks I - 2
+- [ ] Shared [DEP] Engineer - Support - Dirty Tricks II - 2
+- [ ] Shared Engineer - Support - C7 - T2 - Cap - 2
+- [ ] Shared Engineer - Utility - C1 - T2 - Cap - 2
+- [ ] Shared Engineer - Utility - C2 - T3 - Cap - 2
+- [ ] Shared Engineer - Utility - Shield Regeneration I - 2
+- [ ] Shared Engineer - Utility - Shield Regeneration II - 2
+- [ ] Shared Engineer - Utility - Shield Regeneration III - 2
+- [ ] Shared Engineer - Utility - Resist: Physical I - 2
+- [ ] Shared Engineer - Utility - Resist: Physical II - 2
+- [ ] Shared Engineer - Utility - Resist: Physical III - 2
+- [ ] Shared Engineer - Utility - Resist: Technology I - 2
+- [ ] Shared Engineer - Utility - Resist: Technology II - 2
+- [ ] Shared Engineer - Utility - Resist: Technology III - 2
+- [ ] Shared Engineer - Utility - Sprint Regeneration I - 2
+- [ ] Shared Engineer - Utility - Sprint Regeneration II - 2
+- [ ] Shared Engineer - Utility - Sprint Regeneration III - 2
+- [ ] Shared Engineer - Utility - Resist: Magical I - 2
+- [ ] Shared Engineer - Utility - Resist: Magical II - 2
+- [ ] Shared Engineer - Utility - Resist: Magical III - 2
+- [ ] Shared Engineer - D/S - Grit I - 2
+- [ ] Shared Engineer - D/S - Grit II - 2
+- [ ] Shared Engineer - D/S - Grit III - 2
+- [ ] Shared Engineer - D/S - Empowered Eradication I - 1
+- [ ] Shared Engineer - D/S - Empowered Eradication II - 1
+- [ ] Shared Engineer - D/S - Empowered Eradication III - 1
+- [ ] Shared Engineer - D/S - C5 - T3 - Inlaid - 2
+- [ ] Shared Engineer - D/S - Provocation Boost I - 1
+- [ ] Shared Engineer - D/S - Provocation Boost II - 1
+- [ ] Shared Engineer - D/S - Provocation Boost III - 1
+- [ ] Shared Engineer - D/S - Health Regeneration I - 2
+- [ ] Shared Engineer - D/S - Health Regeneration II - 2
+- [ ] Shared Engineer - D/S - Health Regeneration III - 2
+- [ ] Shared [DEPRECATE] Engineer - D/U - C1 - T3 - Inlaid - 2
+- [ ] Shared Engineer - D/U - C5 - T3 - Inlaid - 2
+- [ ] Shared Engineer - S/U - Movement Speed I - 2
+- [ ] Shared Engineer - S/U - Movement Speed II - 2
+- [ ] Shared Engineer - S/U - Movement Speed III - 2
+- [ ] Shared Engineer - S/U - Hardened Armor I - 1
+- [ ] Shared Engineer - S/U - Hardened Armor II - 1
+- [ ] Shared Engineer - S/U - Hardened Armor III - 1
+- [ ] Shared [DEPRECATE] Engineer - S/U - Swift Gadgetry - 1
+- [ ] Shared Spellslinger - Utility - Series A4 - 2
+- [ ] Shared Spellslinger - Support - Series C4 - 2
+- [ ] Shared AMP 623 - 0
+- [ ] Shared AMP 624 - 0
+- [ ] Shared AMP 629 - 0
+- [ ] Shared AMP 630 - 0
+- [ ] Shared AMP 632 - 0
+- [ ] Shared AMP 633 - 0
+- [ ] Shared AMP 634 - 0
+- [ ] Shared AMP 644 - 0
+- [ ] Shared AMP 647 - 0
+- [ ] Shared AMP 649 - 0
+- [ ] Shared AMP 655 - 0
+- [ ] Shared AMP 656 - 0
+- [ ] Shared AMP 657 - 0
+- [ ] Shared AMP 658 - 0
+- [ ] Shared AMP 659 - 0
+- [ ] Shared AMP 660 - 0
+- [ ] Shared AMP 661 - 0
+- [ ] Shared AMP 662 - 0
+- [ ] Shared AMP 663 - 0
+- [ ] Shared AMP 664 - 0
+- [ ] Shared AMP 665 - 0
+- [ ] Shared AMP 666 - 0
+- [ ] Shared AMP 669 - 0
+- [ ] Shared AMP 670 - 0
+- [ ] Shared AMP 671 - 0
+- [ ] Shared AMP 676 - 0
+- [ ] Shared AMP 679 - 0
+- [ ] Shared Emergency Response - 0
+- [ ] Shared AMP 683 - 0
+- [ ] Shared AMP 684 - 0
+- [ ] Shared AMP 685 - 0
+- [ ] Shared AMP 686 - 0
+- [ ] Shared AMP 687 - 0
+- [ ] Shared AMP 688 - 0
+- [ ] Shared AMP 689 - 0
+- [ ] Shared AMP 690 - 0
+- [ ] Shared AMP 691 - 0
+- [ ] Shared AMP 693 - 0
+- [ ] Shared AMP 694 - 0
+- [ ] Shared AMP 695 - 0
+- [ ] Shared AMP 697 - 0
+- [ ] Shared AMP 698 - 0
+- [ ] Shared AMP 701 - 0
+- [ ] Shared AMP 702 - 0
+- [ ] Shared AMP 703 - 0
+- [ ] Shared AMP 709 - 0
+- [ ] Shared AMP 713 - 0
+- [ ] Shared AMP 716 - 0
+- [ ] Shared AMP 717 - 0
+- [ ] Shared AMP 724 - 0
+- [ ] Shared AMP 725 - 0
+- [ ] Shared AMP 726 - 0
+- [ ] Shared AMP 729 - 0
+- [ ] Shared AMP 731 - 0
+- [ ] Shared ??? - 0
+- [ ] Shared AMP 737 - 0
+- [ ] Shared AMP 748 - 0
+- [ ] Shared AMP 750 - 0
+- [ ] Shared AMP 751 - 0
+- [ ] Shared AMP 752 - 0
+- [ ] Shared AMP 753 - 0
+- [ ] Shared AMP 754 - 0
+- [ ] Shared AMP 755 - 0
+- [ ] Shared AMP 757 - 0
+- [ ] Shared AMP 758 - 0
+- [ ] Shared AMP 759 - 0
+- [ ] Shared AMP 760 - 0
+- [ ] Shared AMP 764 - 0
+- [ ] Shared AMP 768 - 0
+- [ ] Shared [DEP]Stalker - Damage - C3 - T2 - Series Cap - 2
+- [ ] Shared Stalker - Damage - C5 - T1- Series 1 - 2
+- [ ] Shared Stalker - Damage - C5 - T1- Series 2 - 2
+- [ ] Shared Stalker - Damage - C1 - T2 - Series 1 - 2
+- [ ] Shared Stalker - Damage - C1 - T2 - Series 2 - 2
+- [ ] Shared Stalker - Damage - C1 - T2 - Series 3 - 2
+- [ ] Shared Stalker - Damage - C1 - T3 - Series Cap - 2
+- [ ] Shared [DEP]Stalker - Damage - C7 - T3 - Series Cap - 2
+- [ ] Shared [DEP]Stalker - Support - C2 - T1 - Series Cap - 2
+- [ ] Shared Healthy - 2
+- [ ] Shared Stalker - Support - C3 - T2 - Series 2 - 2
+- [ ] Shared Stalker - Support - C1 - T2 - Series 1 - 2
+- [ ] Shared Stalker - Support - C1 - T2 - Series 2 - 2
+- [ ] Shared Stalker - Support - C1 - T2 - Series 3 - 2
+- [ ] Shared Stalker - Support - C1 - T2 - Series 4 - 2
+- [ ] Shared Stalker - Support - C5 - T1 - Series 1 - 2
+- [ ] Shared Stalker - Support - C5 - T1 - Series 2 - 2
+- [ ] Shared Stalker - Support - C7 - T2 - Series 1 - 2
+- [ ] Shared Stalker - Support - C7 - T3 - Series 2 - 2
+- [ ] Shared Stalker - Utility - C2 - T1 - Series 1 - 2
+- [ ] Shared Stalker - Utility - C2 - T1 - Series 2 - 2
+- [ ] Shared Stalker - Utility - C4 - T1 - Series 1 - 2
+- [ ] Shared Stalker - Utility - C4 - T1 - Series 2 - 2
+- [ ] Shared Stalker - Utility - C3 - T2 - Series Cap - 2
+- [ ] Shared Stalker - Utility - C5 - T2 - Series 1 - 2
+- [ ] Shared Stalker - Utility - C5 - T2 - Series 2 - 2
+- [ ] Shared Stalker - Utility - C5 - T2 - Series 3 - 2
+- [ ] Shared [DEP] Stalker - Utility - C5 - T3 - Series Cap - 2
+- [ ] Shared Stalker - Utility - C7 - T2 - Series 1 - 1
+- [ ] Shared Stalker - Utility - C7 - T3 - Series 2 - 1
+- [ ] Shared Stalker - Utility - C7 - T3 - Series 3 - 1
+- [ ] Shared Stalker - D+S - Series A1 - 2
+- [ ] Shared Stalker - D+S - Series A2 - 2
+- [ ] Shared Stalker - D+S - Series A3 - 2
+- [ ] Shared [DEP]Stalker - D+S - Series B4 - 2
+- [ ] Shared Stalker - D+S - Series C1 - 2
+- [ ] Shared Stalker - D+S - Series C2 - 2
+- [ ] Shared Stalker - D+S - Series C3 - 2
+- [ ] Shared Stalker - D+S - Series C4 - 2
+- [ ] Shared Stalker - D+U - Series A4 - 2
+- [ ] Shared Stalker - D+U - Series B1 - 2
+- [ ] Shared Stalker - D+U - Series B2 - 2
+- [ ] Shared Stalker - D+U - Series B3 - 2
+- [ ] Shared Stalker - D+U - Series B4 - 2
+- [ ] Shared Stalker - D+U - Series C1 - 2
+- [ ] Shared Stalker - D+U - Series C2 - 2
+- [ ] Shared Stalker - D+U - Series C3 - 2
+- [ ] Shared Stalker - D+U - Series C4 - 2
+- [ ] Shared Stalker - S+U - Series A1 - 2
+- [ ] Shared Stalker - S+U - Series A2 - 2
+- [ ] Shared Stalker - S+U - Series A3 - 2
+- [ ] Shared [DEP]Stalker - S+U - Series B1 - 2
+- [ ] Shared [DEP]Stalker - S+U - Series B2 - 2
+- [ ] Shared [DEP]Stalker - S+U - Series B3 - 2
+- [ ] Shared [DEP] Stalker - S+U - Series B4 - 2
+- [ ] Shared Stalker - S+U - Series C4 - 2
+- [ ] Shared Stalker - S+U - Series D1 - 2
+- [ ] Shared Stalker - S+U - Series D2 - 2
+- [ ] Shared Stalker - S+U - Series D3 - 2
+- [ ] Shared Stalker - S+U - Series D4 - 2
+- [ ] Shared Spellslinger - Damage - Series E4 - 2
+- [ ] Shared Spellslinger - Damage - Series F4 - 2
+- [ ] Shared Spellslinger - Support - Series G4 - 2
+- [ ] Shared AMP 929 - 0
+- [ ] Shared AMP 933 - 0
+- [ ] Shared AMP 935 - 0
+- [ ] Warrior Warrior - Kinetic Fury - 2
+- [ ] Warrior Global - AMP - Strikethrough I - 2
+- [ ] Warrior Global - AMP - Strikethrough II - 2
+- [ ] Warrior Global - AMP - Strikethrough III - 2
+- [ ] Warrior Warrior - Kinetic Amplifier - 2
+- [ ] Warrior Warrior - Radiate - 2
+- [ ] Warrior Warrior - Cheap Shot - 2
+- [ ] Warrior Global - AMP - Critical Hit I - 2
+- [ ] Warrior Global - AMP - Critical Hit II - 2
+- [ ] Warrior Global - AMP - Critical Hit III - 2
+- [ ] Warrior Warrior - Bloodlust - 2
+- [ ] Warrior Global - AMP - Critical Hit Severity I - 2
+- [ ] Warrior Global - AMP - Critical Hit Severity II - 2
+- [ ] Warrior Global - AMP - Critical Hit Severity III - 2
+- [ ] Warrior Warrior - Power Hitter - 2
+- [ ] Warrior Global - AMP - Assault Power I - 2
+- [ ] Warrior Global - AMP - Assault Power II - 2
+- [ ] Warrior Global - AMP - Assault Power III - 2
+- [ ] Warrior Warrior - Laceration - 2
+- [ ] Warrior Warrior - Armor Shred - 2
+- [ ] Warrior Warrior - Tremor - 2
+- [ ] Warrior Warrior - Berserker - 2
+- [ ] Warrior Warrior - MKII.Suit - 2
+- [ ] Warrior Global - AMP - Critical Mitigation I - 2
+- [ ] Warrior Global - AMP - Critical Mitigation II - 2
+- [ ] Warrior Global - AMP - Critical Mitigation III - 2
+- [ ] Warrior Warrior - Full Defense - 2
+- [ ] Warrior Warrior - Full Force - 2
+- [ ] Warrior Global - AMP -  Maximum Shield Capacity I - 2
+- [ ] Warrior Global - AMP -  Maximum Shield Capacity II - 2
+- [ ] Warrior Global - AMP -  Maximum Shield Capacity III - 2
+- [ ] Warrior Warrior - Reserve Power - 2
+- [ ] Warrior Warrior - Fortitude - 2
+- [ ] Warrior Warrior - Spt - B. Strike - C4 - R11 - Capstone - 2
+- [ ] Warrior Warrior - To the Pain - 1
+- [ ] Warrior Warrior - Health Sponge - 2
+- [ ] Warrior Warrior - Impenetrable - 2
+- [ ] Warrior Warrior - Bust Out - 2
+- [ ] Warrior Global - AMP -  CC Duration I - 2
+- [ ] Warrior Global - AMP -  CC Duration II - 2
+- [ ] Warrior Global - AMP -  CC Duration III - 2
+- [ ] Warrior Warrior - Kinetic Drive - 2
+- [ ] Warrior Generic - Dash Regen - 1 - 2
+- [ ] Warrior Generic - Dash Regen - 2 - 2
+- [ ] Warrior Generic - Dash Regen - 3 - 2
+- [ ] Warrior Global - AMP - Cooldown I - 2
+- [ ] Warrior Global - AMP - Cooldown II - 2
+- [ ] Warrior Global - AMP - Cooldown III - 2
+- [ ] Warrior Warrior - Power Link - 2
+- [ ] Warrior Warrior - Kinetic Burst - 2
+- [ ] Warrior Warrior - Energy Banks - 2
+- [ ] Warrior Warrior - Can't Stop, Won't Stop - 1
+- [ ] Warrior Warrior - Unyielding - 2
+- [ ] Warrior Warrior - Overwhelming Presence - 2
+- [ ] Warrior Warrior - Fury - 2
+- [ ] Warrior Warrior - Stance Dancer - 2
+- [ ] Warrior Global - AMP - Support Power I - 2
+- [ ] Warrior Global - AMP - Support Power II - 2
+- [ ] Warrior Global - AMP - Support Power III - 2
+- [ ] Warrior Global - AMP - Armor Pierce I - 2
+- [ ] Warrior Global - AMP - Armor Pierce II - 2
+- [ ] Warrior Global - AMP - Armor Pierce III - 2
+- [ ] Warrior Warrior - Sunder - 2
+- [ ] Warrior Warrior - Cornered - 2
+- [ ] Warrior Warrior - Festering Blade - 2
+- [ ] Warrior Global - AMP - Lifesteal I - 2
+- [ ] Warrior Global - AMP - Lifesteal II - 2
+- [ ] Warrior Global - AMP - Lifesteal III - 2
+- [ ] Warrior Warrior - No Escape - 2
+- [ ] Warrior Warrior - Recklessness - 2
+- [ ] Warrior Global - AMP -  PvP Offense I - 2
+- [ ] Warrior Global - AMP -  PvP Offense II - 2
+- [ ] Warrior Global - AMP -  PvP Offense III - 2
+- [ ] Warrior Warrior - Killing Spree - 2
+- [ ] Warrior Warrior - Speed Burst - 2
+- [ ] Warrior Warrior - Shock Absorber - 2
+- [ ] Warrior War - Kinetic Buffer - 2
+- [ ] Warrior Global - AMP -  PvP Defense I - 2
+- [ ] Warrior Global - AMP -  PvP Defense II - 2
+- [ ] Warrior Global - AMP -  PvP Defense III - 2
+- [ ] Warrior Warrior - Indomitable - 2
+- [ ] Warrior Warrior - Fortify - 2
+- [ ] Warrior Warrior - Bring It - 2
+- [ ] Warrior Warrior - Anti-Magic Armor - 2
+- [ ] Warrior Global - AMP - Deflect I - 2
+- [ ] Warrior Global - AMP - Deflect II - 2
+- [ ] Warrior Global - AMP - Deflect III - 2
+- [ ] Engineer Engineer - Damage - C1 - T2 - Cap - 2
+- [ ] Engineer Engineer - Damage - C2 - T2 - Inlaid - 2
+- [ ] Engineer Engineer - Damage - C1 - T3 - Inlaid - 2
+- [ ] Engineer Engineer - Damage - C3 - T2 - Inlaid - 2
+- [ ] Engineer Global - AMP - Critical Hit I - 2
+- [ ] Engineer Global - AMP - Critical Hit II - 2
+- [ ] Engineer Global - AMP - Critical Hit III - 2
+- [ ] Engineer Global - AMP - Critical Hit Severity I - 2
+- [ ] Engineer Global - AMP - Critical Hit Severity II - 2
+- [ ] Engineer Global - AMP - Critical Hit Severity III - 2
+- [ ] Engineer Engineer - Damage - C4 - T3 - Cap - 2
+- [ ] Engineer Global - AMP - Assault Power I - 2
+- [ ] Engineer Global - AMP - Assault Power II - 2
+- [ ] Engineer Global - AMP - Assault Power III - 2
+- [ ] Engineer Engineer - Assault Capstone - Target Acquisition - 2
+- [ ] Engineer Global - AMP - Strikethrough I - 2
+- [ ] Engineer Global - AMP - Strikethrough II - 2
+- [ ] Engineer Global - AMP - Strikethrough III - 2
+- [ ] Engineer Engineer - Damage - C5 - T3 - Cap - 2
+- [ ] Engineer Engineer - Damage - C6 - T2 - Inlaid - 2
+- [ ] Engineer Engineer - Finesse - Rank 4 - 2
+- [ ] Engineer Engineer - Support - C2 - T1 - Inlaid - 2
+- [ ] Engineer Generic - Dash Regen - 1 - 2
+- [ ] Engineer Generic - Dash Regen - 2 - 2
+- [ ] Engineer Generic - Dash Regen - 3 - 2
+- [ ] Engineer Engineer - Support - Dirty Tricks - 2
+- [ ] Engineer Engineer - Support - C4 - T2 - Cap - 2
+- [ ] Engineer Global - AMP - Support Power I - 2
+- [ ] Engineer Global - AMP - Support Power II - 2
+- [ ] Engineer Global - AMP - Support Power III - 2
+- [ ] Engineer Engineer - Support Capstone - Disruptive Module - 2
+- [ ] Engineer Engineer - D/S - C5 - T3 - Inlaid - 2
+- [ ] Engineer Global - AMP - Critical Mitigation I - 2
+- [ ] Engineer Global - AMP - Critical Mitigation II - 2
+- [ ] Engineer Global - AMP - Critical Mitigation III - 2
+- [ ] Engineer Engineer - Support - C6 - T1 - Inlaid - 2
+- [ ] Engineer Engineer - Support - C6 - T3 - Inlaid - 2
+- [ ] Engineer Global - AMP - Cooldown I - 2
+- [ ] Engineer Global - AMP - Cooldown II - 2
+- [ ] Engineer Global - AMP - Cooldown III - 2
+- [ ] Engineer Engineer - Support - C7 - T3 - Inlaid - 2
+- [ ] Engineer Global - AMP - Deflect I - 2
+- [ ] Engineer Global - AMP - Deflect II - 2
+- [ ] Engineer Global - AMP - Deflect III - 2
+- [ ] Engineer Engineer - Utility - C1 - T3 - Inlaid - 2
+- [ ] Engineer Engineer - Utility - C2 - T2 - Inlaid - 2
+- [ ] Engineer Global - AMP -  Maximum Shield Capacity I - 2
+- [ ] Engineer Global - AMP -  Maximum Shield Capacity II - 2
+- [ ] Engineer Global - AMP -  Maximum Shield Capacity III - 2
+- [ ] Engineer Engineer - Utility - C3 - T1 - Inlaid - 2
+- [ ] Engineer Engineer - Utility Capstone - Repair Bot - 2
+- [ ] Engineer Engineer - Utility - C5 - T1 - Inlaid - 2
+- [ ] Engineer Engineer - Utility - C6 - T2 - Inlaid - 2
+- [ ] Engineer Engineer - Utility - C6 - T3 - Inlaid - 2
+- [ ] Engineer Engineer - Utility - C7 - T2 - Inlaid - 2
+- [ ] Engineer Engineer - Insight - Rank 2 - 2
+- [ ] Engineer Engineer - D/S - C1 - T3 - Inlaid - 2
+- [ ] Engineer Engineer - The Zone - Inlaid - 2
+- [ ] Engineer Engineer - D/S - C4 - T3 - Inlaid - 2
+- [ ] Engineer Engineer - D/S - C7 - T3 - Inlaid - 2
+- [ ] Engineer Global - AMP - Armor Pierce I - 2
+- [ ] Engineer Global - AMP - Armor Pierce II - 2
+- [ ] Engineer Global - AMP - Armor Pierce III - 2
+- [ ] Engineer Engineer - D/U - C2 - T2 - Inlaid - 2
+- [ ] Engineer Engineer - S/U - C3 - T3 - Inlaid - 2
+- [ ] Engineer Engineer - D/U - C4 - T3 - Inlaid - 2
+- [ ] Engineer Engineer - D/U - C5 - T3 - Inlaid - 2
+- [ ] Engineer Global - AMP - Lifesteal I - 2
+- [ ] Engineer Global - AMP - Lifesteal II - 2
+- [ ] Engineer Global - AMP - Lifesteal III - 2
+- [ ] Engineer Global - AMP -  PvP Offense I - 2
+- [ ] Engineer Global - AMP -  PvP Offense II - 2
+- [ ] Engineer Global - AMP -  PvP Offense III - 2
+- [ ] Engineer Engineer - S/U - C7 - T3 - Inlaid - 2
+- [ ] Engineer Global - AMP -  PvP Defense I - 2
+- [ ] Engineer Global - AMP -  PvP Defense II - 2
+- [ ] Engineer Global - AMP -  PvP Defense III - 2
+- [ ] Engineer Engineer - S/U - C1 - T3 - Inlaid - 2
+- [ ] Engineer Global - AMP -  CC Duration I - 2
+- [ ] Engineer Global - AMP -  CC Duration II - 2
+- [ ] Engineer Global - AMP -  CC Duration III - 2
+- [ ] Engineer Engineer - D/U - C4 - T3 - Inlaid - 2
+- [ ] Engineer Engineer - S/U - C4 - T3 - Inlaid - 2
+- [ ] Engineer Engineer - Damage - C3 - T3 - Cap - 2
+- [ ] Engineer Engineer - Support - Reckless Dash - 2
+- [ ] Engineer Engineer - Brutality - Rank 3 - 2
+- [ ] Engineer Engineer - Damage - C4 - T3 - Capstone Augment - 2
+- [ ] Esper Esper - Damage - Inlaid - C1 T3 - 2
+- [ ] Esper Esper - Damage - Inlaid - C2 T3 - 2
+- [ ] Esper Global - AMP - Critical Hit I - 2
+- [ ] Esper Global - AMP - Critical Hit II - 2
+- [ ] Esper Global - AMP - Critical Hit III - 2
+- [ ] Esper Esper - Damage - Series Cap - C3 T2 - 2
+- [ ] Esper Esper - Damage - Series Cap - C3 T3 - 2
+- [ ] Esper Global - AMP - Assault Power I - 2
+- [ ] Esper Global - AMP - Assault Power II - 2
+- [ ] Esper Global - AMP - Assault Power III - 2
+- [ ] Esper Esper - Damage - Series Cap - C4 T3 - 2
+- [ ] Esper Global - AMP - Critical Hit Severity I - 2
+- [ ] Esper Global - AMP - Critical Hit Severity II - 2
+- [ ] Esper Esper - Damage - Series Cap - C5 T2 - 2
+- [ ] Esper Esper - Damage - Inlaid - C6 T2 - 2
+- [ ] Esper Esper - Damage - C7 - T1 - Inlaid - 2
+- [ ] Esper Global - AMP - Strikethrough I - 2
+- [ ] Esper Global - AMP - Strikethrough II - 2
+- [ ] Esper Global - AMP - Strikethrough III - 2
+- [ ] Esper Esper - Damage - Inlaid - C7 T3 - 2
+- [ ] Esper Esper - Support - Series Cap - C1 T2 - 2
+- [ ] Esper Esper - Support - Inlaid - C1 T3 - 2
+- [ ] Esper Global - AMP - Intensity I - 2
+- [ ] Esper Global - AMP - Intensity II - 2
+- [ ] Esper Global - AMP - Intensity III - 2
+- [ ] Esper Esper - Support - Inlaid - C2 T2 - 2
+- [ ] Esper Esper - Support - Inlaid - C3 T1 - 2
+- [ ] Esper Global - AMP - Support Power I - 2
+- [ ] Esper Global - AMP - Support Power II - 2
+- [ ] Esper Global - AMP - Support Power III - 2
+- [ ] Esper Esper - Support - Series Cap - C4 T3 - 2
+- [ ] Esper Esper - Support - Series 1 - C5 T1 - 2
+- [ ] Esper Global - AMP - Focus Cost I - 2
+- [ ] Esper Global - AMP - Focus Cost II - 2
+- [ ] Esper Global - AMP - Focus Cost III - 2
+- [ ] Esper Esper - Support - Inlaid - C6 T3 - 2
+- [ ] Esper Esper - Support - Inlaid - C7 T2 - 2
+- [ ] Esper Global - AMP - Cooldown I - 2
+- [ ] Esper Global - AMP - Cooldown II - 2
+- [ ] Esper Global - AMP -  Maximum Shield Capacity I - 2
+- [ ] Esper Global - AMP -  Maximum Shield Capacity II - 2
+- [ ] Esper Global - AMP -  Maximum Shield Capacity III - 2
+- [ ] Esper Esper - Utility - Series Cap -  C1 T3 - 2
+- [ ] Esper Esper - Utility - C1 T3 - 2
+- [ ] Esper Esper - Utility - Inlaid -  C2 T3 - 2
+- [ ] Esper Global - AMP -  CC Duration I - 2
+- [ ] Esper Global - AMP -  CC Duration II - 2
+- [ ] Esper Esper - Utility - Series Cap -  C4 T2 - 2
+- [ ] Esper Esper - Utility - Series Cap -  C4 T3 - 1
+- [ ] Esper Esper - Utility - Inlaid - C6 T3 - 2
+- [ ] Esper Esper - Support - Inlaid - C6 T3 - 2
+- [ ] Esper Esper - Support - Inlaid - C7 T2 - 2
+- [ ] Esper Esper - Damage/Support - Inlaid - C1 T2 - 2
+- [ ] Esper Esper - Damage/Support - Inalid - C1 T3 - 2
+- [ ] Esper Esper - Damage/Support - Series 1 - C2 T2 - 2
+- [ ] Esper Generic - Dash Regen - 1 - 2
+- [ ] Esper Generic - Dash Regen - 2 - 2
+- [ ] Esper Generic - Dash Regen - 3 - 2
+- [ ] Esper Esper - Damage/Support - Inlaid - C4 T3 - 2
+- [ ] Esper Esper - Damage/Support - Inalid - C6 T2 - 2
+- [ ] Esper Esper - Damage/Support - Inlaid - C7 T3 - 2
+- [ ] Esper Global - AMP -  PvP Offense I - 2
+- [ ] Esper Global - AMP -  PvP Offense II - 2
+- [ ] Esper Global - AMP -  PvP Offense III - 2
+- [ ] Esper Esper - Damage/Utility- Series Cap - C1 T3 - 2
+- [ ] Esper Esper - Damage/Utility- Inlaid - C2 T3 - 2
+- [ ] Esper Esper - Damage/Utility - Inlaid - C3 T2 - 2
+- [ ] Esper Global - AMP - Armor Pierce I - 2
+- [ ] Esper Global - AMP - Armor Pierce II - 2
+- [ ] Esper Global - AMP - Armor Pierce III - 2
+- [ ] Esper Esper - Damage/Utility - Inlaid - C6 T3 - 2
+- [ ] Esper Esper - Support/Utility - Series Cap -  C2 T2 - 2
+- [ ] Esper Esper - Support/Utility - Series Cap -  C5 T2 - 1
+- [ ] Esper Esper - Support/Utility - Inlaid - C6 T3 - 2
+- [ ] Esper Global - AMP -  PvP Defense I - 2
+- [ ] Esper Global - AMP -  PvP Defense II - 2
+- [ ] Esper Global - AMP -  PvP Defense III - 2
+- [ ] Esper Esper - Support/Utility - Series Cap -  C7 T3 - 2
+- [ ] Esper Esper - Spectral Swarm - Fluff - 2
+- [ ] Esper Esper - Mirage - Base - 2
+- [ ] Esper Esper - Fixation - 2
+- [ ] Esper Global - AMP - Lifesteal I - 2
+- [ ] Esper Global - AMP - Lifesteal II - 2
+- [ ] Esper Global - AMP - Lifesteal III - 2
+- [ ] Esper Global - AMP -  CC Duration III - 2
+- [ ] Esper Global - AMP - Cooldown III - 2
+- [ ] Esper Global - AMP - Critical Hit Severity III - 2
+- [ ] Medic Global - AMP - Strikethrough I - 2
+- [ ] Medic Global - AMP - Strikethrough II - 2
+- [ ] Medic Global - AMP - Strikethrough III - 2
+- [ ] Medic Medic - Weakness Into Strength - 2
+- [ ] Medic Medic - Core Damage - 2
+- [ ] Medic Global - AMP - Critical Hit I - 2
+- [ ] Medic Global - AMP - Critical Hit II - 2
+- [ ] Medic Global - AMP - Critical Hit III - 2
+- [ ] Medic Medic - Victory Spark - 2
+- [ ] Medic Medic - Stay With Me - 2
+- [ ] Medic Medic - In Flux - 2
+- [ ] Medic Global - AMP - Critical Hit Severity I - 2
+- [ ] Medic Global - AMP - Critical Hit Severity II - 2
+- [ ] Medic Global - AMP - Critical Hit Severity III - 2
+- [ ] Medic Global - AMP - Assault Power I - 2
+- [ ] Medic Global - AMP - Assault Power II - 2
+- [ ] Medic Global - AMP - Assault Power III - 2
+- [ ] Medic Medic - Annihilation - 2
+- [ ] Medic Medic - Entrapment - 2
+- [ ] Medic Medic - Renewable Probes - 2
+- [ ] Medic Medic - Danger Zone - 2
+- [ ] Medic Medic - Meltdown - 2
+- [ ] Medic Global - AMP - Intensity I - 2
+- [ ] Medic Global - AMP - Intensity II - 2
+- [ ] Medic Global - AMP - Intensity III - 2
+- [ ] Medic Medic - Running on Empty - 2
+- [ ] Medic Medic - Emergency - 2
+- [ ] Medic Global - AMP - Support Power I - 2
+- [ ] Medic Global - AMP - Support Power II - 2
+- [ ] Medic Global - AMP - Support Power III - 2
+- [ ] Medic Medic - Rejuvenator - 2
+- [ ] Medic Medic - Emergency Extraction - 2
+- [ ] Medic Medic - Armor Coating - 2
+- [ ] Medic Medic - Hypercharge - 2
+- [ ] Medic Medic - Solid State - 2
+- [ ] Medic Medic - Amorphous Barrier - 2
+- [ ] Medic Medic - Invigorating Shields - 2
+- [ ] Medic Global - AMP -  CC Duration I - 2
+- [ ] Medic Global - AMP -  CC Duration II - 2
+- [ ] Medic Global - AMP -  CC Duration III - 2
+- [ ] Medic Medic - Protection Probes - 2
+- [ ] Medic Medic - Health Probes - 2
+- [ ] Medic Medic - Regenerator - 2
+- [ ] Medic Medic - Null Zone - 2
+- [ ] Medic Medic - Defense Mechanism - 2
+- [ ] Medic Medic - Shield Protocol - 2
+- [ ] Medic Medic - Assault - Tier 2 - Critical Priority - 2
+- [ ] Medic Global - AMP - Cooldown I - 2
+- [ ] Medic Global - AMP - Cooldown II - 2
+- [ ] Medic Global - AMP - Cooldown III - 2
+- [ ] Medic Medic - Power Converter - 1
+- [ ] Medic Medic - Scalpel! Forceps! - 2
+- [ ] Medic Medic - Surgical - 2
+- [ ] Medic Medic - Power Cadence - 2
+- [ ] Medic Global - AMP - Armor Pierce I - 2
+- [ ] Medic Global - AMP - Armor Pierce II - 2
+- [ ] Medic Global - AMP - Armor Pierce III - 2
+- [ ] Medic Global - AMP - Lifesteal I - 2
+- [ ] Medic Global - AMP - Lifesteal II - 2
+- [ ] Medic Global - AMP - Lifesteal III - 2
+- [ ] Medic Global - AMP -  PvP Offense I - 2
+- [ ] Medic Global - AMP -  PvP Offense II - 2
+- [ ] Medic Global - AMP -  PvP Offense III - 2
+- [ ] Medic Medic - Chemical Burn - 2
+- [ ] Medic Medic - Antigen Isolation - 2
+- [ ] Medic Medic - Energy Pulse - 2
+- [ ] Medic Global - AMP -  PvP Defense I - 2
+- [ ] Medic Global - AMP -  PvP Defense II - 2
+- [ ] Medic Global - AMP -  PvP Defense III - 2
+- [ ] Medic Medic - Attrition - 2
+- [ ] Medic Medic - Concerted Effort - 2
+- [ ] Medic Medic - Acerbic Injection - 2
+- [ ] Medic Medic - Debilitative Armor - 2
+- [ ] Medic Medic - Recycler - 2
+- [ ] Medic Medic - Transfusion - 2
+- [ ] Medic Medic - Protective Surge - 2
+- [ ] Medic Medic - Reboot - 2
+- [ ] Medic Medic - Quick Dodge - 2
+- [ ] Medic Global - AMP -  Maximum Shield Capacity I - 2
+- [ ] Medic Global - AMP -  Maximum Shield Capacity II - 2
+- [ ] Medic Global - AMP -  Maximum Shield Capacity III - 2
+- [ ] Medic Global - AMP - Focus Cost I - 2
+- [ ] Medic Global - AMP - Focus Cost II - 2
+- [ ] Medic Global - AMP - Focus Cost III - 2
+- [ ] Medic Generic - Dash Regen - 1 - 2
+- [ ] Medic Generic - Dash Regen - 2 - 2
+- [ ] Medic Generic - Dash Regen - 3 - 2
+- [ ] Stalker Global - AMP - Critical Hit I - 2
+- [ ] Stalker Global - AMP - Critical Hit II - 2
+- [ ] Stalker Global - AMP - Critical Hit III - 2
+- [ ] Stalker Global - AMP - Armor Pierce I - 2
+- [ ] Stalker Global - AMP - Armor Pierce II - 2
+- [ ] Stalker Global - AMP - Armor Pierce III - 2
+- [ ] Stalker Global - AMP - Lifesteal I - 2
+- [ ] Stalker Global - AMP - Lifesteal II - 2
+- [ ] Stalker Global - AMP - Lifesteal III - 2
+- [ ] Stalker Global - AMP - Assault Power I - 2
+- [ ] Stalker Global - AMP - Assault Power II - 2
+- [ ] Stalker Global - AMP - Assault Power III - 2
+- [ ] Stalker Stalker - Damage - C5 - T2- Series Cap - 2
+- [ ] Stalker Global - AMP - Strikethrough I - 2
+- [ ] Stalker Global - AMP - Strikethrough II - 2
+- [ ] Stalker Global - AMP - Strikethrough III - 2
+- [ ] Stalker Stalker - Damage - C2 - T2 - Inlaid - 2
+- [ ] Stalker Stalker - Damage - C2 - T3 - Inlaid - 2
+- [ ] Stalker Stalker - Damage - C6- T2 - Inlaid - 2
+- [ ] Stalker Stalker - Damage - C6 - T3 - Inlaid - 2
+- [ ] Stalker Stalker - Damage - C7 - T1 - Inlaid - 2
+- [ ] Stalker Stalker - Damage - C7 - T3 - Inlaid - 2
+- [ ] Stalker Global - AMP - Deflect I - 2
+- [ ] Stalker Global - AMP - Deflect II - 2
+- [ ] Stalker Global - AMP - Deflect III - 2
+- [ ] Stalker Stalker - Support - C3 - T2 - Series Cap - 2
+- [ ] Stalker Stalker - Support - C5 - T2 - Series Cap - 2
+- [ ] Stalker Global - AMP - Support Power I - 2
+- [ ] Stalker Global - AMP - Support Power II - 2
+- [ ] Stalker Global - AMP - Support Power III - 2
+- [ ] Stalker Stalker - Support - C4 - T3 - Series Cap - 1
+- [ ] Stalker Stalker - Support - C7 - T3 - Series Cap - 2
+- [ ] Stalker Stalker - Support - C1 - T3 - Inlaid - 2
+- [ ] Stalker Stalker - Support - C2 - T2 - Inlaid - 2
+- [ ] Stalker Stalker - Support - Inlaid C - 2
+- [ ] Stalker Stalker - Support - C6 - T3 - Inlaid - 2
+- [ ] Stalker Stalker - Support - C7 - T2 - Inlaid - 2
+- [ ] Stalker Stalker - Utility - C2 - T1 - Series Cap - 2
+- [ ] Stalker Stalker - Utility - C4 - T2 - Series  Cap - 2
+- [ ] Stalker Generic - Dash Regen - 1 - 2
+- [ ] Stalker Generic - Dash Regen - 2 - 2
+- [ ] Stalker Generic - Dash Regen - 3 - 2
+- [ ] Stalker Global - AMP -  Maximum Shield Capacity I - 2
+- [ ] Stalker Global - AMP -  Maximum Shield Capacity II - 2
+- [ ] Stalker Global - AMP -  Maximum Shield Capacity III - 2
+- [ ] Stalker Stalker - Utility - C7 - T3 - Series Cap - 2
+- [ ] Stalker Stalker - Utility - C1 - T3 - Inlaid - Regen - 2
+- [ ] Stalker Stalker - Utility - C2 - T2 - Inlaid - 2
+- [ ] Stalker Stalker - Utility - C2 - T3 - Inlaid - 2
+- [ ] Stalker Stalker - D+U - Inlaid B - 2
+- [ ] Stalker Stalker - Utility - C6 - T3 - Inlaid - 2
+- [ ] Stalker Stalker - Utility - C6 - T1 - Inlaid - 2
+- [ ] Stalker Global - AMP - Critical Hit Severity I - 2
+- [ ] Stalker Global - AMP - Critical Hit Severity II - 2
+- [ ] Stalker Global - AMP - Critical Hit Severity III - 2
+- [ ] Stalker Stalker - D+S - Inlaid A - 2
+- [ ] Stalker Stalker - D+S - Inlaid B - 2
+- [ ] Stalker Stalker - D+S - Inlaid C - 2
+- [ ] Stalker Stalker - D+S - Inlaid D - 2
+- [ ] Stalker Stalker - D+S - Inlaid E - 2
+- [ ] Stalker Global - AMP -  PvP Offense I - 2
+- [ ] Stalker Global - AMP -  PvP Offense II - 2
+- [ ] Stalker Global - AMP -  PvP Offense III - 2
+- [ ] Stalker Stalker - D+U - Inlaid A - 2
+- [ ] Stalker Stalker - Brutality - Tier 3 - Milestone -  Base - 2
+- [ ] Stalker Stalker - D+U - Inlaid C - 2
+- [ ] Stalker Stalker - D+U - Inlaid D - 2
+- [ ] Stalker Stalker - D+U - Inlaid E - 2
+- [ ] Stalker Stalker - S+U - Series A4 - 2
+- [ ] Stalker Global - AMP -  PvP Defense I - 2
+- [ ] Stalker Global - AMP -  PvP Defense II - 2
+- [ ] Stalker Global - AMP -  PvP Defense III - 2
+- [ ] Stalker Stalker - S+U - Inlaid A - 2
+- [ ] Stalker Stalker - S+U - Inlaid B - 2
+- [ ] Stalker Stalker - S+U - Inlaid C - 2
+- [ ] Stalker Stalker - Clone - Base - 2
+- [ ] Stalker Amplification Spike - 2
+- [ ] Stalker Stalker - Bloodthirst Active - 2
+- [ ] Stalker Global - AMP - Critical Mitigation I - 2
+- [ ] Stalker Global - AMP - Critical Mitigation II - 2
+- [ ] Stalker Global - AMP - Critical Mitigation III - 2
+- [ ] Stalker Global - AMP - Cooldown I - 2
+- [ ] Stalker Global - AMP - Cooldown II - 2
+- [ ] Stalker Global - AMP - Cooldown III - 2
+- [ ] Stalker Global - AMP -  CC Duration I - 2
+- [ ] Stalker Global - AMP -  CC Duration II - 2
+- [ ] Stalker Global - AMP -  CC Duration III - 2
+- [ ] Spellslinger Spellslinger - Assault - Tier 3 - Surge Damage - 2
+- [ ] Spellslinger Global - AMP - Critical Hit I - 2
+- [ ] Spellslinger Global - AMP - Critical Hit II - 2
+- [ ] Spellslinger Global - AMP - Critical Hit III - 2
+- [ ] Spellslinger Spellslinger - Assault - Tier 2 - Critical Surge - 2
+- [ ] Spellslinger Global - AMP - Critical Hit Severity I - 2
+- [ ] Spellslinger Global - AMP - Critical Hit Severity II - 2
+- [ ] Spellslinger Global - AMP - Strikethrough I - 2
+- [ ] Spellslinger Global - AMP - Strikethrough II - 2
+- [ ] Spellslinger Global - AMP - Strikethrough III - 2
+- [ ] Spellslinger Spellslinger - Assault - Tier 2 - Multi-Burst - 2
+- [ ] Spellslinger Global - AMP - Assault Power I - 2
+- [ ] Spellslinger Global - AMP - Assault Power II - 2
+- [ ] Spellslinger Global - AMP - Assault Power III - 2
+- [ ] Spellslinger Spellslinger - Assault - Tier 3 - Assassinate - 2
+- [ ] Spellslinger Spellslinger - Utility - Tier 2 - Frost Snap - Base - 2
+- [ ] Spellslinger Spellslinger - A/U - Tier 3 - Proc - 2
+- [ ] Spellslinger Spellslinger - Assault - Tier 3 - Gunslinger - 2
+- [ ] Spellslinger Spellslinger - Assault - Tier 2 - Trigger Fingers - 2
+- [ ] Spellslinger Spellslinger - Assault - Tier 2 - Piercing Shots - 2
+- [ ] Spellslinger Global - AMP - Intensity I - 2
+- [ ] Spellslinger Global - AMP - Intensity II - 2
+- [ ] Spellslinger Global - AMP - Intensity III - 2
+- [ ] Spellslinger Spellslinger - Support - Rank 2 - Savior - 2
+- [ ] Spellslinger Global - AMP - Cooldown I - 2
+- [ ] Spellslinger Global - AMP - Cooldown II - 2
+- [ ] Spellslinger Global - AMP - Cooldown III - 2
+- [ ] Spellslinger Global - AMP - Support Power I - 2
+- [ ] Spellslinger Global - AMP - Support Power II - 2
+- [ ] Spellslinger Global - AMP - Support Power III - 2
+- [ ] Spellslinger Spellslinger - Support - Inlaid B - 2
+- [ ] Spellslinger Spellslinger - Support - Inlaid C - 2
+- [ ] Spellslinger Spellslinger - Support - Inlaid D - 2
+- [ ] Spellslinger Spellslinger - Support - Inlaid F - 2
+- [ ] Spellslinger Spellslinger - Support - Inlaid G - 2
+- [ ] Spellslinger Global - AMP -  Maximum Shield Capacity I - 2
+- [ ] Spellslinger Global - AMP -  Maximum Shield Capacity II - 2
+- [ ] Spellslinger Global - AMP -  Maximum Shield Capacity III - 2
+- [ ] Spellslinger Global - AMP -  CC Duration I - 2
+- [ ] Spellslinger Global - AMP -  CC Duration II - 2
+- [ ] Spellslinger Global - AMP -  CC Duration III - 2
+- [ ] Spellslinger Spellslinger - Utility - Series F4 - 2
+- [ ] Spellslinger Spellslinger - Utility - Inlaid A1 - 2
+- [ ] Spellslinger Spellslinger - S/U - Tier 3 - Hyper Shield - 2
+- [ ] Spellslinger Spellslinger - Utility - Tier 2 - Speed of the Void - Base - 2
+- [ ] Spellslinger Spellslinger - S/U - Tier 2 - Enhanced Shields - 2
+- [ ] Spellslinger Spellslinger - A/S - Tier 3 - Urgency - 2
+- [ ] Spellslinger Spellslinger - A/S - Tier 2 - Readiness - Base - 2
+- [ ] Spellslinger Spellslinger - A/S - Tier 2 - Locked and Loaded - Base - 2
+- [ ] Spellslinger Spellslinger - A/U - Tier 2 - Shock & Awe - 2
+- [ ] Spellslinger Spellslinger - A/S - Tier 2 - The One - 2
+- [ ] Spellslinger Spellslinger - A/S - Tier 2 - Void Stone - 2
+- [ ] Spellslinger Global - AMP - Armor Pierce I - 2
+- [ ] Spellslinger Global - AMP - Armor Pierce II - 2
+- [ ] Spellslinger Global - AMP - Armor Pierce III - 2
+- [ ] Spellslinger Spellslinger - D+U - Series A4 - 2
+- [ ] Spellslinger Global - AMP - Lifesteal I - 2
+- [ ] Spellslinger Global - AMP - Lifesteal II - 2
+- [ ] Spellslinger Global - AMP - Lifesteal III - 2
+- [ ] Spellslinger Global - AMP -  PvP Offense I - 2
+- [ ] Spellslinger Global - AMP -  PvP Offense II - 2
+- [ ] Spellslinger Global - AMP -  PvP Offense III - 2
+- [ ] Spellslinger Spellslinger - Assault - Tier 2 - Proc - 2
+- [ ] Spellslinger Spellslinger - A/U - Tier 2 - 2
+- [ ] Spellslinger Spellslinger - Utility - Tier 2 - Reorient - Base - 2
+- [ ] Spellslinger Spellslinger - D+U - Inlaid C - 2
+- [ ] Spellslinger Spellslinger - Utility - Tier 3 - Base - 2
+- [ ] Spellslinger Global - AMP -  PvP Defense I - 2
+- [ ] Spellslinger Global - AMP -  PvP Defense II - 2
+- [ ] Spellslinger Global - AMP -  PvP Defense III - 2
+- [ ] Spellslinger Spellslinger - S/U - Tier 2 - Fury - 2
+- [ ] Spellslinger Spellslinger - S/U - Tier 2 - Flame Armor - 2
+- [ ] Spellslinger Spellslinger - S/U - Tier 2 - Frost Armor - 2
+- [ ] Spellslinger Spellslinger - Assault - Tier 2 - Deadly Chain - 2
+- [ ] Spellslinger Spellslinger - Support - Rank 3 - Desperation - 2
+- [ ] Spellslinger Spellslinger - Support - Series G5 - 2
+- [ ] Spellslinger Spellslinger - D+S - Series A4 - 2
+- [ ] Spellslinger Spellslinger - A/S - Tier 2 - Power Surge - 2
+- [ ] Spellslinger Spellslinger - S/U - Tier 3 - Final Salvo - 1
+- [ ] Spellslinger Spellslinger - Utility - Inlaid H - 1
+- [ ] Spellslinger Global - AMP - Critical Hit Severity III - 2
+- [ ] Spellslinger Generic - Dash Regen - 1 - 2
+- [ ] Spellslinger Generic - Dash Regen - 2 - 2
+- [ ] Spellslinger Generic - Dash Regen - 3 - 2
+- [ ] Spellslinger Global - AMP - Focus Cost I - 2
+- [ ] Spellslinger Global - AMP - Focus Cost II - 2
+- [ ] Spellslinger Global - AMP - Focus Cost III - 2

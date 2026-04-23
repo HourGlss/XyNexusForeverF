@@ -286,6 +286,37 @@ namespace NexusForever.Game.Spell
         }
 
         /// <summary>
+        /// Synchronise the enabled AMP ids in this <see cref="IActionSet"/> with the supplied collection.
+        /// </summary>
+        public bool SyncAmps(IEnumerable<ushort> desiredAmps)
+        {
+            ushort[] desired = desiredAmps?
+                .Distinct()
+                .ToArray() ?? [];
+            var desiredSet = desired.ToHashSet();
+            bool changed = false;
+
+            foreach (IActionSetAmp amp in Amps
+                .Where(a => !desiredSet.Contains((ushort)a.Entry.Id))
+                .ToList())
+            {
+                RemoveAmp(amp);
+                changed = true;
+            }
+
+            foreach (ushort id in desired)
+            {
+                if (GetAmp(id) != null)
+                    continue;
+
+                AddAmp(id);
+                changed = true;
+            }
+
+            return changed;
+        }
+
+        /// <summary>
         /// Remove one or more AMP's from <see cref="IActionSet"/> depending on supplied <see cref="AmpRespecType"/>.
         /// </summary>
         public void RemoveAmp(AmpRespecType type, uint value)
@@ -379,7 +410,7 @@ namespace NexusForever.Game.Spell
                 SpecIndex = Index
             };
 
-            foreach (IActionSetAmp amp in Amps)
+            foreach (IActionSetAmp amp in Amps.OrderBy(a => a.Entry.Id))
                 serverAmpList.Amps.Add((ushort)amp.Entry.Id);
 
             return serverAmpList;

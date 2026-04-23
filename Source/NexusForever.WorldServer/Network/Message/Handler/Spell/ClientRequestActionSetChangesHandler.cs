@@ -44,21 +44,13 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Spell
             foreach (ClientRequestActionSetChanges.ActionTier actionTier in requestActionSetChanges.ActionTiers)
                 session.Player.SpellManager.UpdateSpell(actionTier.Action, actionTier.Tier, requestActionSetChanges.ActionSetIndex);
 
+            session.EnqueueMessageEncrypted(new ServerActionSetClearCache());
             session.EnqueueMessageEncrypted(actionSet.BuildServerActionSet());
             if (requestActionSetChanges.ActionTiers.Count > 0)
                 session.Player.SpellManager.SendServerAbilityPoints();
 
-            // only new AMP can be added with this packet, filter out existing ones
-            List<ushort> newAmps = requestActionSetChanges.Amps
-                .Except(actionSet.Amps
-                    .Select(a => (ushort)a.Entry.Id))
-                .ToList();
-
-            if (newAmps.Count > 0)
+            if (actionSet.SyncAmps(requestActionSetChanges.Amps))
             {
-                foreach (ushort id in newAmps)
-                    actionSet.AddAmp(id);
-
                 session.Player.SpellManager.GrantSpells();
                 session.EnqueueMessageEncrypted(actionSet.BuildServerAmpList());
             }

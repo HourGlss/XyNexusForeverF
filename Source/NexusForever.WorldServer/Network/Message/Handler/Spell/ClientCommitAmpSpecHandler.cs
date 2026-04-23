@@ -10,18 +10,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Spell
         public void HandleMessage(IWorldSession session, ClientCommitAmpSpec commitAmpSpec)
         {
             IActionSet actionSet = session.Player.SpellManager.GetActionSet(session.Player.SpellManager.ActiveActionSet);
-            bool changed = false;
-
-            foreach (ushort id in commitAmpSpec.Amps.Distinct())
-            {
-                if (actionSet.GetAmp(id) != null)
-                    continue;
-
-                actionSet.AddAmp(id);
-                changed = true;
-            }
-
-            if (changed)
+            if (actionSet.SyncAmps(commitAmpSpec.Amps))
             {
                 session.Player.SpellManager.GrantSpells();
                 session.EnqueueMessageEncrypted(actionSet.BuildServerAmpList());
