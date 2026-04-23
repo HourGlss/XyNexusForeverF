@@ -30,8 +30,8 @@
 - [ ] Warrior Unstoppable Force - 1
 - [ ] Warrior Stance: Onslaught - 1
 - [x] Engineer Artillerybot
-- [ ] Engineer Bio Shell - 2
-- [ ] Engineer Bolt Caster - 2
+- [x] Engineer Bio Shell
+- [x] Engineer Bolt Caster
 - [ ] Engineer Electrocute - 2
 - [ ] Engineer Energy Auger - 2
 - [ ] Engineer Mortar Strike - 2
@@ -39,7 +39,7 @@
 - [ ] Engineer Quick Burst - 2
 - [ ] Engineer Target Acquisition - 2
 - [ ] Engineer Unstable Anomaly - 1
-- [ ] Engineer Bruiserbot - 2
+- [x] Engineer Bruiserbot
 - [ ] Engineer Disruptive Module - 2
 - [ ] Engineer Feedback - 2
 - [ ] Engineer Flak Cannon - 2
@@ -48,16 +48,16 @@
 - [ ] Engineer Ricochet - 2
 - [ ] Engineer Shock Pulse - 1
 - [ ] Engineer Thresher - 1
-- [ ] Engineer Unsteady Miasma - 1
+- [x] Engineer Unsteady Miasma
 - [ ] Engineer Code Red - 1
-- [ ] Engineer Diminisherbot - 2
+- [x] Engineer Diminisherbot
 - [ ] Engineer Obstruct Vision - 2
 - [ ] Engineer Personal Defense Unit - 2
 - [ ] Engineer Recursive Matrix - 1
 - [ ] Engineer Repairbot - 2
 - [ ] Engineer Shatter Impairment - 1
 - [ ] Engineer Urgent Withdrawal - 1
-- [ ] Engineer Volatile Injection - 2
+- [x] Engineer Volatile Injection
 - [ ] Engineer Zap - 2
 - [ ] Engineer Mode: Eradicate - 1
 - [ ] Engineer Mode: Provoke - 1
