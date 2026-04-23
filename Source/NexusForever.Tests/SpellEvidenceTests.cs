@@ -114,15 +114,22 @@ public class SpellEvidenceTests
     }
 
     [Theory]
-    [MemberData(nameof(EngineerScoreTwoSkillEffectTypes))]
-    public void EngineerScoreTwoSkillEffectTypesHaveApplyHandlers(string skillName, SpellEffectType[] spellEffectTypes)
+    [MemberData(nameof(ClassScoreTwoSkillEffectTypes))]
+    public void ClassScoreTwoSkillEffectTypesHaveExpectedApplyCoverage(string className, string skillName, SpellEffectType[] spellEffectTypes)
     {
         var manager = new GlobalSpellEffectManager();
         manager.Initialise();
 
         Assert.NotEmpty(spellEffectTypes);
         foreach (SpellEffectType spellEffectType in spellEffectTypes)
-            Assert.True(manager.GetSpellEffectApplyDelegate(spellEffectType) != null, $"{skillName} depends on {spellEffectType} apply support.");
+        {
+            bool hasApplyHandler = manager.GetSpellEffectApplyDelegate(spellEffectType) != null;
+            bool knownMissingHandler = ClassScoreTwoKnownMissingApplyHandlers.Contains(spellEffectType);
+
+            Assert.True(
+                hasApplyHandler || knownMissingHandler,
+                $"{className} {skillName} depends on {spellEffectType}, but no apply handler is registered and it is not documented as a known score-2 gap.");
+        }
     }
 
     [Theory]
@@ -392,25 +399,166 @@ public class SpellEvidenceTests
                 || type.GetGenericTypeDefinition() == typeof(ISpellEffectRemoveHandler<>));
     }
 
-    public static IEnumerable<object[]> EngineerScoreTwoSkillEffectTypes()
+    private static readonly HashSet<SpellEffectType> ClassScoreTwoKnownMissingApplyHandlers =
+    [
+        SpellEffectType.Absorption,
+        SpellEffectType.DelayDeath,
+        SpellEffectType.DespawnUnit,
+        SpellEffectType.DistributedDamage,
+        SpellEffectType.FacilityModification,
+        SpellEffectType.ForceFacing,
+        SpellEffectType.ForcedAction,
+        SpellEffectType.ModifyAbilityCharges,
+        SpellEffectType.ModifySpell,
+        SpellEffectType.ModifySpellEffect,
+        SpellEffectType.ProxyChannelVariableTime,
+        SpellEffectType.RavelSignal,
+        SpellEffectType.SapVital,
+        SpellEffectType.ShieldOverload,
+        SpellEffectType.SummonCreature,
+        SpellEffectType.SummonTrap,
+        SpellEffectType.Transference,
+    ];
+
+    public static IEnumerable<object[]> ClassScoreTwoSkillEffectTypes()
     {
-        yield return ["Electrocute", new[] { SpellEffectType.Damage, SpellEffectType.UnitPropertyModifier, SpellEffectType.Fluff, SpellEffectType.Proxy }];
-        yield return ["Energy Auger", new[] { SpellEffectType.CCStateSet, SpellEffectType.Damage, SpellEffectType.UnitPropertyModifier, SpellEffectType.Fluff, SpellEffectType.Proxy }];
-        yield return ["Mortar Strike", new[] { SpellEffectType.Damage, SpellEffectType.Fluff, SpellEffectType.Proxy }];
-        yield return ["Pulse Blast", new[] { SpellEffectType.Damage, SpellEffectType.Fluff, SpellEffectType.Proxy }];
-        yield return ["Quick Burst", new[] { SpellEffectType.Damage, SpellEffectType.UnitPropertyModifier, SpellEffectType.Fluff, SpellEffectType.Proxy }];
-        yield return ["Target Acquisition", new[] { SpellEffectType.VitalModifier, SpellEffectType.Damage, SpellEffectType.Fluff, SpellEffectType.Proxy }];
-        yield return ["Disruptive Module", new[] { SpellEffectType.VitalModifier, SpellEffectType.Damage, SpellEffectType.Fluff, SpellEffectType.Proxy, SpellEffectType.HealShields }];
-        yield return ["Feedback", new[] { SpellEffectType.Damage, SpellEffectType.UnitPropertyModifier, SpellEffectType.Proc, SpellEffectType.Proxy, SpellEffectType.SpellForceRemove }];
-        yield return ["Flak Cannon", new[] { SpellEffectType.VitalModifier, SpellEffectType.Damage, SpellEffectType.Fluff, SpellEffectType.Proxy }];
-        yield return ["Hyper Wave", new[] { SpellEffectType.CCStateSet, SpellEffectType.Damage, SpellEffectType.UnitPropertyModifier, SpellEffectType.Proxy }];
-        yield return ["Particle Ejector", new[] { SpellEffectType.Damage, SpellEffectType.UnitPropertyModifier, SpellEffectType.Proxy }];
-        yield return ["Ricochet", new[] { SpellEffectType.Damage, SpellEffectType.UnitPropertyModifier, SpellEffectType.Fluff, SpellEffectType.Proxy }];
-        yield return ["Obstruct Vision", new[] { SpellEffectType.CCStateSet, SpellEffectType.Damage, SpellEffectType.Proxy }];
-        yield return ["Personal Defense Unit", new[] { SpellEffectType.Heal, SpellEffectType.UnitPropertyModifier, SpellEffectType.Proxy }];
-        yield return ["Repairbot", new[] { SpellEffectType.Fluff, SpellEffectType.Proxy, SpellEffectType.SummonPet }];
-        yield return ["Zap", new[] { SpellEffectType.CCStateSet, SpellEffectType.Damage, SpellEffectType.UnitPropertyModifier }];
+        foreach (string row in ClassScoreTwoSkillEffectTypeData.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            string[] columns = row.Split('|', StringSplitOptions.TrimEntries);
+            if (columns.Length != 3)
+                throw new InvalidOperationException($"Invalid class skill evidence row: {row}");
+
+            SpellEffectType[] spellEffectTypes = columns[2]
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(Enum.Parse<SpellEffectType>)
+                .ToArray();
+
+            yield return [columns[0], columns[1], spellEffectTypes];
+        }
     }
+
+    private const string ClassScoreTwoSkillEffectTypeData = """
+Warrior|Augmented Blade|VitalModifier,Damage,UnitPropertyModifier,Proc,Fluff,Proxy,ModifySpellCooldown,SpellForceRemove
+Warrior|Breaching Strikes|Damage,UnitPropertyModifier,Fluff,Proxy,ModifySpellCooldown,SpellForceRemove,RavelSignal
+Warrior|Leap|VitalModifier,ForcedMove,CCStateSet,Damage,UnitPropertyModifier,Fluff,Proxy,CCStateBreak,ForceFacing,SpellForceRemove
+Warrior|Relentless Strikes|VitalModifier,Damage,Fluff,Proxy,ModifySpellCooldown,SpellForceRemove
+Warrior|Savage Strike|VitalModifier,CCStateSet,Damage,UnitPropertyModifier,Proxy
+Warrior|Tremor|ForcedMove,CCStateSet,Damage,Fluff,Proxy
+Warrior|Whirlwind|ForcedMove,CCStateSet,Damage,UnitPropertyModifier,Proxy,ModifyInterruptArmour,SpellForceRemove
+Warrior|Atomic Spear|Damage,UnitPropertyModifier,Fluff,Proxy,DistributedDamage,SpellForceRemove
+Warrior|Atomic Surge|CCStateSet,Damage,UnitPropertyModifier,Proxy
+Warrior|Bolstering Strike|VitalModifier,Damage,UnitPropertyModifier,Fluff,Proxy,ModifySpellCooldown,SpellForceRemove,HealShields
+Warrior|Bum Rush|ForcedMove,CCStateSet,Damage,UnitPropertyModifier,Fluff,Proxy
+Warrior|Jolt|Damage,UnitPropertyModifier,Fluff,Proxy,ModifySpellCooldown
+Warrior|Menacing Strike|Damage,Heal,UnitPropertyModifier,Proxy
+Warrior|Plasma Wall|VitalModifier,Damage,UnitPropertyModifier,Proc,Fluff,Proxy,SpellForceRemove
+Warrior|Polarity Field|VitalModifier,Damage,UnitPropertyModifier,Fluff,Proxy
+Warrior|Shield Burst|Damage,Fluff,Proxy,ShieldOverload,SpellForceRemove,HealShields
+Warrior|Defense Grid|VitalModifier,Damage,UnitPropertyModifier,Proc,Fluff,Proxy,HealShields
+Warrior|Emergency Reserves|VitalModifier,UnitPropertyModifier,Fluff,Proxy,HealShields
+Warrior|Flash Bang|CCStateSet,Damage,Fluff,Proxy
+Warrior|Grapple|CCStateSet,Damage,Proc,Fluff,Proxy
+Warrior|Kick|CCStateSet,Damage,Proxy
+Warrior|Plasma Blast|CCStateSet,Damage,Fluff,HealShields
+Warrior|Power Link|VitalModifier,Damage,UnitPropertyModifier,Proc,Fluff,Proxy,ModifySpellCooldown,SpellForceRemove
+Warrior|Tether Bolt|CCStateSet,Damage
+Engineer|Electrocute|Damage,Proxy,SpellForceRemove
+Engineer|Energy Auger|CCStateSet,Damage,UnitPropertyModifier,Fluff,Proxy
+Engineer|Mortar Strike|Damage,Fluff,Proxy,ModifySpellCooldown,SpellForceRemove
+Engineer|Pulse Blast|Damage,UnitPropertyModifier,Fluff,Proxy
+Engineer|Quick Burst|Damage,UnitPropertyModifier,Fluff,Proxy
+Engineer|Target Acquisition|VitalModifier,Damage,UnitPropertyModifier,Fluff,Proxy,ModifySpellCooldown
+Engineer|Disruptive Module|Damage,UnitPropertyModifier,Fluff,Proxy,HealShields
+Engineer|Feedback|Damage,UnitPropertyModifier,Proc,Fluff,Proxy,ModifySpellCooldown,SpellForceRemove
+Engineer|Flak Cannon|Damage,UnitPropertyModifier,Fluff,Proxy,SpellForceRemove
+Engineer|Hyper Wave|CCStateSet,Damage,UnitPropertyModifier,Proxy
+Engineer|Particle Ejector|Damage,UnitPropertyModifier,Proxy
+Engineer|Ricochet|VitalModifier,CCStateSet,Damage,UnitPropertyModifier,Fluff,Proxy,ModifySpell,ModifySpellCooldown
+Engineer|Obstruct Vision|CCStateSet,Damage,Proxy
+Engineer|Personal Defense Unit|Heal,UnitPropertyModifier,Fluff,Proxy,Absorption,SummonTrap
+Engineer|Repairbot|UnitPropertyModifier,Fluff,Proxy,FacilityModification,SummonPet
+Engineer|Zap|CCStateSet,Damage,UnitPropertyModifier,SapVital
+Esper|Blade Dance|Damage,UnitPropertyModifier,Fluff,Proxy,FacilityModification,ModifySpellCooldown,DespawnUnit
+Esper|Concentrated Blade|Damage,Fluff,Proxy
+Esper|Haunt|CCStateSet,Damage,UnitPropertyModifier,Proc,Proxy,ModifySpell,ModifySpellCooldown,SpellForceRemove
+Esper|Illusionary Blades|Damage,Proc,Fluff,Proxy
+Esper|Reap|VitalModifier,CCStateSet,Damage,Fluff,Proxy
+Esper|Telekinetic Storm|CCStateSet,Damage,UnitPropertyModifier,Fluff,SummonCreature,Proxy
+Esper|Telekinetic Strike|VitalModifier,CCStateSet,Damage,Fluff,Proxy,SpellForceRemove
+Esper|Mind Over Body|VitalModifier,Heal,UnitPropertyModifier,Fluff,Proxy,SpellForceRemove
+Esper|Pyrokinetic Flame|Damage,Heal,UnitPropertyModifier,Proc,Fluff,Proxy,ModifySpell
+Esper|Soothe|VitalModifier,Heal,Fluff,Proxy
+Esper|Crush|CCStateSet,Damage,UnitPropertyModifier,Proxy
+Esper|Fixation|VitalModifier,Proxy,ModifySpellCooldown
+Esper|Incapacitate|CCStateSet,Damage,UnitPropertyModifier,Proc,Proxy
+Esper|Meditate|VitalModifier,Heal,UnitPropertyModifier
+Esper|Projected Spirit|ForcedMove,Heal,Proxy,CCStateBreak,ModifySpellCooldown
+Esper|Restraint|VitalModifier,CCStateSet,Damage,Fluff,Proxy
+Esper|Shockwave|ForcedMove,CCStateSet,Damage,CCStateBreak
+Medic|Annihilation|Damage,Proc,Fluff,Proxy,ModifySpellCooldown
+Medic|Atomize|Damage,Fluff,Proxy,ModifySpellCooldown,SpellForceRemove
+Medic|Collider|Damage,Proxy,ModifySpellCooldown
+Medic|Devastator Probes|Damage,Proxy,ModifySpellCooldown,SpellForceRemove
+Medic|Discharge|Damage,Fluff,Proxy,ModifySpellCooldown,SpellForceRemove
+Medic|Fissure|Damage,UnitPropertyModifier,Proc,Fluff,Proxy,SpellForceRemove
+Medic|Gamma Rays|VitalModifier,Damage,Fluff,Proxy,SpellForceRemove
+Medic|Nullifier|Damage,Fluff,Proxy
+Medic|Quantum Cascade|Damage,UnitPropertyModifier,Proc,Fluff,Proxy,SpellForceRemoveChanneled,ModifySpellCooldown,SpellForceRemove
+Medic|Crisis Wave|VitalModifier,Heal,UnitPropertyModifier,Proc,Proxy,ModifySpell,ModifySpellCooldown,SpellForceRemove
+Medic|Emission|Heal,Fluff,Proxy,ModifySpell,ModifySpellCooldown,SpellForceRemove
+Medic|Extricate|ForcedMove,Heal,UnitPropertyModifier,CCStateBreak,HealShields
+Medic|Flash|Heal,Proxy,HealShields
+Medic|Shield Surge|Damage,UnitPropertyModifier,Fluff,Proxy,HealShields
+Medic|Triage|Heal,UnitPropertyModifier,HealShields
+Medic|Empowering Probes|Damage,Heal,UnitPropertyModifier,Proc,Fluff,Proxy
+Medic|Field Probes|Damage,Heal,UnitPropertyModifier,Proc,Fluff,Proxy,SpellForceRemove
+Medic|Magnetic Lockdown|VitalModifier,CCStateSet,Damage,Proxy,ModifySpell
+Medic|Paralytic Surge|CCStateSet,Damage
+Medic|Protection Probes|UnitPropertyModifier,Fluff,Proxy,HealShields
+Medic|Recharge|VitalModifier,ModifySpellCooldown
+Medic|Restrictor|ForcedMove,CCStateSet,UnitPropertyModifier,Fluff,Proxy
+Medic|Urgency|ForcedMove,CCStateSet,Damage,Heal,UnitPropertyModifier,Proxy,CCStateBreak,SpellForceRemove
+Stalker|Concussive Kicks|ForcedMove,CCStateSet,Damage,ModifySpellCooldown
+Stalker|Cripple|CCStateSet,Damage,UnitPropertyModifier,Proxy,SpellForceRemove
+Stalker|Impale|Damage,Proxy
+Stalker|Neutralize|Damage,Proc,Fluff,Proxy,ModifySpell,ModifySpellCooldown,SpellForceRemove
+Stalker|Punish|VitalModifier,Damage,UnitPropertyModifier,Proxy,ModifySpellCooldown,SpellForceRemove
+Stalker|Shred|Damage,Proxy,DistributedDamage
+Stalker|Decimate|VitalModifier,Damage,UnitPropertyModifier,Fluff,Proxy,ModifySpellCooldown
+Stalker|Razor Disk|Damage,UnitPropertyModifier,Proxy
+Stalker|Razor Storm|VitalModifier,CCStateSet,Damage,UnitPropertyModifier,Proxy,SpellForceRemove
+Stalker|Steadfast|UnitPropertyModifier,Proxy
+Stalker|Whiplash|VitalModifier,Damage,UnitPropertyModifier,Proxy,SpellForceRemove
+Stalker|Collapse|VitalModifier,CCStateSet,Damage,Proxy,SpellForceRemove
+Stalker|Pounce|VitalModifier,ForcedMove,CCStateSet,Transference,Damage,UnitPropertyModifier,Fluff,Proxy,SpellForceRemove
+Stalker|Preparation|VitalModifier,Heal,UnitPropertyModifier,ForcedAction,Proxy,SpellForceRemove
+Stalker|Reaver|CCStateSet,Damage,UnitPropertyModifier,Proxy,SpellForceRemove
+Stalker|Stagger|CCStateSet,Damage,Proxy,ModifySpellCooldown,SpellForceRemove
+Spellslinger|Arcane Missiles|VitalModifier,Damage,UnitPropertyModifier,Proc,Fluff,Proxy,DistributedDamage
+Spellslinger|Assassinate|Damage,Fluff,Proxy,ModifyAbilityCharges
+Spellslinger|Charged Shot|CCStateSet,Damage,Fluff,Proxy,ModifySpellCooldown
+Spellslinger|Chill|CCStateSet,Damage,Proxy
+Spellslinger|Flame Burst|Damage,UnitPropertyModifier,Proc,Fluff,Proxy,ModifySpellCooldown,SpellForceRemove
+Spellslinger|Ignite|Damage,Proxy
+Spellslinger|Quick Draw|VitalModifier,Damage,UnitPropertyModifier,Fluff,Proxy,SpellForceRemove
+Spellslinger|Rapid Fire|VitalModifier,Damage,UnitPropertyModifier,Proc,Fluff,Proxy,ModifySpellCooldown,SpellForceRemove,ProxyChannelVariableTime
+Spellslinger|True Shot|Damage,Proc,ModifySpell
+Spellslinger|Wild Barrage|CCStateSet,Damage,Proxy
+Spellslinger|Dual Fire|VitalModifier,Damage,Heal,Proxy
+Spellslinger|Healing Salve|Heal,UnitPropertyModifier,Proc,Proxy
+Spellslinger|Regenerative Pulse|VitalModifier,Heal,Fluff,Proxy,ModifySpellCooldown,SpellForceRemove,DelayDeath
+Spellslinger|Runic Healing|Heal,UnitPropertyModifier,Proxy,ModifySpell,ModifySpellEffect
+Spellslinger|Sustain|Heal,Fluff,ModifySpellCooldown
+Spellslinger|Vitality Burst|Heal,UnitPropertyModifier,Fluff,Proxy,ModifySpellCooldown
+Spellslinger|Voidspring|Heal,UnitPropertyModifier,Fluff,Proxy
+Spellslinger|Affinity|Heal,Proc,Fluff,Proxy,ModifySpellCooldown,SpellForceRemove
+Spellslinger|Flash Freeze|CCStateSet,Damage,Proxy
+Spellslinger|Gate|VitalModifier,ForcedMove,CCStateSet,UnitPropertyModifier,Fluff,SummonCreature,Proxy,ModifySpellCooldown
+Spellslinger|Gather Focus|UnitPropertyModifier
+Spellslinger|Phase Shift|CCStateSet,Heal,UnitPropertyModifier,Proc,CCStateBreak,ModifyInterruptArmour,ModifySpellCooldown
+Spellslinger|Void Pact|UnitPropertyModifier,Proc,Fluff,Proxy,ModifySpellCooldown
+Spellslinger|Spell Surge|Fluff,Proxy,SpellForceRemoveChanneled,SpellForceRemove
+""";
 
     private static ISpellInfoPatch CreatePatch(Type patchType)
     {
