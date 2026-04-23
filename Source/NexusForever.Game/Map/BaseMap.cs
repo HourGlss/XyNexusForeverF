@@ -458,6 +458,12 @@ namespace NexusForever.Game.Map
                     continue;
 
                 IWorldEntity entity = entityFactory.CreateWorldEntity(model.Type);
+                if (entity == null)
+                {
+                    log.Warn($"Skipping entity {model.Id} with unsupported type {model.Type} on map {Entry.Id}.");
+                    continue;
+                }
+
                 entity.Initialise(creatureInfo, model);
                 entity.AddToMap(this, new Vector3(model.X, model.Y, model.Z));
             }

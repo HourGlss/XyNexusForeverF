@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Spell;
 using NexusForever.Game.Static.Spell;
+using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Abilities;
 
@@ -12,6 +14,14 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Spell
         public void HandleMessage(IWorldSession session, ClientRequestActionSetChanges requestActionSetChanges)
         {
             // TODO: check for client validity, e.g. Level & Spell4TierRequirements
+            if (requestActionSetChanges.ActionSetIndex >= ActionSet.MaxActionSets)
+                throw new InvalidPacketValueException($"Invalid action set index: {requestActionSetChanges.ActionSetIndex}");
+
+            if (requestActionSetChanges.Actions.Count > ActionSet.MaxActionCount)
+                throw new InvalidPacketValueException($"Too many action set shortcuts: {requestActionSetChanges.Actions.Count}");
+
+            if (requestActionSetChanges.ActionTiers.Any(t => t.Tier > ActionSet.MaxTier))
+                throw new InvalidPacketValueException("Invalid action tier.");
 
             IActionSet actionSet = session.Player.SpellManager.GetActionSet(requestActionSetChanges.ActionSetIndex);
 

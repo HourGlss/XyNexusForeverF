@@ -20,22 +20,15 @@ namespace NexusForever.StsServer.Network.Packet
             if (HasHeader)
             {
                 uint remaining = reader.BaseStream.Remaining();
-                if (remaining < dataLength)
-                {
-                    // don't have enough data, push entire frame into packet
-                    byte[] data = reader.ReadBytes((int)remaining);
-                    Buffer.BlockCopy(data, 0, buffer, (int)position, (int)remaining);
-                }
-                else
-                {
-                    // enough data, push required frame data into packet
-                    byte[] data = reader.ReadBytes((int)dataLength);
-                    Buffer.BlockCopy(data, 0, buffer, (int)position, (int)dataLength);
+                uint remainingBody = dataLength - position;
+                uint length = Math.Min(remaining, remainingBody);
 
+                byte[] data = reader.ReadBytes((int)length);
+                Buffer.BlockCopy(data, 0, buffer, (int)position, (int)length);
+                position += length;
+
+                if (position == dataLength)
                     packet.SetBody(buffer, dataLength);
-                }
-
-                position += remaining;
             }
             else
             {

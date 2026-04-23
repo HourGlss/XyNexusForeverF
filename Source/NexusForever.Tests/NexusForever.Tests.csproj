@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NexusForever.Game\NexusForever.Game.csproj" />
+    <ProjectReference Include="..\NexusForever.Game.Abstract\NexusForever.Game.Abstract.csproj" />
+    <ProjectReference Include="..\NexusForever.Game.Static\NexusForever.Game.Static.csproj" />
+    <ProjectReference Include="..\NexusForever.Network\NexusForever.Network.csproj" />
+    <ProjectReference Include="..\NexusForever.Network.Internal\NexusForever.Network.Internal.csproj" />
+    <ProjectReference Include="..\NexusForever.Network.Sts\NexusForever.Network.Sts.csproj" />
+    <ProjectReference Include="..\NexusForever.Network.World\NexusForever.Network.World.csproj" />
+    <ProjectReference Include="..\NexusForever.StsServer\NexusForever.StsServer.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>

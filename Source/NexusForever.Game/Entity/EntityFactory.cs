@@ -73,7 +73,7 @@ namespace NexusForever.Game.Entity
                 EntityType.HousingHarvestPlug => serviceProvider.GetService<IHousingHarvestPlugEntity>(),
                 EntityType.HousingPlant       => serviceProvider.GetService<IHousingPlantEntity>(),
                 EntityType.Lockbox            => serviceProvider.GetService<ILockboxEntity>(),
-                _                             => throw new NotImplementedException()
+                _                             => null
             };
         }
     }

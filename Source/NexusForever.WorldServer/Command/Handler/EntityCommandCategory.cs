@@ -61,14 +61,20 @@ namespace NexusForever.WorldServer.Command.Handler
                 return;
             }
 
-            if (temporary ?? true)
-                context.Invoker.SummonFactory.Summon(creatureInfo, entityType ?? creatureInfo.Entry.CreationTypeEnum, context.Invoker.Position, context.Invoker.Rotation);
-            else
+            EntityType type = entityType ?? creatureInfo.Entry.CreationTypeEnum;
+            IWorldEntity entity = entityFactory.CreateWorldEntity(type);
+            if (entity == null)
             {
-                IWorldEntity entity = entityFactory.CreateWorldEntity(entityType ?? creatureInfo.Entry.CreationTypeEnum);
-                entity.Initialise(creatureInfo);
-                entity.AddToMap(context.Invoker.Map, context.Invoker.Position);
+                context.SendMessage($"Unsupported entity type {type}!");
+                return;
             }
+
+            entity.Initialise(creatureInfo);
+            entity.Rotation = context.Invoker.Rotation;
+            if (temporary ?? true)
+                entity.SummonerGuid = context.Invoker.Guid;
+
+            entity.AddToMap(context.Invoker.Map, context.Invoker.Position);
         }
 
         [Command(Permission.EntityInfo, "Get information about the target entity.", "i", "info")]

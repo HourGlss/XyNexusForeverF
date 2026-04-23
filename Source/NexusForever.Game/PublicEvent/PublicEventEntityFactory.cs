@@ -69,6 +69,13 @@ namespace NexusForever.Game.PublicEvent
                     continue;
 
                 IWorldEntity entity = entityFactory.CreateWorldEntity(model.Type);
+                if (entity == null)
+                {
+                    log.LogWarning("Skipping public event {PublicEventId} entity {EntityId} with unsupported type {EntityType}.",
+                        publicEvent.Id, model.Id, model.Type);
+                    continue;
+                }
+
                 entity.Initialise(creatureInfo, model);
                 entity.Rotation = new Vector3(model.Rx, model.Ry, model.Rz);
                 entity.AddToMap(publicEvent.Map, new Vector3(model.X, model.Y, model.Z));

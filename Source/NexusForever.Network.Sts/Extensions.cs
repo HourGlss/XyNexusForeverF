@@ -13,6 +13,9 @@ namespace NexusForever.Network.Sts
                 return default;
 
             XmlNode valueNode = node.FirstChild;
+            if (valueNode == null)
+                return default;
+
             return (T)Convert.ChangeType(valueNode.Value, typeof(T));
         }
     }

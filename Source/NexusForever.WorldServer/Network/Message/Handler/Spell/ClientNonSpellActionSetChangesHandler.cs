@@ -1,5 +1,6 @@
 ﻿using System;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Spell;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.Network;
@@ -25,6 +26,20 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Spell
         public void HandleMessage(IWorldSession session, ClientNonSpellActionSetChanges requestActionSetChanges)
         {
             // TODO: validate the rest of the shortcut types when known
+            if (requestActionSetChanges.SpecIndex >= ActionSet.MaxActionSets)
+                throw new InvalidPacketValueException($"Invalid action set index: {requestActionSetChanges.SpecIndex}");
+
+            if ((uint)requestActionSetChanges.ActionBarIndex >= ActionSet.MaxActionCount)
+                throw new InvalidPacketValueException($"Invalid action bar index: {requestActionSetChanges.ActionBarIndex}");
+
+            IActionSet actionSet = session.Player.SpellManager.GetActionSet(requestActionSetChanges.SpecIndex);
+            if (requestActionSetChanges.ShortcutType == ShortcutType.None || requestActionSetChanges.ObjectId == 0u)
+            {
+                if (actionSet.GetShortcut(requestActionSetChanges.ActionBarIndex) != null)
+                    actionSet.RemoveShortcut(requestActionSetChanges.ActionBarIndex);
+
+                return;
+            }
 
             switch (requestActionSetChanges.ShortcutType)
             {
@@ -49,11 +64,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Spell
                     throw new InvalidPacketValueException($"Unsupported shortcut type: {requestActionSetChanges.ShortcutType}");
             }
 
-            IActionSet actionSet = session.Player.SpellManager.GetActionSet(requestActionSetChanges.SpecIndex);
-            if (requestActionSetChanges.ObjectId == 0u)
-                actionSet.RemoveShortcut(requestActionSetChanges.ActionBarIndex);
-            else
-                actionSet.AddShortcut(requestActionSetChanges.ActionBarIndex, requestActionSetChanges.ShortcutType, requestActionSetChanges.ObjectId, 0);
+            actionSet.AddShortcut(requestActionSetChanges.ActionBarIndex, requestActionSetChanges.ShortcutType, requestActionSetChanges.ObjectId, 0);
         }
     }
 }

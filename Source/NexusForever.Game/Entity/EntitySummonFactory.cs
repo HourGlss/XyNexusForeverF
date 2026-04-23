@@ -71,6 +71,9 @@ namespace NexusForever.Game.Entity
 
         private void Summon(ICreatureInfo creatureInfo, IWorldEntity entity, Vector3 position, Vector3 rotation, OnAddDelegate add = null)
         {
+            if (entity == null)
+                throw new InvalidOperationException($"Unable to create summon entity for creature {creatureInfo?.Entry.Id}.");
+
             entity.Initialise(creatureInfo);
             entity.Rotation = rotation;
             entity.SummonerGuid = owner.Guid;

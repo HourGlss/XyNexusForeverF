@@ -812,6 +812,9 @@ namespace NexusForever.Game.Entity.Movement
                 return;
 
             List<Vector3> nodes = generator.CalculatePath();
+            if (nodes == null || nodes.Count < 2)
+                return;
+
             LaunchSpline(nodes, SplineType.Linear, mode, speed);
         }
 

@@ -68,7 +68,6 @@ namespace NexusForever.Game.Entity
         private readonly Dictionary<uint /*spell4Id*/, double /*cooldown*/> spellCooldowns = new();
         private readonly Dictionary<uint /*cooldownId*/, double /*cooldown*/> cooldownIds = new();
         private readonly Dictionary<uint /*globalCooldownEnum*/, double /*cooldown*/> globalSpellCooldowns = new();
-        private uint maxGlobalSpellCooldownEnum = 3; // TODO: Read value from GameTables?
 
         private readonly IActionSet[] actionSets = new ActionSet[ActionSet.MaxActionSets];
 
@@ -98,6 +97,10 @@ namespace NexusForever.Game.Entity
                 spells.Add(spellModel.Spell4BaseId, new CharacterSpell(owner, spellModel, spellBaseInfo, item));
             }
 
+            uint maxGlobalSpellCooldownEnum = GameTableManager.Instance.Spell4.Entries
+                .Select(s => s.GlobalCooldownEnum)
+                .DefaultIfEmpty(3u)
+                .Max();
             for (uint i = 0; i <= maxGlobalSpellCooldownEnum; i++)
                 globalSpellCooldowns.Add(i, 0d);
 
@@ -282,7 +285,7 @@ namespace NexusForever.Game.Entity
             foreach (CharacterSpell unlockedSpell in spells.Values)
                 unlockedSpell.Update(lastTick);
 
-            if (continuousSpell != null && globalSpellCooldowns[continuousSpell.GlobalCooldownEnum] <= 0d && !player.IsCasting())
+            if (continuousSpell != null && GetGlobalSpellCooldown(continuousSpell.GlobalCooldownEnum) <= 0d && !player.IsCasting())
                 continuousSpell?.SpellManagerCast();
         }
 
@@ -586,11 +589,12 @@ namespace NexusForever.Game.Entity
 
         public double GetGlobalSpellCooldown(uint globalEnum)
         {
-            return globalSpellCooldowns[globalEnum];
+            return globalSpellCooldowns.TryGetValue(globalEnum, out double cooldown) ? cooldown : 0d;
         }
 
         public void SetGlobalSpellCooldown(uint globalEnum, double cooldown)
         {
+            globalSpellCooldowns.TryAdd(globalEnum, 0d);
             globalSpellCooldowns[globalEnum] = cooldown;
             log.Trace($"Global spell cooldown {globalEnum} set to {cooldown} seconds.");
         }

@@ -150,6 +150,9 @@ namespace NexusForever.StsServer.Network
                 message.Read(doc);
             }
 
+            if (message is ClientConnectMessage connect)
+                connect.ReadHeaders(packet.Headers);
+
             handlerInfo.Delegate.Invoke(this, message);
         }
 

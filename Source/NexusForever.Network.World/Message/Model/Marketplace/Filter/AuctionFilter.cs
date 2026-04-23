@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Static.Marketplace;
+using NexusForever.Network;
 
 namespace NexusForever.Network.World.Message.Model.Marketplace.Filter
 {
@@ -39,7 +40,7 @@ namespace NexusForever.Network.World.Message.Model.Marketplace.Filter
             }
 
             if (Filter == null)
-                throw new NotImplementedException();
+                throw new InvalidPacketValueException($"Unsupported auction filter type: {Type}");
 
             Filter.Read(reader);
         }

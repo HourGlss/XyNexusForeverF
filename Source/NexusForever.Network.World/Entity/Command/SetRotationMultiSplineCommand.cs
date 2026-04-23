@@ -8,9 +8,9 @@ namespace NexusForever.Network.World.Entity.Command
         public List<uint> SplineIds { get; set; } = new();
 
         public float Speed { get; set; }
-        public float Position { get; set; }
-        public float TakeoffLocationHeight { get; set; }
-        public float LandingLocationHeight { get; set; }
+        public uint Position { get; set; }
+        public uint TakeoffLocationHeight { get; set; }
+        public uint LandingLocationHeight { get; set; }
 
         public byte Mode { get; set; }
         public uint Offset { get; set; }

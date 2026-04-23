@@ -9,9 +9,9 @@ namespace NexusForever.Network.World.Entity.Command
     {
         public List<uint> SplineIds { get; set; } = new();
         public float Speed { get; set; }
-        public float Position { get; set; }
-        public float TakeoffLocationHeight { get; set; }
-        public float LandingLocationHeight { get; set; }
+        public uint Position { get; set; }
+        public uint TakeoffLocationHeight { get; set; }
+        public uint LandingLocationHeight { get; set; }
         public Vector3 FormationData { get; set; }
         public SplineMode Mode { get; set; }
         public uint Offset { get; set; }
@@ -44,7 +44,7 @@ namespace NexusForever.Network.World.Entity.Command
             foreach (var splineId in SplineIds)
                 writer.Write(splineId);
 
-            writer.Write(Speed);
+            writer.WritePackedFloat(Speed);
             writer.Write(Position);
             writer.Write(TakeoffLocationHeight);
             writer.Write(LandingLocationHeight);

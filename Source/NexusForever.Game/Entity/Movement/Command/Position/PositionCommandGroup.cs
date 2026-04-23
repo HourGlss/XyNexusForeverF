@@ -219,7 +219,8 @@ namespace NexusForever.Game.Entity.Movement.Command.Position
         /// </summary>
         public void SetPositionMultiSpline()
         {
-            throw new NotImplementedException();
+            // Multi-spline runtime semantics need packet captures before implementation.
+            // Keep the current position command active instead of crashing the movement update.
         }
 
         /// <summary>

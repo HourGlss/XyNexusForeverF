@@ -34,14 +34,17 @@ namespace NexusForever.StsServer.Network.Packet
                     if (headerLine == string.Empty)
                         break;
 
-                    string[] headerParameters = headerLine.Split(':');
-                    if (headerParameters.Length != 2)
+                    int separatorIndex = headerLine.IndexOf(':');
+                    if (separatorIndex == -1)
                         throw new InvalidDataException("STS packet contains an invalid header line!");
 
-                    if (Headers.ContainsKey(headerParameters[0]))
+                    string headerName  = headerLine[..separatorIndex].Trim();
+                    string headerValue = headerLine[(separatorIndex + 1)..].Trim();
+
+                    if (Headers.ContainsKey(headerName))
                         throw new InvalidDataException("STS packet contains duplicate header!");
 
-                    Headers.Add(headerParameters[0], headerParameters[1]);
+                    Headers.Add(headerName, headerValue);
                 }
 
                 if (!Headers.ContainsKey("l"))
