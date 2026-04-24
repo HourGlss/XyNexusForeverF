@@ -66,11 +66,15 @@ namespace NexusForever.Game.Pvp
             var duel = new Duel(nextDuelId++, challenger, recipient, flag);
             duels.Add(duel.Id, duel);
 
-            challenger.EnqueueToVisible(new ServerDuelChallenge
+            var challenge = new ServerDuelChallenge
             {
                 ChallengerUnitId = challenger.Guid,
                 OpponentUnitId = recipient.Guid
-            }, true);
+            };
+
+            challenger.Session.EnqueueMessageEncrypted(challenge);
+            if (recipient.Session != challenger.Session)
+                recipient.Session.EnqueueMessageEncrypted(challenge);
         }
 
         public void HandleAccept(IPlayer recipient)
