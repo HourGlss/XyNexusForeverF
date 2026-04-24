@@ -1,0 +1,14 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Aspire: Smoke Test Remote Receiver",
+      "type": "shell",
+      "command": "bash ./tools/check-aspire-remote-dashboard.sh",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

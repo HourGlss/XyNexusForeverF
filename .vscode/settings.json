@@ -1,0 +1,9 @@
+{
+  "aspire.enableSettingsFileCreationPromptOnStartup": false,
+  "aspire.aspireCliExecutablePath": "/home/xyf/.aspire/bin/aspire",
+  "aspire.enableAspireDashboardAutoLaunch": "launch",
+  "aspire.dashboardBrowser": "integratedBrowser",
+  "aspire.closeDashboardOnDebugEnd": false,
+  "aspire.registerMcpServerInWorkspace": true,
+  "aspire.globalAppHostsPollingInterval": 5000
+}

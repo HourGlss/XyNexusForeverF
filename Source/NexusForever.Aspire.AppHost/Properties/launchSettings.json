@@ -1,16 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/launchsettings.json",
   "profiles": {
-    "NexusForever.Aspire.AppHost": {
-      "commandName": "Project",
-      "dotnetRunMessages": true,
-      "launchBrowser": true,
-      "applicationUrl": "https://localhost:17021",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "DOTNET_ENVIRONMENT": "Development"
-      }
-    },
     "NexusForever.Aspire.RemoteDashboard": {
       "commandName": "Project",
       "dotnetRunMessages": true,
@@ -23,6 +13,16 @@
         "ASPIRE_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS": "true",
         "ASPIRE_DASHBOARD_OTLP_HTTP_ENDPOINT_URL": "http://192.168.0.144:4318",
         "NEXUSFOREVER_ASPIRE_REMOTE_DASHBOARD_ONLY": "true"
+      }
+    },
+    "NexusForever.Aspire.FullStack": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:17021",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development"
       }
     }
   }

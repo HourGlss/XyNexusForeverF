@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "aspire",
+      "request": "launch",
+      "name": "Aspire: Remote Dashboard Receiver",
+      "program": "${workspaceFolder}/Source/NexusForever.Aspire.AppHost/NexusForever.Aspire.AppHost.csproj",
+      "command": "run"
+    }
+  ]
+}

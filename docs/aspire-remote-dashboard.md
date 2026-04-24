@@ -41,6 +41,23 @@ Expected result:
 - `4318` is listening for OTLP/HTTP
 - the OTLP POST returns `200`
 
+## Run from VS Code
+
+This repo now includes VS Code workspace files to make the Aspire extension useful for the remote receiver setup:
+
+- `.vscode/launch.json` adds an `Aspire: Remote Dashboard Receiver` debug target
+- `.vscode/settings.json` points the extension at `/home/xyf/.aspire/bin/aspire`, keeps the dashboard in the VS Code browser, and leaves the tab open after debug stops
+- `.vscode/tasks.json` adds `Aspire: Smoke Test Remote Receiver`
+- `.aspire/settings.json` pins the AppHost project so Aspire CLI and extension commands resolve the correct AppHost from the repo root
+
+Important detail:
+
+- the Aspire VS Code extension debug schema does not expose AppHost launch profile selection
+- because of that, `NexusForever.Aspire.RemoteDashboard` is intentionally the first launch profile in `launchSettings.json`
+- the full local orchestration profile is still available as `NexusForever.Aspire.FullStack`
+
+Use `F5` in VS Code with the `Aspire: Remote Dashboard Receiver` configuration to launch the receiver on `192.168.0.144`.
+
 ## Run on 192.168.0.241
 
 The live server must have telemetry enabled in its real runtime config files, not just the example JSON in this repo.
