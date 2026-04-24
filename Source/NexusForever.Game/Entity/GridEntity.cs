@@ -163,6 +163,9 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void RelocateOnMap(Vector3 position, OnRelocateDelegate callback = null)
         {
+            if (Map == null || PendingRemoval)
+                return;
+
             Debug.Assert(Map != null);
 
             if (callback != null)
@@ -182,6 +185,9 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void VisibilityUpdate()
         {
+            if (Map == null || PendingRemoval)
+                return;
+
             Debug.Assert(Map != null);
             Map.EnqueueVisibilityUpdate(this, OnVisibilityUpdate);
         }

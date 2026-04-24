@@ -125,17 +125,26 @@ namespace NexusForever.Game.Map
                         }
                         case IGridActionRelocate actionRelocate:
                         {
+                            if (!CanProcessGridAction(actionRelocate.Entity, "relocate"))
+                                break;
+
                             RelocateEntity(actionRelocate.Entity, actionRelocate.Vector);
                             actionRelocate.Callback?.Invoke(actionRelocate.Vector);
                             break;
                         }
                         case IGridActionRemove actionRemove:
                         {
+                            if (!CanProcessGridAction(actionRemove.Entity, "remove", allowPendingRemoval: true))
+                                break;
+
                             RemoveEntity(actionRemove.Entity);
                             actionRemove.Callback?.Invoke();
                             break;
                         }
                         case IGridActionVisibilityUpdate actionVisionUpdate:
+                            if (!CanProcessGridAction(actionVisionUpdate.Entity, "visibility update"))
+                                break;
+
                             actionVisionUpdate.Callback?.Invoke();
                             break;
                     }
@@ -150,6 +159,24 @@ namespace NexusForever.Game.Map
             // new actions are added to the queue after processing so they are processed starting next update
             foreach (IGridAction action in newActions)
                 pendingActions.Enqueue(action);
+        }
+
+        private bool CanProcessGridAction(IGridEntity entity, string actionName, bool allowPendingRemoval = false)
+        {
+            if (entity.Map != this)
+            {
+                string entityMapId = entity.Map?.Entry?.Id.ToString() ?? "null";
+                log.Trace($"Skipping stale {actionName} grid action for entity {entity.Guid} on map {Entry.Id}; entity is attached to map {entityMapId}.");
+                return false;
+            }
+
+            if (!allowPendingRemoval && entity.PendingRemoval)
+            {
+                log.Trace($"Skipping stale {actionName} grid action for entity {entity.Guid} on map {Entry.Id}; entity is pending removal.");
+                return false;
+            }
+
+            return true;
         }
 
         private bool ProcessGridActionAdd(IGridActionAdd actionAdd)
