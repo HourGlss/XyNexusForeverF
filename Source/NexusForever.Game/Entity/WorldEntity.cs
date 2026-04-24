@@ -1159,6 +1159,8 @@ namespace NexusForever.Game.Entity
             if (status != EntityStatus.Stealth || wasStealthed == Stealthed || !InWorld)
                 return;
 
+            UpdateNearbyVisibility();
+
             EnqueueToVisible(new ServerUnitStealth
             {
                 UnitId = Guid,
@@ -1172,6 +1174,33 @@ namespace NexusForever.Game.Entity
                     BExiting = !Stealthed
                 }
             }, true);
+        }
+
+        // Stealth changes who can keep this entity in their visible set, so nearby observers
+        // need to re-run their visibility classification against us.
+        private void UpdateNearbyVisibility()
+        {
+            var check = new SearchCheckRange<IGridEntity>();
+            check.Initialise(Position, Map.VisionRange);
+
+            foreach (IGridEntity entity in Map.Search(Position, Map.VisionRange, check))
+            {
+                if (entity == this)
+                    continue;
+
+                entity.VisibilityUpdate();
+            }
+        }
+
+        protected override bool CanSeeEntity(IGridEntity entity)
+        {
+            if (entity is not IWorldEntity worldEntity || !worldEntity.Stealthed)
+                return base.CanSeeEntity(entity);
+
+            if (entity == this || worldEntity.ControllerGuid == Guid)
+                return true;
+
+            return GetPropertyValue(Property.SeeThroughStealth) > 0f;
         }
 
         /// <summary>
