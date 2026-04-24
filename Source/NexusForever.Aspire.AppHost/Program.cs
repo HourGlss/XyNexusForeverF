@@ -5,9 +5,18 @@ using NexusForever.Network.Internal.Static;
 
 internal class Program
 {
+    private const string RemoteDashboardOnlyEnvironmentVariable = "NEXUSFOREVER_ASPIRE_REMOTE_DASHBOARD_ONLY";
+
     private static async Task Main(string[] args)
     {
         var builder = DistributedApplication.CreateBuilder(args);
+
+        if (IsRemoteDashboardOnly())
+        {
+            DistributedApplication dashboardOnlyHost = builder.Build();
+            await dashboardOnlyHost.RunAsync();
+            return;
+        }
 
         //builder.AddDockerComposeEnvironment("nexus-forever");
 
@@ -112,5 +121,11 @@ internal class Program
 
         DistributedApplication host = builder.Build();
         await host.RunAsync();
+    }
+
+    private static bool IsRemoteDashboardOnly()
+    {
+        string? value = Environment.GetEnvironmentVariable(RemoteDashboardOnlyEnvironmentVariable);
+        return bool.TryParse(value, out bool enabled) && enabled;
     }
 }
