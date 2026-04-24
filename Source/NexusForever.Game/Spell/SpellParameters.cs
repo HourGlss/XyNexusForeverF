@@ -14,6 +14,7 @@ namespace NexusForever.Game.Spell
         public bool UserInitiatedSpellCast { get; set; } = true;
         public uint PrimaryTargetId { get; set; }
         public Position TargetPosition { get; set; }
+        public Position OriginPosition { get; set; }
         public uint PositionalUnitId { get; set; }
         public ushort? TaxiNode { get; set; }
         public ulong SpellCost { get; set; }

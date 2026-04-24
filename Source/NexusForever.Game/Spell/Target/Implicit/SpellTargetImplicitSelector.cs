@@ -42,6 +42,8 @@ namespace NexusForever.Game.Spell.Target.Implicit
 
                 initialPosition = positionalUnit.Position;
             }
+            else if (parameters.TargetPosition != null && parameters.TargetPosition.Vector != Vector3.Zero)
+                initialPosition = parameters.TargetPosition.Vector;
 
             searchCheck.Initialise(caster, initialPosition, info.Entry.TargetMaxRange, info.BaseInfo.TargetMechanics.Flags);
         }

@@ -24,12 +24,15 @@ namespace NexusForever.Game.Spell
             Data = data;
             ParentSpell = parentSpell;
 
+            Position targetPosition = ResolveTargetPosition(target, parentSpell, parameters);
+
             proxyParameters = new SpellParameters
             {
                 ParentSpellInfo = parameters.SpellInfo,
                 RootSpellInfo = parameters.RootSpellInfo,
                 PrimaryTargetId = Target.Guid,
-                TargetPosition = new Position(Target.Position),
+                TargetPosition = targetPosition,
+                OriginPosition = parameters.OriginPosition,
                 UserInitiatedSpellCast = parameters.UserInitiatedSpellCast,
                 IsProxy = true
             };
@@ -92,6 +95,20 @@ namespace NexusForever.Game.Spell
                 action.Invoke();
                 events.EnqueueEvent(TickingEvent(tickTime, events, action));
             });
+        }
+
+        private static Position ResolveTargetPosition(IUnitEntity target, ISpell parentSpell, ISpellParameters parameters)
+        {
+            if (parentSpell.Caster != null && parentSpell.Caster.Guid == target.Guid)
+            {
+                if (parameters.TargetPosition != null && parameters.TargetPosition.Vector != default)
+                    return parameters.TargetPosition;
+
+                if (parameters.OriginPosition != null)
+                    return parameters.OriginPosition;
+            }
+
+            return new Position(target.Position);
         }
     }
 }

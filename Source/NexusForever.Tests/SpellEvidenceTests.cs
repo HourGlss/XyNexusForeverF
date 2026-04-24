@@ -257,6 +257,44 @@ public class SpellEvidenceTests
     }
 
     [Fact]
+    public void ProxyUsesOriginPositionForSelfTargetWhenParentSpellHasNoExplicitTargetPosition()
+    {
+        var originPosition = new Position(new Vector3(12f, 0f, 34f));
+        var movedPosition = new Vector3(56f, 0f, 78f);
+
+        var parentParameters = new SpellParameters
+        {
+            SpellInfo = TestProxy.Create<ISpellInfo>(),
+            RootSpellInfo = TestProxy.Create<ISpellInfo>(),
+            OriginPosition = originPosition
+        };
+
+        IUnitEntity caster = CreateUnit(42u, movedPosition);
+        ISpell parentSpell = TestProxy.Create<ISpell>(
+            ("get_CastMethod", CastMethod.Normal),
+            ("get_Caster", caster),
+            ("get_Parameters", parentParameters));
+
+        var data = new SpellEffectProxyData();
+        data.Populate(new Spell4EffectsEntry
+        {
+            DataBits00 = 12345u
+        });
+
+        ISpellParameters capturedParameters = null;
+        IUnitEntity proxyCaster = TestProxy.Create<IUnitEntity>(
+            ("CastSpell", (Action<uint, ISpellParameters>)((_, parameters) => capturedParameters = parameters)));
+
+        var proxy = new Proxy(caster, data, parentSpell, parentParameters);
+        proxy.Evaluate();
+        proxy.Cast(proxyCaster, TestProxy.Create<ISpellEventManager>());
+
+        Assert.NotNull(capturedParameters);
+        Assert.Same(originPosition, capturedParameters.TargetPosition);
+        Assert.Same(originPosition, capturedParameters.OriginPosition);
+    }
+
+    [Fact]
     public void PetCastSpellUsesPlayerTargetWhenParentSpellHasNoPrimaryTarget()
     {
         ISpellInfo parentSpellInfo = TestProxy.Create<ISpellInfo>();
@@ -381,6 +419,38 @@ public class SpellEvidenceTests
 
         Assert.Same(caster, searchCheck.Searcher);
         Assert.Equal(positionalUnitPosition, searchCheck.Position);
+        Assert.Equal(25f, searchCheck.Radius);
+        Assert.Equal(SpellTargetMechanicFlags.IsEnemy, searchCheck.TargetMechanicFlags);
+    }
+
+    [Fact]
+    public void ImplicitSelectorUsesTargetPositionWhenNoPositionalUnitExists()
+    {
+        Vector3 targetPosition = new(91f, 0f, 37f);
+        IUnitEntity caster = CreateUnit(100u, Vector3.Zero);
+
+        var targetMechanics = new Spell4TargetMechanicsEntry
+        {
+            Flags = SpellTargetMechanicFlags.IsEnemy
+        };
+
+        ISpellInfo spellInfo = TestProxy.Create<ISpellInfo>(
+            ("get_Entry", new Spell4Entry
+            {
+                TargetMaxRange = 25f
+            }),
+            ("get_BaseInfo", TestProxy.Create<ISpellBaseInfo>(("get_TargetMechanics", targetMechanics))));
+
+        var searchCheck = new CapturingImplicitSearchCheck();
+        var selector = new SpellTargetImplicitSelector(searchCheck);
+        selector.Initialise(caster, new SpellParameters
+        {
+            SpellInfo = spellInfo,
+            TargetPosition = new Position(targetPosition)
+        });
+
+        Assert.Same(caster, searchCheck.Searcher);
+        Assert.Equal(targetPosition, searchCheck.Position);
         Assert.Equal(25f, searchCheck.Radius);
         Assert.Equal(SpellTargetMechanicFlags.IsEnemy, searchCheck.TargetMechanicFlags);
     }
@@ -924,11 +994,11 @@ Spellslinger|Spell Surge|Fluff,Proxy,SpellForceRemoveChanneled,SpellForceRemove
             }));
     }
 
-    private static IUnitEntity CreateUnit(uint guid)
+    private static IUnitEntity CreateUnit(uint guid, Vector3? position = null)
     {
         return TestProxy.Create<IUnitEntity>(
             ("get_Guid", guid),
-            ("get_Position", new Vector3(guid, 0f, 0f)));
+            ("get_Position", position ?? new Vector3(guid, 0f, 0f)));
     }
 
     private static ISpell CreateDispelTargetSpell(uint spell4Id, SpellClass spellClass, Action finish)

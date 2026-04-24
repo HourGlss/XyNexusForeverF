@@ -113,6 +113,7 @@ namespace NexusForever.Game.Spell
             status = SpellStatus.Initiating;
 
             parameters.RootSpellInfo ??= parameters.SpellInfo;
+            parameters.OriginPosition ??= new Position(caster.Position);
 
             if (this is not SpellThreshold && parameters.SpellInfo.Thresholds.Count > 0)
             {
@@ -426,9 +427,7 @@ namespace NexusForever.Game.Spell
         {
             telegraphs.Clear();
 
-            Vector3 position = Caster.Position;
-            if (Parameters.PositionalUnitId > 0)
-                position = Caster.GetVisible<IWorldEntity>(Parameters.PositionalUnitId)?.Position ?? Caster.Position;
+            Vector3 position = GetSpellReferencePosition();
 
             Vector3 rotation = Caster.Rotation;
             if (Parameters.PositionalUnitId > 0)
@@ -826,6 +825,17 @@ namespace NexusForever.Game.Spell
                 return Parameters.PositionalUnitId;
 
             return Caster.Guid;
+        }
+
+        private Vector3 GetSpellReferencePosition()
+        {
+            if (Parameters.PositionalUnitId > 0)
+                return Caster.GetVisible<IWorldEntity>(Parameters.PositionalUnitId)?.Position ?? Caster.Position;
+
+            if (Parameters.TargetPosition != null && Parameters.TargetPosition.Vector != Vector3.Zero)
+                return Parameters.TargetPosition.Vector;
+
+            return Caster.Position;
         }
 
         protected void SendSpellStart()
