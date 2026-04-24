@@ -557,12 +557,6 @@ namespace NexusForever.Game.Spell
                     continue;
 
                 Vital vital = (Vital)innateCostType;
-                if (IsEsperResourceCost(vital))
-                {
-                    Caster.ModifyVital(vital, -Caster.GetVitalValue(vital));
-                    continue;
-                }
-
                 Caster.ModifyVital(vital, Parameters.SpellInfo.Entry.InnateCosts[i] * -1f);
             }
         }

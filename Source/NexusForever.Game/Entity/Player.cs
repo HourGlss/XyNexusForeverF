@@ -354,6 +354,8 @@ namespace NexusForever.Game.Entity
 
             CalculateDefaultProperties();
             SetBaseCharacterProperties();
+            ApplyRuntimePropertyFallbacks();
+            ApplyMissingVitalDefaults();
 
             MaxInterruptArmour = 0;
 
@@ -407,6 +409,18 @@ namespace NexusForever.Game.Entity
 
             foreach (IPropertyModifier propertyValue in baseProperties.Concat(classProperties))
                 SetBaseProperty(propertyValue.Property, propertyValue.GetValue(Level));
+        }
+
+        private void ApplyRuntimePropertyFallbacks()
+        {
+            foreach ((Property property, float value) in PlayerResourceDefaults.GetBasePropertyFallbacks(Class, GetPropertyValue))
+                SetBaseProperty(property, value);
+        }
+
+        private void ApplyMissingVitalDefaults()
+        {
+            foreach ((Static.Entity.Stat stat, float value) in PlayerResourceDefaults.GetMissingVitalDefaults(Class, GetStatFloat, GetPropertyValue))
+                SetStat(stat, value);
         }
 
         public override void Update(double lastTick)
