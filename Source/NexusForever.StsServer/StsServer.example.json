@@ -11,17 +11,17 @@
     },
     "Telemetry": {
         "Logging": {
-            "Enable": false
+            "Enable": true
         },
         "Metrics": {
-            "Enable": false
+            "Enable": true
         },
         "Tracing": {
-            "Enable": false
+            "Enable": true
         },
         "Endpoint": {
-            "Url": "",
-            "Protocol": "Grpc",
+            "Url": "http://192.168.0.144:4318",
+            "Protocol": "HttpProtobuf",
             "Headers": ""
         }
     }
