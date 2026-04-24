@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using NexusForever.Database.Character.Model;
 using NexusForever.Database.Configuration.Model;
 
@@ -61,6 +62,9 @@ namespace NexusForever.Database.Character
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            optionsBuilder.ConfigureWarnings(warnings =>
+                warnings.Ignore(RelationalEventId.ModelValidationKeyDefaultValueWarning));
+
             if (!optionsBuilder.IsConfigured)
                 optionsBuilder.UseConfiguration(config);
         }

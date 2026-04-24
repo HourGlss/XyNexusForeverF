@@ -993,6 +993,73 @@ namespace NexusForever.Database.Character.Migrations
                     b.ToTable("character_mail", (string)null);
                 });
 
+            modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterPathEpisodeModel", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul)
+                        .HasColumnName("id");
+
+                    b.Property<uint>("EpisodeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("episodeId");
+
+                    b.Property<byte>("RewardReceived")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(3) unsigned")
+                        .HasDefaultValue((byte)0)
+                        .HasColumnName("rewardReceived");
+
+                    b.HasKey("Id", "EpisodeId")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("character_path_episode", (string)null);
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterPathMissionModel", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul)
+                        .HasColumnName("id");
+
+                    b.Property<uint>("EpisodeId")
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("episodeId");
+
+                    b.Property<uint>("MissionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("missionId");
+
+                    b.Property<byte>("Complete")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(3) unsigned")
+                        .HasDefaultValue((byte)0)
+                        .HasColumnName("complete");
+
+                    b.Property<uint>("Progress")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("progress");
+
+                    b.Property<byte>("Unlocked")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(3) unsigned")
+                        .HasDefaultValue((byte)0)
+                        .HasColumnName("unlocked");
+
+                    b.HasKey("Id", "EpisodeId", "MissionId")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("character_path_mission", (string)null);
+                });
+
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterModel", b =>
                 {
                     b.Property<ulong>("Id")
@@ -2655,6 +2722,30 @@ namespace NexusForever.Database.Character.Migrations
                     b.Navigation("Recipient");
                 });
 
+            modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterPathEpisodeModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
+                        .WithMany("PathEpisode")
+                        .HasForeignKey("Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK__character_path_episode_id__character_id");
+
+                    b.Navigation("Character");
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterPathMissionModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.Character.Model.CharacterPathEpisodeModel", "CharacterPathEpisode")
+                        .WithMany("PathMission")
+                        .HasForeignKey("Id", "EpisodeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK__character_path_mission_id__character_path_episode_id");
+
+                    b.Navigation("CharacterPathEpisode");
+                });
+
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterPathModel", b =>
                 {
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
@@ -2909,6 +3000,11 @@ namespace NexusForever.Database.Character.Migrations
                     b.Navigation("Attachment");
                 });
 
+            modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterPathEpisodeModel", b =>
+                {
+                    b.Navigation("PathMission");
+                });
+
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterModel", b =>
                 {
                     b.Navigation("Achievement");
@@ -2940,6 +3036,8 @@ namespace NexusForever.Database.Character.Migrations
                     b.Navigation("Mail");
 
                     b.Navigation("Path");
+
+                    b.Navigation("PathEpisode");
 
                     b.Navigation("PetCustomisation");
 
