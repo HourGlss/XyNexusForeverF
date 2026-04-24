@@ -229,6 +229,9 @@ namespace NexusForever.Game.Pvp
 
         private void CheckFlagOutOfRange(IPlayer player, UpdateTimer timer)
         {
+            if (!Flag.InWorld)
+                return;
+
             bool isOutOfRange = Vector3.Distance(player.Position, Flag.Position) > FlagRange;
 
             if (!isOutOfRange)

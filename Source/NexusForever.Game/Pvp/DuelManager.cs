@@ -216,7 +216,7 @@ namespace NexusForever.Game.Pvp
             flag.CreateFlags = EntityCreateFlag.SpawnAnimation;
 
             Vector3 position = (challenger.Position + recipient.Position) / 2f;
-            challenger.Map.EnqueueAdd(flag, position);
+            flag.AddToMap(challenger.Map, position);
             return flag;
         }
     }
