@@ -602,8 +602,10 @@ public class SpellEvidenceTests
         Assert.Equal(new[] { 1.1f, 1f }, appliedScales);
     }
 
-    [Fact]
-    public void KeyForcedMovementSuppressesCasterFallingDamage()
+    [Theory]
+    [InlineData(SpellEffectForcedMoveType.KeyBackward)]
+    [InlineData(SpellEffectForcedMoveType.Unknown12)]
+    public void KeyForcedMovementSuppressesCasterFallingDamage(SpellEffectForcedMoveType moveType)
     {
         TimeSpan? suppressedDuration = null;
         bool forceMoveCalled = false;
@@ -623,7 +625,7 @@ public class SpellEvidenceTests
 
         var entry = new Spell4EffectsEntry
         {
-            DataBits00 = (uint)SpellEffectForcedMoveType.KeyBackward,
+            DataBits00 = (uint)moveType,
             DataBits01 = BitConverter.SingleToUInt32Bits(15f),
             DataBits02 = BitConverter.SingleToUInt32Bits(15f),
             DataBits03 = 250u,

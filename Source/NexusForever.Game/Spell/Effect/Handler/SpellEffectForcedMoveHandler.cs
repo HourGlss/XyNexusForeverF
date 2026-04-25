@@ -150,6 +150,9 @@ namespace NexusForever.Game.Spell.Effect.Handler
                 case SpellEffectForcedMoveType.KeyVelocity:
                 case SpellEffectForcedMoveType.Unknown9:
                 case SpellEffectForcedMoveType.Unknown10:
+                case SpellEffectForcedMoveType.Unknown11:
+                case SpellEffectForcedMoveType.Unknown12:
+                case SpellEffectForcedMoveType.Unknown13:
                 {
                     //float speed = distance / (float)data.FlightTime.TotalSeconds;
                     float spin = (data.Spin * MathF.PI * 2) / v20;
@@ -159,9 +162,6 @@ namespace NexusForever.Game.Spell.Effect.Handler
                     break;
                 }
                 // seems like high jumps?? Trampoline?
-                case SpellEffectForcedMoveType.Unknown11:
-                case SpellEffectForcedMoveType.Unknown12:
-                case SpellEffectForcedMoveType.Unknown13:
                 case SpellEffectForcedMoveType.Unknown14:
                 case SpellEffectForcedMoveType.Unknown15:
                 {
