@@ -10,6 +10,7 @@ namespace NexusForever.Game.Prerequisite
         public CastResult? CastResult { get; set; }
         public ISpellInfo SpellInfo { get; set; }
         public IUnitEntity Target { get; set; }
+        public bool EvaluateTarget { get; set; }
         public ushort? TaxiNode { get; set; }
     }
 }

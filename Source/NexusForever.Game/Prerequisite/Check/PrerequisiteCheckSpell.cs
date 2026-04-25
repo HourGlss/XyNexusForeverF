@@ -26,12 +26,16 @@ namespace NexusForever.Game.Prerequisite.Check
             if (value == 0 && objectId == 0)
                 return false;
 
+            IUnitEntity unit = parameters?.EvaluateTarget == true && parameters.Target != null
+                ? parameters.Target
+                : player;
+
             switch (comparison)
             {
                 case PrerequisiteComparison.Equal:
-                    return player.HasSpell(s => s.Spell4Id == value, out ISpell equalSpell);
+                    return unit.HasSpell(s => s.Spell4Id == value, out ISpell equalSpell);
                 case PrerequisiteComparison.NotEqual:
-                    return !player.HasSpell(s => s.Spell4Id == value, out ISpell notEqualSpell);
+                    return !unit.HasSpell(s => s.Spell4Id == value, out ISpell notEqualSpell);
                 default:
                     log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.UnderSpell}!");
                     return false;

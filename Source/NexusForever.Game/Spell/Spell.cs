@@ -16,8 +16,10 @@ using NexusForever.Game.Spell.Target;
 using NexusForever.Game.Spell.Type;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Prerequisite;
 using NexusForever.Game.Static.Spell;
 using NexusForever.Game.Static.Spell.Effect;
+using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Combat;
 using NexusForever.Network.World.Entity;
@@ -347,9 +349,10 @@ namespace NexusForever.Game.Spell
 
                 var parameters = new PrerequisiteParameters
                 {
-                    TaxiNode = Parameters.TaxiNode,
-                    SpellInfo = Parameters.SpellInfo,
-                    Target   = explicitTarget
+                    TaxiNode       = Parameters.TaxiNode,
+                    SpellInfo      = Parameters.SpellInfo,
+                    Target         = explicitTarget,
+                    EvaluateTarget = true
                 };
                 if (!PrerequisiteManager.Instance.Meets(player, Parameters.SpellInfo.TargetCastPrerequisites.Id, parameters))
                     return parameters.CastResult != null ? parameters.CastResult.Value : CastResult.PrereqTargetCast;
@@ -761,8 +764,8 @@ namespace NexusForever.Game.Spell
         {
             bool effectCanApply = true;
 
-            // TODO: Possibly update Prereq Manager to handle other Units
-            if (unit is not IPlayer player)
+            IPlayer player = Caster as IPlayer ?? unit as IPlayer;
+            if (player == null)
                 return true;
 
             if ((targetFlags & SpellEffectTargetFlags.Caster) != 0)
@@ -772,9 +775,9 @@ namespace NexusForever.Game.Spell
                 {
                     var parameters = new PrerequisiteParameters
                     {
-                        TaxiNode = Parameters.TaxiNode,
+                        TaxiNode  = Parameters.TaxiNode,
                         SpellInfo = Parameters.SpellInfo,
-                        Target = unit
+                        Target    = unit
                     };
                     effectCanApply = PrerequisiteManager.Instance.Meets(player, spell4EffectsEntry.PrerequisiteIdCasterApply, parameters);
                 }
@@ -782,19 +785,51 @@ namespace NexusForever.Game.Spell
 
             if (effectCanApply && (targetFlags & SpellEffectTargetFlags.Caster) == 0)
             {
-                if (spell4EffectsEntry.PrerequisiteIdTargetApply > 0)
+                if (spell4EffectsEntry.PrerequisiteIdTargetApply > 0
+                    && ShouldEvaluateTargetApplyPrerequisite(unit, spell4EffectsEntry.PrerequisiteIdTargetApply))
                 {
                     var parameters = new PrerequisiteParameters
                     {
-                        TaxiNode = Parameters.TaxiNode,
-                        SpellInfo = Parameters.SpellInfo,
-                        Target = unit
+                        TaxiNode       = Parameters.TaxiNode,
+                        SpellInfo      = Parameters.SpellInfo,
+                        Target         = unit,
+                        EvaluateTarget = true
                     };
                     effectCanApply = PrerequisiteManager.Instance.Meets(player, spell4EffectsEntry.PrerequisiteIdTargetApply, parameters);
                 }
             }
 
             return effectCanApply;
+        }
+
+        private bool ShouldEvaluateTargetApplyPrerequisite(IUnitEntity unit, uint prerequisiteId)
+        {
+            if (unit is IPlayer)
+                return true;
+
+            IGameTableManager gameTableManager = LegacyServiceProvider.Provider?.GetService<IGameTableManager>();
+            PrerequisiteEntry prerequisite = gameTableManager?.Prerequisite.GetEntry(prerequisiteId);
+            if (prerequisite == null)
+                return false;
+
+            return IsActiveSpellStatePrerequisite(prerequisite);
+        }
+
+        private static bool IsActiveSpellStatePrerequisite(PrerequisiteEntry prerequisite)
+        {
+            bool hasPrerequisite = false;
+
+            foreach (PrerequisiteType type in prerequisite.PrerequisiteTypeId)
+            {
+                if (type == PrerequisiteType.None)
+                    continue;
+
+                hasPrerequisite = true;
+                if (type is not (PrerequisiteType.UnderSpell or PrerequisiteType.Unknown50 or PrerequisiteType.Spell130))
+                    return false;
+            }
+
+            return hasPrerequisite;
         }
 
         public bool IsMovingInterrupted()

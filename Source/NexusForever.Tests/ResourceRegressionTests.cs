@@ -3,6 +3,7 @@ using System.Reflection;
 using Microsoft.Extensions.Logging.Abstractions;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Prerequisite.Check;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Prerequisite;
@@ -61,6 +62,76 @@ public class ResourceRegressionTests
         Assert.False(handler.Meets(player, PrerequisiteComparison.NotEqual, 39407u, 0u, null));
         Assert.False(handler.Meets(player, PrerequisiteComparison.Equal, 111u, 0u, null));
         Assert.True(handler.Meets(player, PrerequisiteComparison.NotEqual, 111u, 0u, null));
+    }
+
+    [Fact]
+    public void Unknown50CanCheckActiveSpellStateOnTargetUnit()
+    {
+        var handler = new PrerequisiteCheckUnknown50(NullLogger<PrerequisiteCheckUnknown50>.Instance);
+        ISpell targetSpell = TestProxy.Create<ISpell>(("get_Spell4Id", 52309u));
+        IPlayer caster = TestProxy.Create<IPlayer>(
+            ("HasSpell", (HasSpellPredicateDelegate)((Func<ISpell, bool> predicate, out ISpell spell) =>
+            {
+                spell = null;
+                return false;
+            })));
+        IUnitEntity target = TestProxy.Create<IUnitEntity>(
+            ("HasSpell", (HasSpellPredicateDelegate)((Func<ISpell, bool> predicate, out ISpell spell) =>
+            {
+                if (predicate(targetSpell))
+                {
+                    spell = targetSpell;
+                    return true;
+                }
+
+                spell = null;
+                return false;
+            })));
+        var parameters = new PrerequisiteParameters
+        {
+            Target = target,
+            EvaluateTarget = true
+        };
+
+        Assert.True(handler.Meets(caster, PrerequisiteComparison.Equal, 52309u, 0u, parameters));
+        Assert.False(handler.Meets(caster, PrerequisiteComparison.NotEqual, 52309u, 0u, parameters));
+        Assert.False(handler.Meets(caster, PrerequisiteComparison.Equal, 111u, 0u, parameters));
+        Assert.True(handler.Meets(caster, PrerequisiteComparison.NotEqual, 111u, 0u, parameters));
+    }
+
+    [Fact]
+    public void Spell130ChecksActiveSpellStateOnTargetUnit()
+    {
+        var handler = new PrerequisiteCheckSpell130(NullLogger<PrerequisiteCheckSpell130>.Instance);
+        ISpell targetSpell = TestProxy.Create<ISpell>(("get_Spell4Id", 41471u));
+        IPlayer caster = TestProxy.Create<IPlayer>(
+            ("HasSpell", (HasSpellPredicateDelegate)((Func<ISpell, bool> predicate, out ISpell spell) =>
+            {
+                spell = null;
+                return false;
+            })));
+        IUnitEntity target = TestProxy.Create<IUnitEntity>(
+            ("HasSpell", (HasSpellPredicateDelegate)((Func<ISpell, bool> predicate, out ISpell spell) =>
+            {
+                if (predicate(targetSpell))
+                {
+                    spell = targetSpell;
+                    return true;
+                }
+
+                spell = null;
+                return false;
+            })));
+        var parameters = new PrerequisiteParameters
+        {
+            Target = target,
+            EvaluateTarget = true
+        };
+
+        Assert.True(handler.Meets(caster, PrerequisiteComparison.Equal, 41471u, 437u, parameters));
+        Assert.False(handler.Meets(caster, PrerequisiteComparison.NotEqual, 41471u, 437u, parameters));
+        Assert.False(handler.Meets(caster, PrerequisiteComparison.Equal, 111u, 437u, parameters));
+        Assert.True(handler.Meets(caster, PrerequisiteComparison.NotEqual, 111u, 437u, parameters));
     }
 
     [Fact]

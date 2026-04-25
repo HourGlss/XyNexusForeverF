@@ -5,15 +5,15 @@ using NexusForever.Game.Static.Prerequisite;
 
 namespace NexusForever.Game.Prerequisite.Check
 {
-    [PrerequisiteCheck(PrerequisiteType.Unknown50)]
-    public class PrerequisiteCheckUnknown50 : IPrerequisiteCheck
+    [PrerequisiteCheck(PrerequisiteType.Spell130)]
+    public class PrerequisiteCheckSpell130 : IPrerequisiteCheck
     {
         #region Dependency Injection
 
-        private readonly ILogger<PrerequisiteCheckUnknown50> log;
+        private readonly ILogger<PrerequisiteCheckSpell130> log;
 
-        public PrerequisiteCheckUnknown50(
-            ILogger<PrerequisiteCheckUnknown50> log)
+        public PrerequisiteCheckSpell130(
+            ILogger<PrerequisiteCheckSpell130> log)
         {
             this.log = log;
         }
@@ -22,15 +22,14 @@ namespace NexusForever.Game.Prerequisite.Check
 
         public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
-            uint spell4Id = value != 0u ? value : objectId;
-            if (spell4Id == 0u)
+            if (value == 0u)
                 return false;
 
             IUnitEntity unit = parameters?.EvaluateTarget == true && parameters.Target != null
                 ? parameters.Target
                 : player;
 
-            bool hasSpell = unit.HasSpell(s => s.Spell4Id == spell4Id, out _);
+            bool hasSpell = unit.HasSpell(s => s.Spell4Id == value, out _);
             return comparison switch
             {
                 PrerequisiteComparison.Equal    => hasSpell,
@@ -41,7 +40,7 @@ namespace NexusForever.Game.Prerequisite.Check
 
         private bool LogUnhandled(PrerequisiteComparison comparison)
         {
-            log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.Unknown50}!");
+            log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.Spell130}!");
             return false;
         }
     }
