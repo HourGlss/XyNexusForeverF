@@ -580,8 +580,15 @@ namespace NexusForever.Game.Spell
             if (Caster is not IPlayer player)
                 return;
 
-            if (Parameters.SpellInfo.Entry.SpellCoolDown != 0u)
-                player.SpellManager.SetSpellCooldown(Parameters.SpellInfo, Parameters.SpellInfo.Entry.SpellCoolDown / 1000d, true);
+            if (Parameters.SpellInfo.Entry.SpellCoolDown == 0u)
+                return;
+
+            double cooldown = Parameters.SpellInfo.Entry.SpellCoolDown / 1000d;
+            float cooldownReductionModifier = player.GetPropertyValue(Property.CooldownReductionModifier);
+            if (cooldownReductionModifier > 0f)
+                cooldown *= cooldownReductionModifier;
+
+            player.SpellManager.SetSpellCooldown(Parameters.SpellInfo, cooldown, true);
         }
 
         protected void CostSpell()

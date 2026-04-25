@@ -13,6 +13,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Spell
 
             IActionSet actionSet = session.Player.SpellManager.GetActionSet(requestAmpReset.SpecIndex);
             actionSet.RemoveAmp(requestAmpReset.RespecType, requestAmpReset.Value);
+            session.Player.SpellManager.RefreshActiveAmpModifiers();
             session.EnqueueMessageEncrypted(actionSet.BuildServerAmpList());
         }
     }

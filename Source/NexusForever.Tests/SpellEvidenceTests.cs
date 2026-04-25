@@ -28,6 +28,7 @@ using NexusForever.Game.Spell.Target.Implicit;
 using NexusForever.Game.Spell.Target.Implicit.Filter;
 using NexusForever.Game.Spell.Type;
 using NexusForever.Game.Static;
+using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
 using NexusForever.Game.Static.Spell.Effect;
 using NexusForever.Game.Static.Spell.Target;
@@ -660,7 +661,9 @@ public class SpellEvidenceTests
                 emitCooldown = emit;
             })));
 
-        IPlayer caster = TestProxy.Create<IPlayer>(("get_SpellManager", spellManager));
+        IPlayer caster = TestProxy.Create<IPlayer>(
+            ("get_SpellManager", spellManager),
+            ("GetPropertyValue", (Func<Property, float>)(property => property == Property.CooldownReductionModifier ? 1f : 0f)));
 
         IServiceProvider previousProvider = LegacyServiceProvider.Provider;
         IScriptCollection scriptCollection = TestProxy.Create<IScriptCollection>();
@@ -695,6 +698,81 @@ public class SpellEvidenceTests
         Assert.Same(spellInfo, cooldownSpellInfo);
         Assert.Equal(6d, cooldownSeconds);
         Assert.True(emitCooldown);
+    }
+
+    [Fact]
+    public void CooldownReductionModifierScalesBaseCooldownOnExecute()
+    {
+        ISpellInfo spellInfo = CreateRapidTapThresholdSpellInfo(66986u, 6000u);
+
+        double cooldownSeconds = 0d;
+        ISpellManager spellManager = TestProxy.Create<ISpellManager>(
+            ("SetSpellCooldown", (Action<ISpellInfo, double, bool>)((_, cooldown, _) => cooldownSeconds = cooldown)));
+        IPlayer caster = TestProxy.Create<IPlayer>(
+            ("get_SpellManager", spellManager),
+            ("GetPropertyValue", (Func<Property, float>)(property => property == Property.CooldownReductionModifier ? 0.95f : 0f)));
+
+        IServiceProvider previousProvider = LegacyServiceProvider.Provider;
+        IScriptCollection scriptCollection = TestProxy.Create<IScriptCollection>();
+        LegacyServiceProvider.Provider = new ServiceCollection()
+            .AddSingleton<IScriptManager>(TestProxy.Create<IScriptManager>(
+                ("InitialiseOwnedCollection", (Func<object, IScriptCollection>)(_ => scriptCollection)),
+                ("InitialiseOwnedScripts", (Action<IScriptCollection, uint>)((_, _) => { }))))
+            .BuildServiceProvider();
+
+        try
+        {
+            var spell = new TestRapidTapThresholdSpell(
+                TestProxy.Create<ISpellTargetInfoCollection>(("Initialise", (Action<ISpell>)(_ => { }))),
+                TestProxy.Create<IGlobalSpellManager>(("get_NextCastingId", 1u)),
+                TestProxy.Create<ICastResultValidatorManager>(("GetCastResult", (Func<ISpell, CastResult>)(_ => CastResult.Ok))),
+                TestProxy.Create<IDisableManager>(),
+                TestProxy.Create<ISpellFactory>());
+
+            spell.Initialise(caster, new SpellParameters
+            {
+                SpellInfo = spellInfo,
+                RootSpellInfo = spellInfo
+            });
+
+            spell.ExecuteForTest();
+        }
+        finally
+        {
+            LegacyServiceProvider.Provider = previousProvider;
+        }
+
+        Assert.Equal(5.7d, cooldownSeconds, precision: 6);
+    }
+
+    [Fact]
+    public void CharacterSpellCastsActiveActionSetTier()
+    {
+        ISpellInfo tierOne = CreateTieredSpellInfo(70001u, 42u, 1u);
+        ISpellInfo tierFour = CreateTieredSpellInfo(70004u, 42u, 4u);
+
+        ISpellBaseInfo baseInfo = TestProxy.Create<ISpellBaseInfo>(
+            ("get_Entry", new Spell4BaseEntry
+            {
+                Id = 42u,
+                CastMethod = CastMethod.Normal
+            }),
+            ("GetSpellInfo", (Func<byte, ISpellInfo>)(tier => tier == 4 ? tierFour : tierOne)));
+
+        ISpellParameters capturedParameters = null;
+        ISpellManager spellManager = TestProxy.Create<ISpellManager>(
+            ("SetAsContinuousCast", (Action<ICharacterSpell>)(_ => { })),
+            ("GetSpellTier", (Func<uint, byte>)(spell4BaseId => spell4BaseId == 42u ? (byte)4 : (byte)1)));
+        IPlayer player = TestProxy.Create<IPlayer>(
+            ("get_SpellManager", spellManager),
+            ("CastSpell", (Action<ISpellParameters>)(parameters => capturedParameters = parameters)));
+
+        var characterSpell = new CharacterSpell(player, baseInfo, 1, item: null);
+        characterSpell.Cast();
+
+        Assert.NotNull(capturedParameters);
+        Assert.Same(tierFour, capturedParameters.RootSpellInfo);
+        Assert.Same(tierFour, capturedParameters.SpellInfo);
     }
 
     [Fact]
@@ -1098,6 +1176,21 @@ Spellslinger|Spell Surge|Fluff,Proxy,SpellForceRemoveChanneled,SpellForceRemove
                     OrderIndex = 0
                 }
             }));
+    }
+
+    private static ISpellInfo CreateTieredSpellInfo(uint spell4Id, uint spell4BaseId, uint tierIndex)
+    {
+        return TestProxy.Create<ISpellInfo>(
+            ("get_Entry", new Spell4Entry
+            {
+                Id = spell4Id,
+                Spell4BaseIdBaseSpell = spell4BaseId,
+                TierIndex = tierIndex,
+                AbilityChargeCount = 0u,
+                Spell4IdMechanicAlternateSpell = 0u,
+                SpellCoolDownIds = [0u, 0u, 0u]
+            }),
+            ("get_PrerequisiteRunners", new List<PrerequisiteEntry>()));
     }
 
     private static ISpellInfo CreatePounceRootSpellInfo()

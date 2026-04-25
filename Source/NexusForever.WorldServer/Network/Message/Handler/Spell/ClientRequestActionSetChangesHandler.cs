@@ -51,6 +51,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Spell
 
             if (actionSet.SyncAmps(requestActionSetChanges.Amps))
             {
+                session.Player.SpellManager.RefreshActiveAmpModifiers();
                 session.Player.SpellManager.GrantSpells();
                 session.EnqueueMessageEncrypted(actionSet.BuildServerAmpList());
             }

@@ -12,6 +12,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Spell
             IActionSet actionSet = session.Player.SpellManager.GetActionSet(session.Player.SpellManager.ActiveActionSet);
             if (actionSet.SyncAmps(commitAmpSpec.Amps))
             {
+                session.Player.SpellManager.RefreshActiveAmpModifiers();
                 session.Player.SpellManager.GrantSpells();
                 session.EnqueueMessageEncrypted(actionSet.BuildServerAmpList());
             }

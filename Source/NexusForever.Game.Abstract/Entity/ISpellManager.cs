@@ -45,6 +45,11 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         bool IsAmpEnabled(ushort ampId);
 
+        /// <summary>
+        /// Rebuild passive property modifiers granted by enabled AMPs in the active action set.
+        /// </summary>
+        void RefreshActiveAmpModifiers();
+
         List<ICharacterSpell> GetPets();
 
         /// <summary>

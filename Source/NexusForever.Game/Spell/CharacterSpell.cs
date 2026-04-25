@@ -30,7 +30,7 @@ namespace NexusForever.Game.Spell
         public ISpellInfo SpellInfo { get; private set; }
         public ISpellInfo AlternateSpellInfo { get; private set; }
         public IItem Item { get; }
-        public uint GlobalCooldownEnum => SpellInfo.Entry.GlobalCooldownEnum;
+        public uint GlobalCooldownEnum => GetActiveSpellInfo().Entry.GlobalCooldownEnum;
 
         public byte Tier
         {
@@ -91,14 +91,28 @@ namespace NexusForever.Game.Spell
         {
             this.tier = tier;
             SpellInfo = BaseInfo.GetSpellInfo(tier);
-            AlternateSpellInfo = null;
+            AlternateSpellInfo = GetAlternateSpellInfo(SpellInfo);
+        }
 
-            if (SpellInfo.Entry.Spell4IdMechanicAlternateSpell > 0)
-            {
-                Spell4Entry alternativeEntry = GameTableManager.Instance.Spell4.GetEntry(SpellInfo.Entry.Spell4IdMechanicAlternateSpell);
-                if (alternativeEntry != null)
-                    AlternateSpellInfo = LegacyServiceProvider.Provider.GetService<ISpellInfoManager>().GetSpellBaseInfo(alternativeEntry.Spell4BaseIdBaseSpell).GetSpellInfo(tier);
-            }
+        private ISpellInfo GetActiveSpellInfo()
+        {
+            byte activeTier = Owner.SpellManager.GetSpellTier(BaseInfo.Entry.Id);
+            return BaseInfo.GetSpellInfo(activeTier) ?? SpellInfo;
+        }
+
+        private static ISpellInfo GetAlternateSpellInfo(ISpellInfo spellInfo)
+        {
+            if (spellInfo?.Entry.Spell4IdMechanicAlternateSpell is null or 0u)
+                return null;
+
+            Spell4Entry alternativeEntry = GameTableManager.Instance.Spell4.GetEntry(spellInfo.Entry.Spell4IdMechanicAlternateSpell);
+            if (alternativeEntry == null)
+                return null;
+
+            return LegacyServiceProvider.Provider
+                .GetService<ISpellInfoManager>()
+                ?.GetSpellBaseInfo(alternativeEntry.Spell4BaseIdBaseSpell)
+                ?.GetSpellInfo((byte)spellInfo.Entry.TierIndex);
         }
 
         private void InitialiseAbilityCharges()
@@ -207,9 +221,11 @@ namespace NexusForever.Game.Spell
 
         private void CastSpell()
         {
-            var spellInfoToCast = SpellInfo;
-            if (AlternateSpellInfo != null && CheckRunnerOverride())
-                spellInfoToCast = AlternateSpellInfo;
+            ISpellInfo activeSpellInfo = GetActiveSpellInfo();
+            ISpellInfo spellInfoToCast = activeSpellInfo;
+            ISpellInfo alternateSpellInfo = GetAlternateSpellInfo(activeSpellInfo);
+            if (alternateSpellInfo != null && CheckRunnerOverride(activeSpellInfo))
+                spellInfoToCast = alternateSpellInfo;
 
             // For Threshold Spells
             if (Owner.HasSpell(spellInfoToCast.Entry.Id, out ISpell spell, isCasting: castMethod == CastMethod.ChargeRelease))
@@ -227,7 +243,7 @@ namespace NexusForever.Game.Spell
             Owner.CastSpell(new SpellParameters
             {
                 CharacterSpell         = this,
-                RootSpellInfo          = SpellInfo,
+                RootSpellInfo          = activeSpellInfo,
                 SpellInfo              = spellInfoToCast,
                 PrimaryTargetId        = Owner.TargetGuid ?? 0u,
                 UserInitiatedSpellCast = true
@@ -255,9 +271,9 @@ namespace NexusForever.Game.Spell
             });
         }
 
-        private bool CheckRunnerOverride()
+        private bool CheckRunnerOverride(ISpellInfo spellInfo)
         {
-            foreach (PrerequisiteEntry runnerPrereq in SpellInfo.PrerequisiteRunners)
+            foreach (PrerequisiteEntry runnerPrereq in spellInfo.PrerequisiteRunners)
                 if (PrerequisiteManager.Instance.Meets(Owner, runnerPrereq.Id))
                     return true;
 

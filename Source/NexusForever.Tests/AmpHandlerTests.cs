@@ -16,12 +16,14 @@ public class AmpHandlerTests
     {
         IActionSet actionSet = CreateActionSet([10, 20], specIndex: 0);
         int grantSpellsCalls = 0;
+        int refreshAmpModifierCalls = 0;
         List<IWritable> messages = [];
 
         ISpellManager spellManager = TestProxy.Create<ISpellManager>(
             ("get_ActiveActionSet", (byte)0),
             ("GetActionSet", (Func<byte, IActionSet>)(_ => actionSet)),
-            ("GrantSpells", (Action)(() => grantSpellsCalls++)));
+            ("GrantSpells", (Action)(() => grantSpellsCalls++)),
+            ("RefreshActiveAmpModifiers", (Action)(() => refreshAmpModifierCalls++)));
         IPlayer player = TestProxy.Create<IPlayer>(("get_SpellManager", spellManager));
         IWorldSession session = TestProxy.Create<IWorldSession>(
             ("get_Player", player),
@@ -36,6 +38,7 @@ public class AmpHandlerTests
         ServerAmpList ampList = Assert.Single(messages.OfType<ServerAmpList>());
         Assert.Equal([20, 30], ampList.Amps);
         Assert.Equal(1, grantSpellsCalls);
+        Assert.Equal(1, refreshAmpModifierCalls);
     }
 
     [Fact]
@@ -43,11 +46,13 @@ public class AmpHandlerTests
     {
         IActionSet actionSet = CreateActionSet([1, 2], specIndex: 1);
         int grantSpellsCalls = 0;
+        int refreshAmpModifierCalls = 0;
         List<IWritable> messages = [];
 
         ISpellManager spellManager = TestProxy.Create<ISpellManager>(
             ("GetActionSet", (Func<byte, IActionSet>)(_ => actionSet)),
-            ("GrantSpells", (Action)(() => grantSpellsCalls++)));
+            ("GrantSpells", (Action)(() => grantSpellsCalls++)),
+            ("RefreshActiveAmpModifiers", (Action)(() => refreshAmpModifierCalls++)));
         IPlayer player = TestProxy.Create<IPlayer>(("get_SpellManager", spellManager));
         IWorldSession session = TestProxy.Create<IWorldSession>(
             ("get_Player", player),
@@ -68,6 +73,7 @@ public class AmpHandlerTests
         ServerAmpList ampList = Assert.Single(messages.OfType<ServerAmpList>());
         Assert.Equal([2, 3], ampList.Amps);
         Assert.Equal(1, grantSpellsCalls);
+        Assert.Equal(1, refreshAmpModifierCalls);
     }
 
     private static IActionSet CreateActionSet(IEnumerable<ushort> enabledAmpIds, byte specIndex)

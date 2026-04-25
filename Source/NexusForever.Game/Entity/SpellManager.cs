@@ -7,6 +7,7 @@ using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Spell;
+using NexusForever.Game.Spell.Effect.Data;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Prerequisite;
 using NexusForever.Game.Static.Spell;
@@ -70,6 +71,7 @@ namespace NexusForever.Game.Entity
         private readonly Dictionary<uint /*globalCooldownEnum*/, double /*cooldown*/> globalSpellCooldowns = new();
 
         private readonly IActionSet[] actionSets = new ActionSet[ActionSet.MaxActionSets];
+        private readonly Dictionary<uint /*spell4Id*/, HashSet<Property>> activeAmpModifierProperties = [];
 
         private SpellManagerSaveMask saveMask;
 
@@ -124,6 +126,8 @@ namespace NexusForever.Game.Entity
                     .Where(c => c.SpecIndex == i))
                     actionSets[i].AddShortcut(shortcutModel);
             }
+
+            RefreshActiveAmpModifiers();
         }
 
         public void GrantSpells()
@@ -416,6 +420,51 @@ namespace NexusForever.Game.Entity
             return GetActionSet(ActiveActionSet).GetAmp(ampId) != null;
         }
 
+        public void RefreshActiveAmpModifiers()
+        {
+            HashSet<uint> desiredSpellIds = GetActionSet(ActiveActionSet).Amps
+                .Select(a => a.Entry.Spell4IdAugment)
+                .Where(spell4Id => spell4Id != 0u)
+                .ToHashSet();
+
+            foreach (uint spell4Id in activeAmpModifierProperties.Keys.Except(desiredSpellIds).ToArray())
+                RemoveActiveAmpModifierSpell(spell4Id);
+
+            foreach (uint spell4Id in desiredSpellIds)
+            {
+                if (!activeAmpModifierProperties.ContainsKey(spell4Id))
+                    ApplyActiveAmpModifierSpell(spell4Id);
+            }
+        }
+
+        private void ApplyActiveAmpModifierSpell(uint spell4Id)
+        {
+            var properties = new HashSet<Property>();
+
+            foreach (Spell4EffectsEntry effect in GameTableManager.Instance.Spell4Effects.Entries
+                .Where(e => e.SpellId == spell4Id &&
+                            e.EffectType == SpellEffectType.UnitPropertyModifier &&
+                            (e.TargetFlags & SpellEffectTargetFlags.Caster) != 0))
+            {
+                var data = new SpellEffectUnitPropertyModifierData();
+                data.Populate(effect);
+
+                var modifier = new SpellPropertyModifier(data.Property, data.Priority, data.PercentageModifier, data.FlatValueModifier, data.LevelScalingModifier);
+                player.AddSpellModifierProperty(modifier, spell4Id);
+                properties.Add(data.Property);
+            }
+
+            activeAmpModifierProperties[spell4Id] = properties;
+        }
+
+        private void RemoveActiveAmpModifierSpell(uint spell4Id)
+        {
+            foreach (Property property in activeAmpModifierProperties[spell4Id])
+                player.RemoveSpellProperty(property, spell4Id);
+
+            activeAmpModifierProperties.Remove(spell4Id);
+        }
+
         public List<ICharacterSpell> GetPets()
         {
             return spells.Values
@@ -624,6 +673,7 @@ namespace NexusForever.Game.Entity
             // TODO: handle other errors
 
             ActiveActionSet = value;
+            RefreshActiveAmpModifiers();
             return SpecError.Ok;
         }
 
