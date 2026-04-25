@@ -28,13 +28,13 @@ namespace NexusForever.Telemetry
                 .ConfigureResource(r => r.AddService(GetServiceName(options)));
 
             if (options.Logging?.Enable is true)
-                otb.WithLogging(l => l.AddOtlpExporter(e => e.AddNexusForeverOtlpExporter(options.Endpoint)));
+                otb.WithLogging(l => l.AddOtlpExporter(e => e.AddNexusForeverOtlpExporter(options.Endpoint, "v1/logs")));
 
             if (options.Metrics?.Enable is true)
-                otb.WithMetrics(m => m.AddOtlpExporter(e => e.AddNexusForeverOtlpExporter(options.Endpoint)));
+                otb.WithMetrics(m => m.AddOtlpExporter(e => e.AddNexusForeverOtlpExporter(options.Endpoint, "v1/metrics")));
 
             if (options.Tracing?.Enable is true)
-                otb.WithTracing(t => t.AddOtlpExporter(e => e.AddNexusForeverOtlpExporter(options.Endpoint)));
+                otb.WithTracing(t => t.AddOtlpExporter(e => e.AddNexusForeverOtlpExporter(options.Endpoint, "v1/traces")));
 
             return otb;
         }
