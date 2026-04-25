@@ -90,6 +90,8 @@ namespace NexusForever.Game.Entity
         // TODO: move this to the config file
         private const double SaveDuration = 60d;
 
+        private DateTime fallingDamageSuppressedUntil = DateTime.MinValue;
+
         public override EntityType Type => EntityType.Player;
 
         public IAccount Account { get; private set; }
@@ -1346,6 +1348,9 @@ namespace NexusForever.Game.Entity
             if (!IsAlive || !float.IsFinite(healthPercent) || healthPercent <= 0f)
                 return;
 
+            if (DateTime.UtcNow < fallingDamageSuppressedUntil)
+                return;
+
             uint damage = (uint)Math.Ceiling(MaxHealth * Math.Clamp(healthPercent, 0f, 1f));
             if (damage == 0u)
                 return;
@@ -1360,6 +1365,16 @@ namespace NexusForever.Game.Entity
             }, true);
 
             ModifyHealth(damage, DamageType.Fall, this);
+        }
+
+        public void SuppressFallingDamage(TimeSpan duration)
+        {
+            if (duration <= TimeSpan.Zero)
+                return;
+
+            DateTime suppressedUntil = DateTime.UtcNow + duration;
+            if (suppressedUntil > fallingDamageSuppressedUntil)
+                fallingDamageSuppressedUntil = suppressedUntil;
         }
 
         /// <summary>

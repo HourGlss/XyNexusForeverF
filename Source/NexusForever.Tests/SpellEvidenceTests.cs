@@ -6,6 +6,7 @@ using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Abstract.Entity.Movement.Force;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Search;
 using NexusForever.Game.Abstract.Spell;
@@ -16,6 +17,7 @@ using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Game.Abstract.Spell.Info.Patch;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Abstract.Spell.Target.Implicit;
+using NexusForever.Game.Abstract.Spell.Target.Implicit.Filter;
 using NexusForever.Game.Abstract.Spell.Validator;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Spell.Effect;
@@ -25,6 +27,7 @@ using NexusForever.Game.Spell.Info.Patch;
 using NexusForever.Game.Spell.Target.Implicit;
 using NexusForever.Game.Spell.Target.Implicit.Filter;
 using NexusForever.Game.Spell.Type;
+using NexusForever.Game.Static;
 using NexusForever.Game.Static.Spell;
 using NexusForever.Game.Static.Spell.Effect;
 using NexusForever.Game.Static.Spell.Target;
@@ -600,6 +603,45 @@ public class SpellEvidenceTests
     }
 
     [Fact]
+    public void KeyForcedMovementSuppressesCasterFallingDamage()
+    {
+        TimeSpan? suppressedDuration = null;
+        bool forceMoveCalled = false;
+
+        IBaseMap map = TestProxy.Create<IBaseMap>(
+            ("GetTerrainHeight", (Func<float, float, float?>)((_, _) => null)));
+        IPlayer caster = TestProxy.Create<IPlayer>(
+            ("get_Guid", 100u),
+            ("get_Position", Vector3.Zero),
+            ("get_Rotation", Vector3.Zero),
+            ("get_Map", map),
+            ("SuppressFallingDamage", (Action<TimeSpan>)(duration => suppressedDuration = duration)));
+        ISpell spell = TestProxy.Create<ISpell>(("get_Caster", caster));
+        ISpellExecutionContext executionContext = TestProxy.Create<ISpellExecutionContext>(("get_Spell", spell));
+        IForcedMovementGenerator forcedMovementGenerator = TestProxy.Create<IForcedMovementGenerator>(
+            ("ForceMove", (ForceMoveDelegate)((_, _, _, _, _, _) => forceMoveCalled = true)));
+
+        var entry = new Spell4EffectsEntry
+        {
+            DataBits00 = (uint)SpellEffectForcedMoveType.KeyBackward,
+            DataBits01 = BitConverter.SingleToUInt32Bits(15f),
+            DataBits02 = BitConverter.SingleToUInt32Bits(15f),
+            DataBits03 = 250u,
+            DataBits06 = BitConverter.SingleToUInt32Bits(5f)
+        };
+        var data = new SpellEffectForcedMoveData();
+        data.Populate(entry);
+
+        var handler = new SpellEffectForcedMoveHandler(forcedMovementGenerator);
+        SpellEffectExecutionResult result = handler.Apply(executionContext, caster, TestProxy.Create<ISpellTargetEffectInfo>(), data);
+
+        Assert.Equal(SpellEffectExecutionResult.Ok, result);
+        Assert.True(forceMoveCalled);
+        Assert.NotNull(suppressedDuration);
+        Assert.True(suppressedDuration.Value >= TimeSpan.FromSeconds(1));
+    }
+
+    [Fact]
     public void RapidTapThresholdSpellsApplyBaseCooldownOnInitialExecute()
     {
         ISpellInfo spellInfo = CreateRapidTapThresholdSpellInfo(66986u, 6000u);
@@ -651,6 +693,68 @@ public class SpellEvidenceTests
         Assert.Same(spellInfo, cooldownSpellInfo);
         Assert.Equal(6d, cooldownSeconds);
         Assert.True(emitCooldown);
+    }
+
+    [Fact]
+    public void PounceCastsNoTargetFallbackWhenNoImplicitTargetIsSelected()
+    {
+        ISpellInfo fallbackSpellInfo = CreatePounceFallbackSpellInfo();
+        ISpellInfo rootSpellInfo = CreatePounceRootSpellInfo();
+        ISpellBaseInfo fallbackBaseInfo = TestProxy.Create<ISpellBaseInfo>(
+            ("GetSpellInfo", (Func<byte, ISpellInfo>)(_ => fallbackSpellInfo)));
+        ISpellInfoManager spellInfoManager = TestProxy.Create<ISpellInfoManager>(
+            ("GetSpellBaseInfo", (Func<uint, ISpellBaseInfo>)(spell4BaseId => spell4BaseId == 26867u ? fallbackBaseInfo : null)));
+
+        IServiceProvider previousProvider = LegacyServiceProvider.Provider;
+        IScriptCollection scriptCollection = TestProxy.Create<IScriptCollection>();
+        LegacyServiceProvider.Provider = new ServiceCollection()
+            .AddSingleton<IScriptManager>(TestProxy.Create<IScriptManager>(
+                ("InitialiseOwnedCollection", (Func<object, IScriptCollection>)(_ => scriptCollection)),
+                ("InitialiseOwnedScripts", (Action<IScriptCollection, uint>)((_, _) => { }))))
+            .AddSingleton(spellInfoManager)
+            .AddSingleton(TestProxy.Create<ISpellTargetImplicitSelector>(
+                ("Initialise", (Action<IUnitEntity, ISpellParameters>)((_, _) => { })),
+                ("SelectTargets", (Action<List<ISpellTargetImplicit>>)(_ => { }))))
+            .AddSingleton(TestProxy.Create<ISpellTargetImplicitConstraintFilter>(
+                ("Initialise", (Action<Spell4AoeTargetConstraintsEntry>)(_ => { })),
+                ("Filter", (Action<List<ISpellTargetImplicit>>)(_ => { }))))
+            .BuildServiceProvider();
+
+        ISpellParameters capturedParameters = null;
+        IUnitEntity caster = TestProxy.Create<IUnitEntity>(
+            ("get_Guid", 100u),
+            ("get_Position", Vector3.Zero),
+            ("get_Rotation", Vector3.Zero),
+            ("CastSpell", (Action<ISpellParameters>)(parameters => capturedParameters = parameters)));
+
+        try
+        {
+            var spell = new TestNormalSpell(
+                TestProxy.Create<ISpellTargetInfoCollection>(
+                    ("Initialise", (Action<ISpell>)(_ => { })),
+                    ("GetEnumerator", (Func<IEnumerator<ISpellTargetInfo>>)(() => Enumerable.Empty<ISpellTargetInfo>().GetEnumerator()))),
+                TestProxy.Create<IGlobalSpellManager>(("get_NextCastingId", 1u)),
+                TestProxy.Create<ICastResultValidatorManager>(),
+                TestProxy.Create<IDisableManager>(("IsDisabled", (Func<DisableType, uint, bool>)((_, _) => false))));
+
+            spell.Initialise(caster, new SpellParameters
+            {
+                SpellInfo = rootSpellInfo,
+                RootSpellInfo = rootSpellInfo
+            });
+            spell.ExecuteForTest();
+        }
+        finally
+        {
+            LegacyServiceProvider.Provider = previousProvider;
+        }
+
+        Assert.NotNull(capturedParameters);
+        Assert.Same(rootSpellInfo, capturedParameters.ParentSpellInfo);
+        Assert.Same(rootSpellInfo, capturedParameters.RootSpellInfo);
+        Assert.Same(fallbackSpellInfo, capturedParameters.SpellInfo);
+        Assert.True(capturedParameters.IsProxy);
+        Assert.Equal(0u, capturedParameters.PrimaryTargetId);
     }
 
     [Fact]
@@ -994,6 +1098,82 @@ Spellslinger|Spell Surge|Fluff,Proxy,SpellForceRemoveChanneled,SpellForceRemove
             }));
     }
 
+    private static ISpellInfo CreatePounceRootSpellInfo()
+    {
+        ISpellBaseInfo baseInfo = TestProxy.Create<ISpellBaseInfo>(
+            ("get_Entry", new Spell4BaseEntry
+            {
+                Id = 26865u,
+                CastMethod = CastMethod.Normal
+            }),
+            ("get_TargetMechanics", new Spell4TargetMechanicsEntry
+            {
+                TargetType = SpellTargetMechanicType.SecondaryTarget
+            }));
+
+        return TestProxy.Create<ISpellInfo>(
+            ("get_Entry", new Spell4Entry
+            {
+                Id = 42676u,
+                Spell4BaseIdBaseSpell = 26865u,
+                TierIndex = 1u,
+                SpellCoolDown = 20000u,
+                CasterInnateRequirements = [0u, 0u],
+                CasterInnateRequirementValues = [0u, 0u],
+                CasterInnateRequirementEval = [0u, 0u],
+                InnateCostTypes = [0u, 0u],
+                InnateCosts = [0u, 0u],
+                InnateCostEMMIds = [0u, 0u],
+                PrerequisiteIdRunners = [0u, 0u],
+                SpellCoolDownIds = [0u, 0u, 0u]
+            }),
+            ("get_BaseInfo", baseInfo),
+            ("get_AoeTargetConstraints", new Spell4AoeTargetConstraintsEntry()),
+            ("get_Telegraphs", new List<TelegraphDamageEntry>()),
+            ("get_Effects", new List<Spell4EffectsEntry>
+            {
+                new()
+                {
+                    Id = 97267u,
+                    TargetFlags = SpellEffectTargetFlags.ImplicitTarget,
+                    EffectType = SpellEffectType.Proxy,
+                    PhaseFlags = uint.MaxValue
+                }
+            }),
+            ("get_Thresholds", new List<Spell4ThresholdsEntry>()),
+            ("get_PrerequisiteRunners", new List<PrerequisiteEntry>()));
+    }
+
+    private static ISpellInfo CreatePounceFallbackSpellInfo()
+    {
+        ISpellBaseInfo baseInfo = TestProxy.Create<ISpellBaseInfo>(
+            ("get_Entry", new Spell4BaseEntry
+            {
+                Id = 26867u,
+                CastMethod = CastMethod.Normal
+            }));
+
+        return TestProxy.Create<ISpellInfo>(
+            ("get_Entry", new Spell4Entry
+            {
+                Id = 42678u,
+                Spell4BaseIdBaseSpell = 26867u,
+                TierIndex = 1u,
+                CasterInnateRequirements = [0u, 0u],
+                CasterInnateRequirementValues = [0u, 0u],
+                CasterInnateRequirementEval = [0u, 0u],
+                InnateCostTypes = [0u, 0u],
+                InnateCosts = [0u, 0u],
+                InnateCostEMMIds = [0u, 0u],
+                PrerequisiteIdRunners = [0u, 0u],
+                SpellCoolDownIds = [0u, 0u, 0u]
+            }),
+            ("get_BaseInfo", baseInfo),
+            ("get_Effects", new List<Spell4EffectsEntry>()),
+            ("get_Thresholds", new List<Spell4ThresholdsEntry>()),
+            ("get_PrerequisiteRunners", new List<PrerequisiteEntry>()));
+    }
+
     private static IUnitEntity CreateUnit(uint guid, Vector3? position = null)
     {
         return TestProxy.Create<IUnitEntity>(
@@ -1077,6 +1257,30 @@ Spellslinger|Spell Surge|Fluff,Proxy,SpellForceRemoveChanneled,SpellForceRemove
         }
     }
 
+    private sealed class TestNormalSpell : Spell
+    {
+        public override CastMethod CastMethod => CastMethod.Normal;
+
+        public TestNormalSpell(
+            ISpellTargetInfoCollection spellTargetInfoCollection,
+            IGlobalSpellManager globalSpellManager,
+            ICastResultValidatorManager castResultValidatorManager,
+            IDisableManager disableManager)
+            : base(
+                NullLogger<TestNormalSpell>.Instance,
+                spellTargetInfoCollection,
+                globalSpellManager,
+                castResultValidatorManager,
+                disableManager)
+        {
+        }
+
+        public void ExecuteForTest()
+        {
+            Execute();
+        }
+    }
+
     private sealed class TestRapidTapThresholdSpell : SpellThreshold
     {
         public override CastMethod CastMethod => CastMethod.RapidTap;
@@ -1102,4 +1306,6 @@ Spellslinger|Spell Surge|Fluff,Proxy,SpellForceRemoveChanneled,SpellForceRemove
             Execute();
         }
     }
+
+    private delegate void ForceMoveDelegate(IUnitEntity mover, Vector3 position, Vector3 rotation, TimeSpan flightTime, float gravity, float spin);
 }

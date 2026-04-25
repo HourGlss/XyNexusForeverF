@@ -176,6 +176,11 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         void TakeFallingDamage(float healthPercent);
 
+        /// <summary>
+        /// Temporarily ignore client-reported falling damage while ability forced movement resolves.
+        /// </summary>
+        void SuppressFallingDamage(TimeSpan duration);
+
         void SendGenericError(GenericError error);
         void SendSystemMessage(string text);
 

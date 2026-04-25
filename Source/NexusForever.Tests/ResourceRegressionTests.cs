@@ -2,6 +2,7 @@ using System.Collections;
 using System.Reflection;
 using Microsoft.Extensions.Logging.Abstractions;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Prerequisite.Check;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Prerequisite;
@@ -36,6 +37,30 @@ public class ResourceRegressionTests
 
         Assert.True(handler.Meets(player, PrerequisiteComparison.GreaterThan, 60u, 6u, null));
         Assert.False(handler.Meets(lowPsiPlayer, PrerequisiteComparison.GreaterThan, 60u, 6u, null));
+    }
+
+    [Fact]
+    public void Unknown50ChecksActiveSpellState()
+    {
+        var handler = new PrerequisiteCheckUnknown50(NullLogger<PrerequisiteCheckUnknown50>.Instance);
+        ISpell activeSpell = TestProxy.Create<ISpell>(("get_Spell4Id", 39407u));
+        IPlayer player = TestProxy.Create<IPlayer>(
+            ("HasSpell", (HasSpellPredicateDelegate)((Func<ISpell, bool> predicate, out ISpell spell) =>
+            {
+                if (predicate(activeSpell))
+                {
+                    spell = activeSpell;
+                    return true;
+                }
+
+                spell = null;
+                return false;
+            })));
+
+        Assert.True(handler.Meets(player, PrerequisiteComparison.Equal, 39407u, 0u, null));
+        Assert.False(handler.Meets(player, PrerequisiteComparison.NotEqual, 39407u, 0u, null));
+        Assert.False(handler.Meets(player, PrerequisiteComparison.Equal, 111u, 0u, null));
+        Assert.True(handler.Meets(player, PrerequisiteComparison.NotEqual, 111u, 0u, null));
     }
 
     [Fact]
@@ -97,4 +122,6 @@ public class ResourceRegressionTests
 
         return results;
     }
+
+    private delegate bool HasSpellPredicateDelegate(Func<ISpell, bool> predicate, out ISpell spell);
 }

@@ -5,6 +5,7 @@ using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Event;
+using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Abstract.Spell.Target.Implicit;
 using NexusForever.Game.Abstract.Spell.Target.Implicit.Filter;
@@ -32,6 +33,9 @@ namespace NexusForever.Game.Spell
 {
     public abstract class Spell : ISpell
     {
+        private const uint StalkerPounceSpell4BaseId = 26865;
+        private const uint StalkerPounceNoTargetSpell4BaseId = 26867;
+
         public abstract CastMethod CastMethod { get; }
 
         public ISpellParameters Parameters { get; private set; }
@@ -510,6 +514,7 @@ namespace NexusForever.Game.Spell
 
             SelectTargets(executionContext);  // First Select Targets
             ExecuteEffects(executionContext); // All Effects are evaluated and executed (after SelectTargets())
+            TryCastPounceNoTargetFallback(executionContext);
             HandleProxies(executionContext);  // Any Proxies that are added by Effects are evaluated and executed (after ExecuteEffects())
             
             if (!executionContext.IsDelayed)
@@ -531,6 +536,40 @@ namespace NexusForever.Game.Spell
 
             foreach (IProxy proxy in executionContext.GetProxies())
                 proxy.Cast(Caster, events);
+        }
+
+        private void TryCastPounceNoTargetFallback(ISpellExecutionContext executionContext)
+        {
+            if (executionContext.IsDelayed)
+                return;
+
+            if (Parameters.SpellInfo.Entry.Spell4BaseIdBaseSpell != StalkerPounceSpell4BaseId)
+                return;
+
+            if (executionContext.TargetCollection.GetTargets(SpellEffectTargetFlags.ImplicitTarget).Any())
+                return;
+
+            ISpellInfo fallbackSpellInfo = LegacyServiceProvider.Provider
+                .GetService<ISpellInfoManager>()
+                ?.GetSpellBaseInfo(StalkerPounceNoTargetSpell4BaseId)
+                ?.GetSpellInfo((byte)Parameters.SpellInfo.Entry.TierIndex);
+            if (fallbackSpellInfo == null)
+                return;
+
+            Caster.CastSpell(new SpellParameters
+            {
+                CharacterSpell         = Parameters.CharacterSpell,
+                ParentSpellInfo        = Parameters.SpellInfo,
+                RootSpellInfo          = Parameters.RootSpellInfo,
+                SpellInfo              = fallbackSpellInfo,
+                PrimaryTargetId        = 0u,
+                TargetPosition         = Parameters.TargetPosition,
+                OriginPosition         = Parameters.OriginPosition,
+                PositionalUnitId       = Parameters.PositionalUnitId,
+                TaxiNode               = Parameters.TaxiNode,
+                UserInitiatedSpellCast = Parameters.UserInitiatedSpellCast,
+                IsProxy                = true
+            });
         }
 
         protected void SetCooldown()

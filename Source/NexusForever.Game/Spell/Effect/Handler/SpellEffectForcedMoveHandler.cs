@@ -15,6 +15,8 @@ namespace NexusForever.Game.Spell.Effect.Handler
     [SpellEffectHandler(SpellEffectType.ForcedMove)]
     public class SpellEffectForcedMoveHandler : ISpellEffectApplyHandler<ISpellEffectForcedMoveData>
     {
+        private static readonly TimeSpan FallingDamageSuppressionBuffer = TimeSpan.FromSeconds(1);
+
         #region Dependency Injection
 
         private readonly IForcedMovementGenerator forcedMovementGenerator;
@@ -152,6 +154,8 @@ namespace NexusForever.Game.Spell.Effect.Handler
                     //float speed = distance / (float)data.FlightTime.TotalSeconds;
                     float spin = (data.Spin * MathF.PI * 2) / v20;
                     forcedMovementGenerator.ForceMove(mover, position, new Vector3(angle, 0f, 0f), data.FlightTime, gravity, spin);
+                    if (mover == executionContext.Spell.Caster && mover is IPlayer player)
+                        player.SuppressFallingDamage(data.FlightTime + FallingDamageSuppressionBuffer);
                     break;
                 }
                 // seems like high jumps?? Trampoline?
