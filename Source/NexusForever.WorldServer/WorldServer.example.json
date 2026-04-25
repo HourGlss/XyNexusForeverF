@@ -64,6 +64,7 @@
         }
     },
     "Telemetry": {
+        "ServiceName": "world-server",
         "Logging": {
             "Enable": true
         },

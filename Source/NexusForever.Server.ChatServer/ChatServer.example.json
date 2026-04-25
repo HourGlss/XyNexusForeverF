@@ -25,6 +25,7 @@
         }
     },
     "Telemetry": {
+        "ServiceName": "chat-server",
         "Logging": {
             "Enable": true
         },

@@ -18,6 +18,7 @@
         }
     },
     "Telemetry": {
+        "ServiceName": "group-server",
         "Logging": {
             "Enable": true
         },

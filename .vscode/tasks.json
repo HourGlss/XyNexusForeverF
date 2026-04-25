@@ -2,6 +2,24 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Aspire: Run Remote Dashboard Receiver",
+      "type": "shell",
+      "command": "/home/xyf/.aspire/bin/aspire run --apphost Source/NexusForever.Aspire.AppHost/NexusForever.Aspire.AppHost.csproj --no-build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Aspire: Stop Remote Dashboard Receiver",
+      "type": "shell",
+      "command": "/home/xyf/.aspire/bin/aspire stop --apphost Source/NexusForever.Aspire.AppHost/NexusForever.Aspire.AppHost.csproj --non-interactive",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Aspire: Smoke Test Remote Receiver",
       "type": "shell",
       "command": "bash ./tools/check-aspire-remote-dashboard.sh",

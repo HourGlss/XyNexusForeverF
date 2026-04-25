@@ -2,6 +2,7 @@
 {
     public class TelemetryOptions
     {
+        public string ServiceName { get; set; }
         public TelemetryLoggingOptions Logging { get; set; }
         public TelemetryMetricsOptions Metrics { get; set; }
         public TelemetryTracingOptions Tracing { get; set; }

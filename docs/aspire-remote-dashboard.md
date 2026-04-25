@@ -19,13 +19,14 @@ This profile:
 
 - serves the dashboard at `http://192.168.0.144:17021`
 - receives OTLP/HTTP telemetry at `http://192.168.0.144:4318`
+- exposes the local Aspire resource service at `http://localhost:17022` for the VS Code Aspire sidebar
 - disables dashboard auth for LAN/dev convenience
 - skips local orchestration by setting `NEXUSFOREVER_ASPIRE_REMOTE_DASHBOARD_ONLY=true`
 
 Smoke test on `192.168.0.144`:
 
 ```bash
-dotnet run --project Source/NexusForever.Aspire.AppHost/NexusForever.Aspire.AppHost.csproj --launch-profile NexusForever.Aspire.RemoteDashboard --no-build
+aspire run --apphost Source/NexusForever.Aspire.AppHost/NexusForever.Aspire.AppHost.csproj --no-build
 ```
 
 With the dashboard running, these checks should succeed:
@@ -33,6 +34,7 @@ With the dashboard running, these checks should succeed:
 ```bash
 ss -ltnp | rg '(:17021|:4318)'
 curl -sS -o /dev/null -w '%{http_code}\n' -X POST http://192.168.0.144:4318/v1/metrics -H 'Content-Type: application/x-protobuf' --data-binary ''
+aspire ps --format Json
 ```
 
 Expected result:
@@ -40,6 +42,7 @@ Expected result:
 - `17021` is listening for the dashboard
 - `4318` is listening for OTLP/HTTP
 - the OTLP POST returns `200`
+- `aspire ps` lists `NexusForever.Aspire.AppHost`
 
 ## Run from VS Code
 
@@ -47,7 +50,7 @@ This repo now includes VS Code workspace files to make the Aspire extension usef
 
 - `.vscode/launch.json` adds an `Aspire: Remote Dashboard Receiver` debug target
 - `.vscode/settings.json` points the extension at `/home/xyf/.aspire/bin/aspire`, keeps the dashboard in the VS Code browser, and leaves the tab open after debug stops
-- `.vscode/tasks.json` adds `Aspire: Smoke Test Remote Receiver`
+- `.vscode/tasks.json` adds run, stop, and smoke-test tasks for the remote receiver
 - `.aspire/settings.json` pins the AppHost project so Aspire CLI and extension commands resolve the correct AppHost from the repo root
 
 Important detail:
@@ -56,7 +59,7 @@ Important detail:
 - because of that, `NexusForever.Aspire.RemoteDashboard` is intentionally the first launch profile in `launchSettings.json`
 - the full local orchestration profile is still available as `NexusForever.Aspire.FullStack`
 
-Use `F5` in VS Code with the `Aspire: Remote Dashboard Receiver` configuration to launch the receiver on `192.168.0.144`.
+Use `F5` in VS Code with the `Aspire: Remote Dashboard Receiver` configuration, or run the `Aspire: Run Remote Dashboard Receiver` task, to launch the receiver on `192.168.0.144`. After it starts, click Refresh in the Aspire sidebar if the running AppHost list has not updated yet.
 
 ## Run on 192.168.0.241
 
@@ -66,6 +69,7 @@ Use a `Telemetry` section like:
 
 ```json
 "Telemetry": {
+  "ServiceName": "world-server",
   "Logging": {
     "Enable": true
   },
@@ -82,6 +86,8 @@ Use a `Telemetry` section like:
   }
 }
 ```
+
+Use a unique `ServiceName` per process, for example `auth-server`, `sts-server`, `world-server`, `character-api`, `chat-server`, and `group-server`. The server reads config from the runtime working directory, usually `Source/<Project>/bin/Debug/net10.0/<Server>.json`; changing only `*.example.json` does not affect a running deployment.
 
 ## What you get
 
