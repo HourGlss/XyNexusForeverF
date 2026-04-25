@@ -6,34 +6,18 @@ using NexusForever.Game.Static.Prerequisite;
 namespace NexusForever.Game.Prerequisite.Check
 {
     [PrerequisiteCheck(PrerequisiteType.Stealth)]
-    public class PrerequisiteCheckStealth : IPrerequisiteCheck
+    public class PrerequisiteCheckStealth : BasePrerequisiteHandler, IPrerequisiteCheck
     {
-        #region Dependency Injection
-
-        private readonly ILogger<PrerequisiteCheckStealth> log;
-
         public PrerequisiteCheckStealth(
-            ILogger<PrerequisiteCheckStealth> log)
+            ILogger<BasePrerequisiteHandler> log)
+            : base(log)
         {
-            this.log = log;
         }
-
-        #endregion
 
         public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
-            return comparison switch
-            {
-                PrerequisiteComparison.Equal => player.Stealthed,
-                PrerequisiteComparison.NotEqual => !player.Stealthed,
-                _ => LogUnhandled(comparison)
-            };
-        }
-
-        private bool LogUnhandled(PrerequisiteComparison comparison)
-        {
-            log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.Stealth}!");
-            return false;
+            IUnitEntity unit = GetEvaluationUnit(player, parameters);
+            return MatchBoolean(unit.Stealthed, comparison, PrerequisiteType.Stealth);
         }
     }
 }

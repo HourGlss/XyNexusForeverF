@@ -1,14 +1,14 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Prerequisite;
 using NexusForever.Game.Static.Prerequisite;
 
 namespace NexusForever.Game.Prerequisite.Check
 {
-    [PrerequisiteCheck(PrerequisiteType.InCombat)]
-    public class PrerequisiteCheckInCombat : BasePrerequisiteHandler, IPrerequisiteCheck
+    [PrerequisiteCheck(PrerequisiteType.InSubZone)]
+    public class PrerequisiteCheckInSubZone : BasePrerequisiteHandler, IPrerequisiteCheck
     {
-        public PrerequisiteCheckInCombat(
+        public PrerequisiteCheckInSubZone(
             ILogger<BasePrerequisiteHandler> log)
             : base(log)
         {
@@ -17,7 +17,8 @@ namespace NexusForever.Game.Prerequisite.Check
         public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
             IUnitEntity unit = GetEvaluationUnit(player, parameters);
-            return MatchBoolean(unit.InCombat, comparison, PrerequisiteType.InCombat);
+            uint zoneId = unit.Zone?.Id ?? 0u;
+            return MatchComparable(zoneId, value, comparison, PrerequisiteType.InSubZone);
         }
     }
 }

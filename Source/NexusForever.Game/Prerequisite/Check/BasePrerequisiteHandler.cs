@@ -1,4 +1,6 @@
 using Microsoft.Extensions.Logging;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Prerequisite;
 using NexusForever.Game.Static.Prerequisite;
 
 namespace NexusForever.Game.Prerequisite.Check
@@ -10,6 +12,13 @@ namespace NexusForever.Game.Prerequisite.Check
         protected BasePrerequisiteHandler(ILogger<BasePrerequisiteHandler> log)
         {
             this.log = log;
+        }
+
+        protected IUnitEntity GetEvaluationUnit(IPlayer player, IPrerequisiteParameters parameters)
+        {
+            return parameters?.EvaluateTarget == true && parameters.Target != null
+                ? parameters.Target
+                : player;
         }
 
         protected bool MatchEnum<T>(T entityValue, T value, PrerequisiteComparison comparison, PrerequisiteType type)

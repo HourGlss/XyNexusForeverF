@@ -6,7 +6,9 @@ using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Prerequisite.Check;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.PVP;
 using NexusForever.Game.Static.Prerequisite;
+using NexusForever.GameTable.Model;
 
 namespace NexusForever.Tests;
 
@@ -132,6 +134,88 @@ public class ResourceRegressionTests
         Assert.False(handler.Meets(caster, PrerequisiteComparison.NotEqual, 41471u, 437u, parameters));
         Assert.False(handler.Meets(caster, PrerequisiteComparison.Equal, 111u, 437u, parameters));
         Assert.True(handler.Meets(caster, PrerequisiteComparison.NotEqual, 111u, 437u, parameters));
+    }
+
+    [Fact]
+    public void EntityKindPrerequisitesCanEvaluateTargetUnit()
+    {
+        var creatureHandler = new PrerequisiteCheckIsCreature(NullLogger<BasePrerequisiteHandler>.Instance);
+        var playerHandler = new PrerequisiteCheckIsPlayer(NullLogger<BasePrerequisiteHandler>.Instance);
+        IPlayer caster = TestProxy.Create<IPlayer>(("get_Type", EntityType.Player));
+        IUnitEntity creatureTarget = TestProxy.Create<IUnitEntity>(
+            ("get_Type", EntityType.NonPlayer),
+            ("get_CreatureId", 12664u));
+        IPlayer playerTarget = TestProxy.Create<IPlayer>(("get_Type", EntityType.Player));
+
+        var creatureParameters = new PrerequisiteParameters
+        {
+            Target = creatureTarget,
+            EvaluateTarget = true
+        };
+        var playerParameters = new PrerequisiteParameters
+        {
+            Target = playerTarget,
+            EvaluateTarget = true
+        };
+
+        Assert.True(creatureHandler.Meets(caster, PrerequisiteComparison.Equal, 12664u, 0u, creatureParameters));
+        Assert.False(creatureHandler.Meets(caster, PrerequisiteComparison.Equal, 12665u, 0u, creatureParameters));
+        Assert.True(playerHandler.Meets(caster, PrerequisiteComparison.Equal, 0u, 0u, playerParameters));
+        Assert.True(playerHandler.Meets(caster, PrerequisiteComparison.NotEqual, 0u, 0u, creatureParameters));
+    }
+
+    [Fact]
+    public void VitalAndZonePrerequisitesCanEvaluateTargetUnit()
+    {
+        var healthHandler = new PrerequisiteCheckHealth(NullLogger<BasePrerequisiteHandler>.Instance);
+        var healthRequirementHandler = new PrerequisiteCheckHealthRequirement(NullLogger<BasePrerequisiteHandler>.Instance);
+        var shieldHandler = new PrerequisiteCheckShield(NullLogger<BasePrerequisiteHandler>.Instance);
+        var zoneHandler = new PrerequisiteCheckInSubZone(NullLogger<BasePrerequisiteHandler>.Instance);
+        IPlayer caster = TestProxy.Create<IPlayer>();
+        IUnitEntity target = TestProxy.Create<IUnitEntity>(
+            ("get_Health", 25u),
+            ("get_MaxHealth", 100u),
+            ("get_Shield", 75u),
+            ("get_MaxShieldCapacity", 100u),
+            ("get_Zone", new WorldZoneEntry { Id = 140u }));
+        var parameters = new PrerequisiteParameters
+        {
+            Target = target,
+            EvaluateTarget = true
+        };
+
+        Assert.True(healthHandler.Meets(caster, PrerequisiteComparison.LessThanOrEqual, 25u, 0u, parameters));
+        Assert.False(healthHandler.Meets(caster, PrerequisiteComparison.GreaterThan, 50u, 0u, parameters));
+        Assert.True(healthRequirementHandler.Meets(caster, PrerequisiteComparison.GreaterThanOrEqual, 25u, 0u, parameters));
+        Assert.True(shieldHandler.Meets(caster, PrerequisiteComparison.GreaterThanOrEqual, 75u, 3u, parameters));
+        Assert.False(shieldHandler.Meets(caster, PrerequisiteComparison.LessThan, 75u, 3u, parameters));
+        Assert.True(zoneHandler.Meets(caster, PrerequisiteComparison.Equal, 140u, 0u, parameters));
+        Assert.True(zoneHandler.Meets(caster, PrerequisiteComparison.NotEqual, 141u, 0u, parameters));
+    }
+
+    [Fact]
+    public void PvpFlagPrerequisiteComparesFlaggedBooleanValue()
+    {
+        var handler = new PrerequisiteCheckPvpFlag(NullLogger<BasePrerequisiteHandler>.Instance);
+        IPlayer caster = TestProxy.Create<IPlayer>();
+        IPlayer flaggedTarget = TestProxy.Create<IPlayer>(("get_PvPFlags", PvPFlag.Enabled));
+        IPlayer disabledTarget = TestProxy.Create<IPlayer>(("get_PvPFlags", PvPFlag.Disabled));
+
+        Assert.True(handler.Meets(caster, PrerequisiteComparison.Equal, 1u, 0u, new PrerequisiteParameters
+        {
+            Target = flaggedTarget,
+            EvaluateTarget = true
+        }));
+        Assert.False(handler.Meets(caster, PrerequisiteComparison.Equal, 0u, 0u, new PrerequisiteParameters
+        {
+            Target = flaggedTarget,
+            EvaluateTarget = true
+        }));
+        Assert.True(handler.Meets(caster, PrerequisiteComparison.Equal, 0u, 0u, new PrerequisiteParameters
+        {
+            Target = disabledTarget,
+            EvaluateTarget = true
+        }));
     }
 
     [Fact]

@@ -157,11 +157,8 @@ public class DependencyInjectionSmokeTests
 
         foreach (Type type in typeof(PrerequisiteManager).Assembly.GetTypes())
         {
-            PrerequisiteCheckAttribute attribute = type.GetCustomAttribute<PrerequisiteCheckAttribute>();
-            if (attribute == null)
-                continue;
-
-            AssertKeyedRegistration(services, typeof(IPrerequisiteCheck), type, attribute.Type);
+            foreach (PrerequisiteCheckAttribute attribute in type.GetCustomAttributes<PrerequisiteCheckAttribute>())
+                AssertKeyedRegistration(services, typeof(IPrerequisiteCheck), type, attribute.Type);
         }
     }
 

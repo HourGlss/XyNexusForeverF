@@ -812,10 +812,10 @@ namespace NexusForever.Game.Spell
             if (prerequisite == null)
                 return false;
 
-            return IsActiveSpellStatePrerequisite(prerequisite);
+            return IsTargetUnitPrerequisite(prerequisite);
         }
 
-        private static bool IsActiveSpellStatePrerequisite(PrerequisiteEntry prerequisite)
+        private static bool IsTargetUnitPrerequisite(PrerequisiteEntry prerequisite)
         {
             bool hasPrerequisite = false;
 
@@ -825,7 +825,27 @@ namespace NexusForever.Game.Spell
                     continue;
 
                 hasPrerequisite = true;
-                if (type is not (PrerequisiteType.UnderSpell or PrerequisiteType.Unknown50 or PrerequisiteType.Spell130))
+                if (type is not (
+                    PrerequisiteType.UnderSpell
+                    or PrerequisiteType.Unknown50
+                    or PrerequisiteType.Spell130
+                    or PrerequisiteType.IsCreature
+                    or PrerequisiteType.IsPlayer
+                    or PrerequisiteType.Health
+                    or PrerequisiteType.HealthRequirement
+                    or PrerequisiteType.Shield215
+                    or PrerequisiteType.InCombat
+                    or PrerequisiteType.DeadState
+                    or PrerequisiteType.Stealth
+                    or PrerequisiteType.Level
+                    or PrerequisiteType.Level131
+                    or PrerequisiteType.TrueLevel
+                    or PrerequisiteType.InSubZone
+                    or PrerequisiteType.Faction
+                    or PrerequisiteType.Faction128
+                    or PrerequisiteType.Faction243
+                    or PrerequisiteType.BaseFaction
+                    or PrerequisiteType.PvpFlag))
                     return false;
             }
 

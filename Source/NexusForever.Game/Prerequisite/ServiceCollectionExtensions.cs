@@ -15,11 +15,8 @@ namespace NexusForever.Game.Prerequisite
 
             foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
             {
-                PrerequisiteCheckAttribute attribute = type.GetCustomAttribute<PrerequisiteCheckAttribute>();
-                if (attribute == null)
-                    continue;
-
-                sc.AddKeyedTransient(typeof(IPrerequisiteCheck), attribute.Type, type);
+                foreach (PrerequisiteCheckAttribute attribute in type.GetCustomAttributes<PrerequisiteCheckAttribute>())
+                    sc.AddKeyedTransient(typeof(IPrerequisiteCheck), attribute.Type, type);
             }
         }
     }

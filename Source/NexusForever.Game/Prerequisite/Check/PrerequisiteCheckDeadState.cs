@@ -17,7 +17,8 @@ namespace NexusForever.Game.Prerequisite.Check
 
         public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
-            EntityDeathState? deathState = player.DeathState;
+            IUnitEntity unit = GetEvaluationUnit(player, parameters);
+            EntityDeathState? deathState = unit.DeathState;
             if (deathState == null)
             {
                 return comparison switch
