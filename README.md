@@ -165,6 +165,7 @@ This branch currently includes ported or in-progress work in these areas:
 | Battleground scripts | [Source/NexusForever.Script.Instance/Battleground/](Source/NexusForever.Script.Instance/Battleground/). |
 | Spell cleanup backlog | [todo.md](todo.md). Start here before changing spell handlers broadly. |
 | Code quality reporting | [CODEQUALITY.md](CODEQUALITY.md), [scripts/quality.sh](scripts/quality.sh), [scripts/quality.ps1](scripts/quality.ps1), and [eng/CodeCoverage.runsettings](eng/CodeCoverage.runsettings). |
+| Spell diagnostics | [docs/spell-diagnostics.md](docs/spell-diagnostics.md), `Diagnostics:Spell` in `WorldServer.json`, and [Source/NexusForever.Game/Spell/Telemetry/](Source/NexusForever.Game/Spell/Telemetry/). |
 
 ## Useful Commands
 
@@ -237,9 +238,13 @@ Quality output is written to `artifacts/code-quality/latest/`. The important
 files are `quality-report.json`, `index.html`, `raw/files.csv`, and
 `raw/functions.csv`.
 
-There are currently no dedicated C# test projects in the solution. The quality
-tool reports coverage as unavailable instead of inventing a number. If tests are
-added, put them in `*.Tests` projects or mark them with
+Run the focused regression test project:
+
+```bash
+dotnet test Source/NexusForever.Tests/NexusForever.Tests.csproj
+```
+
+The quality tool expects tests to live in `*.Tests` projects or be marked with
 `<IsTestProject>true</IsTestProject>` so the wrapper can discover them.
 
 ## Working Safely In This Codebase

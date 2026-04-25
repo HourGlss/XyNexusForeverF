@@ -5,6 +5,7 @@ using NexusForever.Game.Spell.Effect;
 using NexusForever.Game.Spell.Info;
 using NexusForever.Game.Spell.Proc;
 using NexusForever.Game.Spell.Target;
+using NexusForever.Game.Spell.Telemetry;
 using NexusForever.Game.Spell.Type;
 using NexusForever.Game.Spell.Validator;
 using NexusForever.Game.Static.Spell;
@@ -23,6 +24,7 @@ namespace NexusForever.Game.Spell
 
             sc.AddSingletonLegacy<IGlobalSpellManager, GlobalSpellManager>();
             sc.AddSingletonLegacy<ISpellLookupManager, SpellLookupManager>();
+            sc.AddSingleton<ISpellDiagnostics, SpellDiagnostics>();
 
             sc.AddTransientFactory<ISpellParameters, SpellParameters>();
 

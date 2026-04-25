@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Numerics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -12,6 +13,7 @@ using NexusForever.Game.Abstract.Spell.Target.Implicit.Filter;
 using NexusForever.Game.Abstract.Spell.Validator;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Spell.Event;
+using NexusForever.Game.Spell.Telemetry;
 using NexusForever.Game.Spell.Target;
 using NexusForever.Game.Spell.Type;
 using NexusForever.Game.Static;
@@ -77,6 +79,9 @@ namespace NexusForever.Game.Spell
 
         private readonly Dictionary<Spell4EffectsEntry, UpdateTimer> delayedEffects = [];
         private float? esperResourceAtExecution;
+        private Activity spellActivity;
+        private CastResult? terminalCastResult;
+        private bool spellActivityStopped;
 
         private IScriptCollection scriptCollection;
 
@@ -87,19 +92,22 @@ namespace NexusForever.Game.Spell
         private readonly IGlobalSpellManager globalSpellManager;
         private readonly ICastResultValidatorManager castResultValidatorManager;
         private readonly IDisableManager disableManager;
+        private readonly ISpellDiagnostics spellDiagnostics;
 
         public Spell(
             ILogger log,
             ISpellTargetInfoCollection spellTargetInfoCollection,
             IGlobalSpellManager globalSpellManager,
             ICastResultValidatorManager castResultValidatorManager,
-            IDisableManager disableManager)
+            IDisableManager disableManager,
+            ISpellDiagnostics spellDiagnostics)
         {
             this.log                        = log;
             this.spellTargetInfoCollection  = spellTargetInfoCollection;
             this.globalSpellManager         = globalSpellManager;
             this.castResultValidatorManager = castResultValidatorManager;
             this.disableManager             = disableManager;
+            this.spellDiagnostics           = spellDiagnostics;
         }
 
         #endregion
@@ -134,10 +142,14 @@ namespace NexusForever.Game.Spell
 
             scriptCollection = ScriptManager.Instance.InitialiseOwnedCollection<ISpell>(this);
             ScriptManager.Instance.InitialiseOwnedScripts<ISpell>(scriptCollection, parameters.SpellInfo.Entry.Id);
+
+            spellActivity = spellDiagnostics.StartCast(this);
         }
 
         public void Dispose()
         {
+            StopSpellDiagnostics("disposed");
+
             if (scriptCollection != null)
                 ScriptManager.Instance.Unload(scriptCollection);
 
@@ -197,6 +209,7 @@ namespace NexusForever.Game.Spell
 
                 SendSpellFinish();
                 log.LogTrace($"Spell {Parameters.SpellInfo.Entry.Id} has finished.");
+                StopSpellDiagnostics(terminalCastResult == null ? "finished" : "cancelled");
             }
         }
 
@@ -218,18 +231,25 @@ namespace NexusForever.Game.Spell
 
             log.LogTrace($"Spell {Parameters.SpellInfo.Entry.Id} has started initating.");
 
-            CastResult result = unsupportedThresholdData ? CastResult.SpellBad : CheckCast();
+            CastResult result = unsupportedThresholdData ? CastResult.SpellBad : RunWithSpellActivity(CheckCast);
             if (result != CastResult.Ok)
             {
+                terminalCastResult = result;
+                spellDiagnostics.RecordCastFailure(this, spellActivity, result, "can_cast");
+
                 // Swallow Proxy CastResults
                 if (Parameters.IsProxy)
+                {
+                    StopSpellDiagnostics("proxy_failed");
                     return false;
+                }
 
                 if (Caster is IPlayer player)
                     player.SpellManager.SetAsContinuousCast(null);
 
                 SendSpellCastResult(result);
                 status = SpellStatus.Failed;
+                StopSpellDiagnostics("failed");
                 return false;
             }
 
@@ -459,6 +479,9 @@ namespace NexusForever.Game.Spell
             if (!IsCasting)
                 return;
 
+            terminalCastResult = result;
+            spellDiagnostics.RecordCastFailure(this, spellActivity, result, "cancel");
+
             if (Caster is IPlayer player && !player.IsLoading)
             {
                 player.Session.EnqueueMessageEncrypted(new Server07F9
@@ -509,13 +532,35 @@ namespace NexusForever.Game.Spell
 
         protected void Execute(ISpellExecutionContext executionContext)
         {
+            Activity previousActivity = Activity.Current;
+            if (spellActivity != null)
+                Activity.Current = spellActivity;
+
+            try
+            {
+                ExecuteWithSpellActivity(executionContext);
+            }
+            finally
+            {
+                if (spellActivity != null)
+                    Activity.Current = previousActivity;
+            }
+        }
+
+        private void ExecuteWithSpellActivity(ISpellExecutionContext executionContext)
+        {
             if (!executionContext.GetSpellEffects().Any())
+            {
+                spellDiagnostics.RecordExecutionStart(this, spellActivity, executionContext);
                 return;
+            }
 
             status = SpellStatus.Executing;
             log.LogTrace($"Spell {Parameters.SpellInfo.Entry.Id} has started executing.");
+            spellDiagnostics.RecordExecutionStart(this, spellActivity, executionContext);
 
             SelectTargets(executionContext);  // First Select Targets
+            spellDiagnostics.RecordTargetsSelected(this, spellActivity, executionContext);
             ExecuteEffects(executionContext); // All Effects are evaluated and executed (after SelectTargets())
             TryCastPounceNoTargetFallback(executionContext);
             HandleProxies(executionContext);  // Any Proxies that are added by Effects are evaluated and executed (after ExecuteEffects())
@@ -529,6 +574,23 @@ namespace NexusForever.Game.Spell
                 {
                     CombatLog = combatLog
                 }, true);
+            }
+        }
+
+        private T RunWithSpellActivity<T>(Func<T> action)
+        {
+            Activity previousActivity = Activity.Current;
+            if (spellActivity != null)
+                Activity.Current = spellActivity;
+
+            try
+            {
+                return action();
+            }
+            finally
+            {
+                if (spellActivity != null)
+                    Activity.Current = previousActivity;
             }
         }
 
@@ -712,7 +774,10 @@ namespace NexusForever.Game.Spell
         protected virtual bool CanExecuteEffect(Spell4EffectsEntry spell4EffectsEntry)
         {
             if (disableManager.IsDisabled(DisableType.SpellEffect, spell4EffectsEntry.Id))
+            {
+                spellDiagnostics.RecordEffectSkipped(this, spellActivity, spell4EffectsEntry, "disabled");
                 return false;
+            }
 
             if (Caster is IPlayer player)
             {
@@ -726,13 +791,19 @@ namespace NexusForever.Game.Spell
                         Target = Caster
                     };
                     if (!PrerequisiteManager.Instance.Meets(player, spell4EffectsEntry.PrerequisiteIdCasterApply, parameters))
+                    {
+                        spellDiagnostics.RecordEffectSkipped(this, spellActivity, spell4EffectsEntry, "caster_apply_prerequisite");
                         return false;
+                    }
                 }
             }
 
             if (delayedEffects.TryGetValue(spell4EffectsEntry, out UpdateTimer updateTimer)
                 && !updateTimer.HasElapsed)
+            {
+                spellDiagnostics.RecordEffectSkipped(this, spellActivity, spell4EffectsEntry, "delayed");
                 return false;
+            }
 
             return true;
         }
@@ -751,13 +822,17 @@ namespace NexusForever.Game.Spell
             foreach (ISpellTarget spellTarget in executionContext.TargetCollection.GetTargets(spell4EffectsEntry.TargetFlags))
             {
                 if (!CheckEffectApplyPrerequisites(spell4EffectsEntry, spellTarget.Entity, spellTarget.Flags))
+                {
+                    spellDiagnostics.RecordEffectSkipped(this, spellActivity, spell4EffectsEntry, "apply_prerequisite");
                     continue;
+                }
 
                 ISpellTargetInfo spellTargetInfo =
                     spellTargetInfoCollection.GetSpellTargetInfo(spellTarget) ??
                     spellTargetInfoCollection.CreateSpellTargetInfo(spellTarget);
 
                 SpellEffectExecutionResult result = spellTargetInfo.Execute(spell4EffectsEntry, executionContext);
+                spellDiagnostics.RecordEffectResult(this, spellActivity, spell4EffectsEntry, spellTarget, result);
                 if (result == SpellEffectExecutionResult.Ok)
                 {
                     // Track the number of times this effect has fired.
@@ -1131,6 +1206,8 @@ namespace NexusForever.Game.Spell
         /// </summary>
         protected virtual void OnStatusChange(SpellStatus previousStatus, SpellStatus status)
         {
+            spellDiagnostics.RecordStatusChange(this, spellActivity, previousStatus, status);
+
             if (status == SpellStatus.Casting)
                 SendSpellStart();
         }
@@ -1143,6 +1220,16 @@ namespace NexusForever.Game.Spell
                     && !Parameters.ForceCancelOnly
                     && delayedEffects.Count == 0)
                 || status == SpellStatus.Finishing;
+        }
+
+        private void StopSpellDiagnostics(string outcome)
+        {
+            if (spellActivityStopped || Parameters == null)
+                return;
+
+            spellDiagnostics.StopCast(this, spellActivity, outcome, terminalCastResult);
+            spellActivity = null;
+            spellActivityStopped = true;
         }
     }
 }

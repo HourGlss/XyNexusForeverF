@@ -13,6 +13,7 @@ using NexusForever.Database;
 using NexusForever.Database.Telemetry;
 using NexusForever.Game;
 using NexusForever.Game.Configuration.Model;
+using NexusForever.Game.Spell.Telemetry;
 using NexusForever.GameTable;
 using NexusForever.Network.Configuration.Model;
 using NexusForever.Network.Internal;
@@ -31,6 +32,8 @@ using NexusForever.WorldServer.Telemetry.Metric;
 using NLog;
 using NLog.Extensions.Logging;
 using OpenTelemetry;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 
 namespace NexusForever.WorldServer
 {
@@ -76,6 +79,8 @@ namespace NexusForever.WorldServer
                             .AddNetworkTracing()
                             .AddEntityFrameworkTracing()
                             .AddWorldServerMetrics();
+                    otb?.WithTracing(t => t.AddSource(SpellDiagnosticsTelemetry.SourceName));
+                    otb?.WithMetrics(m => m.AddMeter(SpellDiagnosticsTelemetry.MeterName));
 
                     // register world server service first since it needs to execute before the web host
                     sc.AddHostedService<ConfigurationHostedService>();
@@ -91,6 +96,8 @@ namespace NexusForever.WorldServer
                         .Bind(hb.Configuration.GetSection("Realm"));
                     sc.AddOptions<ScriptConfig>()
                         .Bind(hb.Configuration.GetSection("Script"));
+                    sc.AddOptions<SpellDiagnosticsOptions>()
+                        .Bind(hb.Configuration.GetSection("Diagnostics:Spell"));
 
                     sc.AddNetworkInternal();
                     sc.AddNetworkInternalBroker(hb.Configuration.GetSection("Network:Internal").Get<BrokerConfig>());

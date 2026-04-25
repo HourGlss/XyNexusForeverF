@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Numerics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Creature;
@@ -26,6 +27,7 @@ using NexusForever.Game.Spell.Effect.Handler;
 using NexusForever.Game.Spell.Info.Patch;
 using NexusForever.Game.Spell.Target.Implicit;
 using NexusForever.Game.Spell.Target.Implicit.Filter;
+using NexusForever.Game.Spell.Telemetry;
 using NexusForever.Game.Spell.Type;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Entity;
@@ -118,7 +120,8 @@ public class SpellEvidenceTests
         var invoker = new SpellEffectHandlerInvoker(
             NullLogger<SpellEffectHandlerInvoker>.Instance,
             provider,
-            manager);
+            manager,
+            CreateSpellDiagnostics());
 
         ISpellTargetEffectInfo info = TestProxy.Create<ISpellTargetEffectInfo>(("get_Entry", new Spell4EffectsEntry
         {
@@ -1366,7 +1369,8 @@ Spellslinger|Spell Surge|Fluff,Proxy,SpellForceRemoveChanneled,SpellForceRemove
                 spellTargetInfoCollection,
                 globalSpellManager,
                 castResultValidatorManager,
-                disableManager)
+                disableManager,
+                CreateSpellDiagnostics())
         {
         }
 
@@ -1392,6 +1396,7 @@ Spellslinger|Spell Surge|Fluff,Proxy,SpellForceRemoveChanneled,SpellForceRemove
                 globalSpellManager,
                 castResultValidatorManager,
                 disableManager,
+                CreateSpellDiagnostics(),
                 spellFactory)
         {
         }
@@ -1403,4 +1408,11 @@ Spellslinger|Spell Surge|Fluff,Proxy,SpellForceRemoveChanneled,SpellForceRemove
     }
 
     private delegate void ForceMoveDelegate(IUnitEntity mover, Vector3 position, Vector3 rotation, TimeSpan flightTime, float gravity, float spin);
+
+    private static ISpellDiagnostics CreateSpellDiagnostics()
+    {
+        return new SpellDiagnostics(
+            NullLogger<SpellDiagnostics>.Instance,
+            Options.Create(new SpellDiagnosticsOptions()));
+    }
 }

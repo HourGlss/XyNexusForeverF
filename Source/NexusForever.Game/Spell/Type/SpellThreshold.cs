@@ -5,6 +5,7 @@ using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Abstract.Spell.Validator;
+using NexusForever.Game.Spell.Telemetry;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
@@ -33,8 +34,9 @@ namespace NexusForever.Game.Spell.Type
             IGlobalSpellManager globalSpellManager,
             ICastResultValidatorManager castResultValidatorManager,
             IDisableManager disableManager,
+            ISpellDiagnostics spellDiagnostics,
             ISpellFactory spellFactory)
-            : base(log, spellTargetInfoCollection, globalSpellManager, castResultValidatorManager, disableManager)
+            : base(log, spellTargetInfoCollection, globalSpellManager, castResultValidatorManager, disableManager, spellDiagnostics)
         {
             this.log          = log;
             this.spellFactory = spellFactory;

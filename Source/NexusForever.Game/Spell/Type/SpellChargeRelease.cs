@@ -4,6 +4,7 @@ using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Abstract.Spell.Validator;
 using NexusForever.Game.Spell.Event;
+using NexusForever.Game.Spell.Telemetry;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable.Model;
 
@@ -23,8 +24,9 @@ namespace NexusForever.Game.Spell.Type
             IGlobalSpellManager globalSpellManager,
             ICastResultValidatorManager castResultValidatorManager,
             IDisableManager disableManager,
+            ISpellDiagnostics spellDiagnostics,
             ISpellFactory spellFactory)
-            : base(log, spellTargetInfoCollection, globalSpellManager, castResultValidatorManager, disableManager, spellFactory)
+            : base(log, spellTargetInfoCollection, globalSpellManager, castResultValidatorManager, disableManager, spellDiagnostics, spellFactory)
         {
             this.log = log;
         }

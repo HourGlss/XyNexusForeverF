@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Prerequisite;
+using NexusForever.Game.Spell.Telemetry;
 using NexusForever.Game.Static.Prerequisite;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -17,17 +18,20 @@ namespace NexusForever.Game.Prerequisite
         private readonly IServiceProvider serviceProvider;
         private readonly IGameTableManager gameTableManager;
         private readonly IFactory<IPrerequisiteParameters> prerequisiteParametersFactory;
+        private readonly ISpellDiagnostics spellDiagnostics;
 
         public PrerequisiteManager(
             ILogger<PrerequisiteManager> log,
             IServiceProvider serviceProvider,
             IGameTableManager gameTableManager,
-            IFactory<IPrerequisiteParameters> prerequisiteParametersFactory)
+            IFactory<IPrerequisiteParameters> prerequisiteParametersFactory,
+            ISpellDiagnostics spellDiagnostics)
         {
             this.log                           = log;
             this.serviceProvider               = serviceProvider;
             this.gameTableManager              = gameTableManager;
             this.prerequisiteParametersFactory = prerequisiteParametersFactory;
+            this.spellDiagnostics              = spellDiagnostics;
         }
 
         #endregion
@@ -71,7 +75,7 @@ namespace NexusForever.Game.Prerequisite
                     continue;
 
                 PrerequisiteComparison comparison = entry.PrerequisiteComparisonId[i];
-                if (!Meets(player, type, comparison, entry.Value[i], entry.ObjectId[i], parameters))
+                if (!Meets(player, prerequisiteId, type, comparison, entry.Value[i], entry.ObjectId[i], parameters))
                 {
                     log.LogTrace($"Player {player.Name} failed prerequisite AND check ({prerequisiteId}) {type}, {comparison}, {entry.Value[i]}, {entry.ObjectId[i]}");
                     return false;
@@ -89,7 +93,7 @@ namespace NexusForever.Game.Prerequisite
                 if (type == PrerequisiteType.None)
                     continue;
 
-                if (Meets(player, type, entry.PrerequisiteComparisonId[i], entry.Value[i], entry.ObjectId[i], parameters))
+                if (Meets(player, prerequisiteId, type, entry.PrerequisiteComparisonId[i], entry.Value[i], entry.ObjectId[i], parameters))
                     return true;
             }
 
@@ -97,16 +101,19 @@ namespace NexusForever.Game.Prerequisite
             return false;
         }
 
-        private bool Meets(IPlayer player, PrerequisiteType type, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
+        private bool Meets(IPlayer player, uint prerequisiteId, PrerequisiteType type, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
             IPrerequisiteCheck handler = serviceProvider.GetKeyedService<IPrerequisiteCheck>(type);
             if (handler == null)
             {
                 log.LogWarning($"Unhandled PrerequisiteType {type}!");
+                spellDiagnostics.RecordPrerequisiteResult(player, prerequisiteId, type, comparison, value, objectId, parameters, false);
                 return false;
             }
 
-            return handler.Meets(player, comparison, value, objectId, parameters);
+            bool met = handler.Meets(player, comparison, value, objectId, parameters);
+            spellDiagnostics.RecordPrerequisiteResult(player, prerequisiteId, type, comparison, value, objectId, parameters, met);
+            return met;
         }
     }
 }
