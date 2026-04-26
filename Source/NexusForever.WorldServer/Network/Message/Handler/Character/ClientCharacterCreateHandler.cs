@@ -58,6 +58,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
 
             CharacterModifyResult? GetResult()
             {
+                float? rewardCharacterSlots = session.Account.RewardPropertyManager.GetRewardProperty(RewardPropertyType.CharacterSlots)?.GetValue(0u);
+                if (CharacterListManager.CalculateRemainingCharacterSlots(rewardCharacterSlots, session.Characters.Count) == 0u)
+                    return CharacterModifyResult.CreateFailed_AccountFull;
+
                 // TODO: validate path
                 if (!textFilterManager.IsTextValid(characterCreate.Name)
                     || !textFilterManager.IsTextValid(characterCreate.Name, UserText.CharacterName))

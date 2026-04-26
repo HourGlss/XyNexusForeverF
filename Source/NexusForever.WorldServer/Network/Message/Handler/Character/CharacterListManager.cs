@@ -19,6 +19,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
 {
     public class CharacterListManager : ICharacterListManager
     {
+        public const uint MinimumCharacterSlots = 6u;
+
         private readonly ILogger<CharacterListHandler> log;
 
         private readonly IDatabaseManager databaseManager;
@@ -93,10 +95,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
             IEnumerable<ServerCharacterList.Character> characters)
         {
             var characterList = (characters as IList<ServerCharacterList.Character> ?? characters.ToList());
-            // 2 is just a fail safe for the minimum amount of character slots
-            // this is set in the tbl files so a value should always exist
-            uint characterSlots =
-                (uint)(rewardPropertyManager.GetRewardProperty(RewardPropertyType.CharacterSlots).GetValue(0u) ?? 2u);
+            float? rewardCharacterSlots = rewardPropertyManager.GetRewardProperty(RewardPropertyType.CharacterSlots)?.GetValue(0u);
 
             var serverCharacterList = new ServerCharacterList
             {
@@ -104,13 +103,32 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
                 RealmId                        = realmContext.RealmId,
                 // no longer used as replaced by entitlements but retail server still used to send this
                 AdditionalCount                = (uint)characterList.Count,
-                MaxNumberCharacters = (uint)Math.Max(0, (int)characterSlots - characterList.Count),
+                MaxNumberCharacters            = CalculateRemainingCharacterSlots(rewardCharacterSlots, characterList.Count),
                 // Free Level 50 needs(?) support. It appears to have just been a custom flag on the account that was consume when used up.
                 // FreeLevel50 = true
             };
             serverCharacterList.Characters.AddRange(characterList);
 
             return serverCharacterList;
+        }
+
+        public static uint CalculateRemainingCharacterSlots(float? rewardCharacterSlots, int characterCount)
+        {
+            if (characterCount < 0)
+                throw new ArgumentOutOfRangeException(nameof(characterCount));
+
+            uint characterSlots = GetEffectiveCharacterSlots(rewardCharacterSlots);
+            return characterSlots > characterCount ? characterSlots - (uint)characterCount : 0u;
+        }
+
+        public static uint GetEffectiveCharacterSlots(float? rewardCharacterSlots)
+        {
+            if (!rewardCharacterSlots.HasValue
+                || !float.IsFinite(rewardCharacterSlots.Value)
+                || rewardCharacterSlots.Value <= 0f)
+                return MinimumCharacterSlots;
+
+            return Math.Max(MinimumCharacterSlots, (uint)rewardCharacterSlots.Value);
         }
 
         private IEnumerable<ServerCharacterList.Character> MapServerCharacters(IEnumerable<CharacterModel> characters)
